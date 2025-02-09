@@ -1,7 +1,7 @@
 import React from "react";
 import { Container, Row, Col, Nav, Card, Button, Image } from "react-bootstrap";
 import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, Chat, Share } from "react-bootstrap-icons";
-import loginImage from "../../assets/fpt-login.jpg";
+import loginImage from "../assets/fpt-login.jpg";
 
 const posts = [
     { id: 1, title: "Bài đăng 1", content: "Nội dung của bài đăng 1...", author: "Admin", image: loginImage },
