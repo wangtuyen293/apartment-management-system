@@ -1,15 +1,18 @@
 import express from "express";
 import "dotenv/config";
 import cors from "cors";
-import mongoose from "mongoose";
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
+connectDB();
+
 app.use(express.json());
 app.use(cors());
 
-mongoose
-  .connect(process.env.MONGODB_CONNECTION_STRING)
-  .then(() => console.log("Connected to database!"));
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
