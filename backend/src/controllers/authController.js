@@ -3,10 +3,10 @@ import jwt from "jsonwebtoken";
 import "dotenv/config";
 import User from "../models/users.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = "4gk4AgeztWuwoPn1eKP92TOpEj8KMmTQ";
 
 const generateToken = (user) => {
-    return jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+    return jwt.sign({ id: user._id, role: user.role, username: user.username, name: user.name, email: user.email, phoneNumber: user.phoneNumber }, JWT_SECRET, {
         expiresIn: "1h",
     });
 };
