@@ -20,13 +20,12 @@ const apartmentSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ["For Rent", "Rented"],
-            default: "For Rent",
+            enum: ["Khách hẹn xem", "Đã cọc", "Đã cho thuê", "Trống", "Đang xét duyệt"],
+            default: "Trống",
         },
         user_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true,
         },
     },
     { timestamps: true }

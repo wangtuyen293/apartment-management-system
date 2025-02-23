@@ -1,19 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Nav, Card, Button, Image, NavDropdown } from "react-bootstrap";
+import { Container, Spinner, Row, Col, Nav, Card, Button, Image, NavDropdown } from "react-bootstrap";
 import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, Chat, Share, HouseDoor } from "react-bootstrap-icons";
 import loginImage from "../assets/fpt-login.jpg";
 import { jwtDecode } from "jwt-decode";
-const posts = [
-    { id: 1, title: "Bài đăng 1", content: "Nội dung của bài đăng 1...", author: "Admin", image: loginImage },
-    { id: 2, title: "Bài đăng 2", content: "Nội dung của bài đăng 2...", author: "Admin", image: loginImage },
-    { id: 3, title: "Bài đăng 3", content: "Nội dung của bài đăng 3...", author: "Admin", image: loginImage },
-];
+import apartmentImage1 from "../assets/fpt-login.jpg";
+import { getApartment, getApartmentDetail } from '../redux/apartmentSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const HomePage = () => {
     const [userName, setUserName] = useState(null);
     const [role, setRole] = useState(null);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { apartment, loading, error } = useSelector(state => state.apartment);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -27,6 +27,16 @@ const HomePage = () => {
             }
         }
     }, []);
+
+    useEffect(() => {
+        dispatch(getApartment());
+    }, [dispatch]);
+
+    const handleViewDetails = (apartmentId) => {
+
+        dispatch(getApartmentDetail(apartmentId));
+        navigate(`/apartment/${apartmentId}`);
+    };
 
     const handleLogout = useCallback(() => {
         localStorage.removeItem("token");
@@ -42,10 +52,8 @@ const HomePage = () => {
     return (
         <Container fluid style={{ backgroundColor: "#F7F8F3" }}>
             <Row>
-                {/* Sidebar */}
                 <Col xs={2} className="p-0 position-fixed" style={{ background: "linear-gradient(180deg, #FF4F70, #FF1A55)", height: "100vh", top: 0, left: 0, display: "flex", flexDirection: "column", borderRight: "1px solid #ddd" }}>
                     <Nav className="flex-column">
-                        {/* Conditional rendering for Admin and User */}
                         {role === "Admin" ? (
                             <>
                                 <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
@@ -102,27 +110,43 @@ const HomePage = () => {
 
                 {/* Content */}
                 <Col xs={10} className="p-5 ms-auto" style={{ marginLeft: "16.67%" }}>
-                    {posts.map(post => (
-                        <Card key={post.id} className="mb-4 w-75 mx-auto" style={{ borderRadius: "15px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", transition: "transform 0.3s ease-in-out" }} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
-                            <Card.Body className="text-center">
-                                <Card.Title style={{ fontWeight: "600", fontSize: "1.25rem" }}>{post.title}</Card.Title>
-                                <Image src={post.image} fluid className="mb-3" style={{ borderRadius: "10px" }} />
-                                <Card.Text>{post.content}</Card.Text>
-                                <Card.Subtitle className="text-muted mb-2">Đăng bởi: {post.author}</Card.Subtitle>
-                                <div className="d-flex justify-content-center gap-3">
-                                    <Button variant="outline-primary" className="d-flex align-items-center" style={{ borderRadius: "30px" }}>
-                                        <HandThumbsUp className="me-2" /> Thích
-                                    </Button>
-                                    <Button variant="outline-secondary" className="d-flex align-items-center" style={{ borderRadius: "30px" }}>
-                                        <Chat className="me-2" /> Bình luận
-                                    </Button>
-                                    <Button variant="outline-success" className="d-flex align-items-center" style={{ borderRadius: "30px" }}>
-                                        <Share className="me-2" /> Chia sẻ
-                                    </Button>
-                                </div>
-                            </Card.Body>
-                        </Card>
-                    ))}
+                    <Container className="my-5">
+                        <Row>
+                            {loading ? (
+                                <Col className="text-center">
+                                    <Spinner animation="border" variant="primary" />
+                                    <p className="mt-3">Loading apartments...</p>
+                                </Col>
+                            ) : error ? (
+                                <Col className="text-center">
+                                    <p className="text-danger">Error: {error}</p>
+                                </Col>
+                            ) : (
+                                apartment && apartment.map((apt) => (
+                                    <Col md={4} key={apt._id} className="mb-4">
+                                        <div className="card shadow-lg border-0 rounded">
+                                            <img src={apartmentImage1} className="card-img-top" alt="Apartment" />
+                                            <div className="card-body">
+                                                <h5 className="card-title">{`Căn hộ ${apt.apartment_number}`}</h5>
+                                                <p className="card-text">
+                                                    <strong>Tầng:</strong> {apt.floor}<br />
+                                                    <strong>Diện tích:</strong> {apt.area} m²<br />
+                                                    <strong>Giá cho thuê:</strong> {apt.price} VND<br />
+                                                    <strong>Tình trạng:</strong> {apt.status}
+                                                </p>
+                                                <Button
+                                                    variant="primary"
+                                                    onClick={() => handleViewDetails(apt._id)}
+                                                >
+                                                    Xem chi tiết
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Col>
+                                ))
+                            )}
+                        </Row>
+                    </Container>
                 </Col>
             </Row>
         </Container>

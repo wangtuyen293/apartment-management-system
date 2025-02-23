@@ -3,11 +3,11 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000";
 
+// Existing actions for fetching apartments
 export const getApartment = createAsyncThunk(
     "apartment/getApartment",
     async (_, { rejectWithValue }) => {
         try {
-
             const response = await axios.get(`${API_URL}/api/v1/apartments`);
             return response.data;
         } catch (error) {
@@ -28,6 +28,36 @@ export const getApartmentDetail = createAsyncThunk(
     }
 );
 
+// New actions for updating apartment status (request for viewing or renting)
+export const requestForViewApartment = createAsyncThunk(
+    "apartment/requestForViewApartment",
+    async ({ apartmentId, userId }, { rejectWithValue }) => {
+        try {
+            // POST request for viewing apartment
+            const response = await axios.post(
+                `${API_URL}/api/v1/apartments/view/${apartmentId}/${userId}`
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || "An error occurred");
+        }
+    }
+);
+
+export const requestForRentApartment = createAsyncThunk(
+    "apartment/requestForRentApartment",
+    async ({ apartmentId, userId }, { rejectWithValue }) => {
+        try {
+            // POST request for renting apartment
+            const response = await axios.post(
+                `${API_URL}/api/v1/apartments/rent/${apartmentId}/${userId}`
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || "An error occurred");
+        }
+    }
+);
 
 const apartmentSlice = createSlice({
     name: "apartment",
@@ -36,10 +66,13 @@ const apartmentSlice = createSlice({
         apartmentDetail: null,
         loading: false,
         error: null,
+        viewRequestStatus: null,
+        rentRequestStatus: null,
     },
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // Fetch Apartments
             .addCase(getApartment.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -52,6 +85,7 @@ const apartmentSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload || "Failed to fetch apartments";
             })
+            // Fetch Apartment Detail
             .addCase(getApartmentDetail.pending, (state) => {
                 state.loading = true;
             })
@@ -63,7 +97,34 @@ const apartmentSlice = createSlice({
                 state.loading = false;
                 state.error = action.error.message;
             })
-
+            // Request for View Apartment
+            .addCase(requestForViewApartment.pending, (state) => {
+                state.loading = true;
+                state.viewRequestStatus = null;
+                state.error = null;
+            })
+            .addCase(requestForViewApartment.fulfilled, (state, action) => {
+                state.loading = false;
+                state.viewRequestStatus = action.payload.message;
+            })
+            .addCase(requestForViewApartment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to request for view apartment";
+            })
+            // Request for Rent Apartment
+            .addCase(requestForRentApartment.pending, (state) => {
+                state.loading = true;
+                state.rentRequestStatus = null;
+                state.error = null;
+            })
+            .addCase(requestForRentApartment.fulfilled, (state, action) => {
+                state.loading = false;
+                state.rentRequestStatus = action.payload.message;
+            })
+            .addCase(requestForRentApartment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to request for rent apartment";
+            });
     },
 });
 

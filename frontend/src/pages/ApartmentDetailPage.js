@@ -1,45 +1,61 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getApartmentDetail } from '../redux/apartmentSlice';
+import { getApartmentDetail, requestForViewApartment, requestForRentApartment } from '../redux/apartmentSlice';
 import { Spinner, Button, Container, Row, Col, Card, Carousel } from 'react-bootstrap';
-import apartmentImage1 from '../assets/fpt-login.jpg'; // You can replace this with multiple image URLs
+import apartmentImage1 from '../assets/fpt-login.jpg';
+import { jwtDecode } from "jwt-decode";
 
 const ApartmentDetailPage = () => {
     const { id } = useParams();
+    const [userId, setUserId] = useState(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { apartmentDetail, loading, error } = useSelector(state => state.apartment);
-    const { token, user } = useSelector(state => state.auth); // Get token and user from Redux state
-
-    // Check if the user is authenticated based on token (from Redux or localStorage)
+    const { apartmentDetail, loading, error, viewRequestStatus, rentRequestStatus } = useSelector(state => state.apartment);
+    const { token, user } = useSelector(state => state.auth);
     const isAuthenticated = token || localStorage.getItem("token");
 
     useEffect(() => {
         dispatch(getApartmentDetail(id));
     }, [id, dispatch]);
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                setUserId(decoded.id);
+            } catch (error) {
+                console.error("Invalid token", error);
+            }
+        }
+    }, []);
+
+    // Handle the action for viewing or renting an apartment
     const handleAction = (action) => {
         if (!isAuthenticated) {
-            alert('You need to log in to perform this action!'); // Show the alert first
-            navigate('/login'); // Then navigate to the login page
+            alert('You need to log in to perform this action!');
+            navigate('/login');
             return;
         }
 
-        // Handle the action based on the button clicked if user is authenticated
-        alert(`${action} functionality not implemented yet!`);
+        if (action === 'Hẹn xem căn hộ') {
+            dispatch(requestForViewApartment({ apartmentId: id, userId: userId }));
+        } else if (action === 'Yêu cầu thuê phòng') {
+            dispatch(requestForRentApartment({ apartmentId: id, userId: userId }));
+        }
     };
-
 
     return (
         <div>
             <Container className="my-5">
-                {/* Back Button */}
-                <Link to="/" className="btn btn-outline-secondary mb-3">
-                    ← Back to Listings
+                <Link
+                    to={isAuthenticated ? "/find" : "/"}
+                    className="btn btn-outline-secondary mb-3"
+                >
+                    ← Trở về
                 </Link>
 
-                {/* Apartment Details */}
                 {loading ? (
                     <div className="text-center">
                         <Spinner animation="border" variant="primary" />
@@ -114,6 +130,7 @@ const ApartmentDetailPage = () => {
                                             {apartmentDetail.description}
                                         </Card.Text>
 
+                                        {/* Render the action buttons */}
                                         <Button
                                             variant="danger"
                                             size="lg"
@@ -134,6 +151,7 @@ const ApartmentDetailPage = () => {
                                         >
                                             Yêu cầu thuê phòng
                                         </Button>
+
                                         <Button
                                             variant="success"
                                             size="lg"
@@ -143,6 +161,10 @@ const ApartmentDetailPage = () => {
                                         >
                                             Đặt cọc ngay
                                         </Button>
+
+                                        {/* Show request status */}
+                                        {viewRequestStatus && <div className="text-success">{viewRequestStatus}</div>}
+                                        {rentRequestStatus && <div className="text-success">{rentRequestStatus}</div>}
                                     </Card.Body>
                                 </Card>
                             </Col>
