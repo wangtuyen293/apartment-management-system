@@ -1,5 +1,5 @@
 import Apartment from '../models/apartments.js';
-
+import User from '../models/users.js';
 
 const getApartment = async (req, res) => {
     try {
@@ -23,6 +23,78 @@ const getApartmentDetail = async (req, res) => {
     }
 };
 
+const requestForViewApartment = async (req, res) => {
+    try {
 
+        const apartment = await Apartment.findById(req.params.id);
+        if (!apartment) {
+            return res.status(404).json({ message: "Apartment not found" });
+        }
 
-export { getApartment, getApartmentDetail };
+        console.log(req.params.userid);
+        const user = await User.findOne({ _id: req.params.userid });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const updatedApartment = await Apartment.updateOne(
+            { _id: req.params.id },
+            {
+                $set: {
+                    status: "Khách hẹn xem",
+                    user_id: user._id
+                }
+            }
+        );
+
+        if (updatedApartment.modifiedCount === 0) {
+            return res.status(400).json({ message: "Failed to update apartment" });
+        }
+
+        return res.status(200).json({ message: "Apartment status updated successfully" });
+
+    } catch (error) {
+        // Handle errors
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+const requestForRentApartment = async (req, res) => {
+    try {
+
+        const apartment = await Apartment.findById(req.params.id);
+        if (!apartment) {
+            return res.status(404).json({ message: "Apartment not found" });
+        }
+
+        console.log(req.params.userid);
+        const user = await User.findOne({ _id: req.params.userid });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const updatedApartment = await Apartment.updateOne(
+            { _id: req.params.id },
+            {
+                $set: {
+                    status: "Đang phê duyệt",
+                    user_id: user._id
+                }
+            }
+        );
+
+        if (updatedApartment.modifiedCount === 0) {
+            return res.status(400).json({ message: "Failed to update apartment" });
+        }
+
+        return res.status(200).json({ message: "Apartment status updated successfully" });
+
+    } catch (error) {
+        // Handle errors
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export { getApartment, getApartmentDetail, requestForViewApartment, requestForRentApartment };

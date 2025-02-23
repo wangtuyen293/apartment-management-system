@@ -1,9 +1,11 @@
 import mongoose from "mongoose";
-import "dotenv/config";
+import dotenv from 'dotenv';
+dotenv.config();
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
+
+        await mongoose.connect("mongodb://localhost:27017/apartment_management_db");
         console.log("Connect database successfully!");
     } catch (err) {
         console.error("Connect database unsuccessfully. " + err.message);

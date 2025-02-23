@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import UserProfilePage from "./pages/UserProfile";
 import LandingPage from "./pages/LandingPage";
 import ApartmentDetailPage from "./pages/ApartmentDetailPage";
+import FindApartments from "./pages/FindApartment";
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
                 <Route path="/home" element={<Home />} />
                 <Route path="/profile" element={<UserProfilePage />} />
                 <Route path="/apartment/:id" element={<ApartmentDetailPage />} />
+                <Route path="/find" element={<FindApartments />} />
             </Routes>
         </Router>
     );
