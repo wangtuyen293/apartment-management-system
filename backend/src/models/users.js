@@ -11,10 +11,30 @@ const userSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
+            lowercase: true,
         },
         password: {
             type: String,
-            required: true,
+            required: function () {
+                return !this.providerId;
+            },
+        },
+        isVerified: {
+            type: Boolean,
+            default: false,
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
+        },
+        providerId: {
+            type: String,
+            unique: true,
+        },
+        authProvider: {
+            type: String,
+            enum: ["email", "google"],
+            default: "email",
         },
         name: {
             type: String,
@@ -32,7 +52,7 @@ const userSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            enum: ["User", "Admin"],
+            enum: ["User", "Manager"],
             default: "User",
         },
     },

@@ -25,6 +25,10 @@ const LoginForm = () => {
         dispatch(loginUser(formData));
     };
 
+    const handleGoogleLogin = () => {
+        window.location.href = "http://localhost:5000/api/v1/auth/google";
+    };
+
     useEffect(() => {
         if (token) {
             navigate("/home");
@@ -117,7 +121,7 @@ const LoginForm = () => {
                             <Button
                                 variant="light"
                                 className="w-100 border"
-                                onClick={() => console.log("Login with Google")}
+                                onClick={handleGoogleLogin}
                             >
                                 Login with Google
                             </Button>
