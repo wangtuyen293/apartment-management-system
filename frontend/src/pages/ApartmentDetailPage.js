@@ -46,6 +46,9 @@ const ApartmentDetailPage = () => {
         }
     };
 
+    const isViewDisabled =
+        apartmentDetail && (apartmentDetail.status === "Đang xét duyệt" || apartmentDetail.status === "Đã cọc");
+
     return (
         <div>
             <Container className="my-5">
@@ -138,9 +141,12 @@ const ApartmentDetailPage = () => {
                                             className="mb-4 rounded-pill shadow-sm"
                                             style={{ marginRight: '10px' }}
                                             onClick={() => handleAction('Hẹn xem căn hộ')}
+                                            disabled={isViewDisabled}
                                         >
                                             Hẹn xem căn hộ
                                         </Button>
+
+
                                         <Button
                                             variant="primary"
                                             size="lg"
@@ -148,6 +154,7 @@ const ApartmentDetailPage = () => {
                                             className="mb-4 rounded-pill shadow-sm"
                                             style={{ marginRight: '10px' }}
                                             onClick={() => handleAction('Yêu cầu thuê phòng')}
+                                            disabled={isViewDisabled}
                                         >
                                             Yêu cầu thuê phòng
                                         </Button>
@@ -158,10 +165,11 @@ const ApartmentDetailPage = () => {
                                             block
                                             className="mb-4 rounded-pill shadow-sm"
                                             onClick={() => handleAction('Đặt cọc ngay')}
+                                            disabled={isViewDisabled}
                                         >
                                             Đặt cọc ngay
                                         </Button>
-
+                                        {isViewDisabled && <p className="text-danger">Căn hộ đang deal.</p>}
                                         {/* Show request status */}
                                         {viewRequestStatus && <div className="text-success">{viewRequestStatus}</div>}
                                         {rentRequestStatus && <div className="text-success">{rentRequestStatus}</div>}

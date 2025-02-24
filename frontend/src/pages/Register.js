@@ -10,10 +10,18 @@ const RegistrationForm = () => {
     const [formData, setFormData] = useState({
         username: "",
         email: "",
+        phoneNumber: "",
         password: "",
         confirmPassword: "",
         name: "",
         gender: "",
+    });
+
+    const [errors, setErrors] = useState({
+        email: "",
+        phoneNumber: "",
+        password: "",
+        confirmPassword: "",
     });
 
     const navigate = useNavigate();
@@ -21,7 +29,45 @@ const RegistrationForm = () => {
     const { loading, error, token } = useSelector((state) => state.auth);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+
+        // Validate input
+        if (name === "email") {
+            setErrors({
+                ...errors,
+                email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+                    ? ""
+                    : "Invalid email format",
+            });
+        }
+
+        if (name === "phoneNumber") {
+            setErrors({
+                ...errors,
+                phoneNumber: /^[0-9]{10}$/.test(value)
+                    ? ""
+                    : "Phone number must be 10 digits",
+            });
+        }
+
+        if (name === "password") {
+            setErrors({
+                ...errors,
+                password:
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(value)
+                        ? ""
+                        : "Password must be at least 8 characters, with one uppercase letter, one lowercase letter, and one number",
+            });
+        }
+
+        if (name === "confirmPassword") {
+            setErrors({
+                ...errors,
+                confirmPassword:
+                    value === formData.password ? "" : "Passwords do not match",
+            });
+        }
     };
 
     const handleSubmit = (e) => {
@@ -86,6 +132,18 @@ const RegistrationForm = () => {
                                 onChange={handleChange}
                                 required
                             />
+                            {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Control
+                                type="text"
+                                name="phoneNumber"
+                                placeholder="Phone Number"
+                                value={formData.phoneNumber}
+                                onChange={handleChange}
+                                required
+                            />
+                            {errors.phoneNumber && <p style={{ color: "red" }}>{errors.phoneNumber}</p>}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Select
@@ -110,6 +168,7 @@ const RegistrationForm = () => {
                                 onChange={handleChange}
                                 required
                             />
+                            {errors.password && <p style={{ color: "red" }}>{errors.password}</p>}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Control
@@ -120,12 +179,13 @@ const RegistrationForm = () => {
                                 onChange={handleChange}
                                 required
                             />
+                            {errors.confirmPassword && <p style={{ color: "red" }}>{errors.confirmPassword}</p>}
                         </Form.Group>
                         <Button
                             style={{ backgroundColor: "#78BCC4" }}
                             type="submit"
                             className="w-100"
-                            disabled={loading}
+                            disabled={loading || Object.values(errors).some((error) => error)}
                         >
                             {loading ? "Registering..." : "Register"}
                         </Button>

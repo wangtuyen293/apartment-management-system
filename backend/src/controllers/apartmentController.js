@@ -78,7 +78,7 @@ const requestForRentApartment = async (req, res) => {
             { _id: req.params.id },
             {
                 $set: {
-                    status: "Đang phê duyệt",
+                    status: "Đang xét duyệt",
                     user_id: user._id
                 }
             }
