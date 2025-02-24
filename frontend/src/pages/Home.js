@@ -48,7 +48,7 @@ const HomePage = () => {
                         {/* Conditional rendering for Admin and User */}
                         {role === "Admin" ? (
                             <>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
+                                <Nav.Link href="home" className="d-flex align-items-center p-3 text-white hover-effect">
                                     <House className="me-2 fs-5" /> Bảng tin
                                 </Nav.Link>
                                 <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
