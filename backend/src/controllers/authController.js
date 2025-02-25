@@ -3,7 +3,8 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import "dotenv/config";
 import User from "../models/users.js";
-import generateToken from "../config/generateToken.js";
+import { generateAccessToken, generateToken } from "../config/generateToken.js";
+import RefreshToken from "../models/refreshToken.js";
 
 export const login = async (req, res) => {
     try {
@@ -53,7 +54,7 @@ export const login = async (req, res) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 1 * 24 * 60 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000,
             sameSite: "Strict",
         });
 
@@ -147,6 +148,56 @@ export const register = async (req, res) => {
             message:
                 "User registered successfully. Please check your email to verify your account.",
         });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const refresh = async (req, res) => {
+    try {
+        const { refresh } = req.body;
+
+        if (!refresh) {
+            return res
+                .status(400)
+                .json({ message: "Refresh token is required" });
+        }
+
+        const existingToken = await RefreshToken.findOne({
+            token: refresh,
+        });
+
+        if (!existingToken || existingToken.expiresAt < new Date()) {
+            return res
+                .status(403)
+                .json({ message: "Refresh token is invalid or expired" });
+        }
+
+        try {
+            decoded = jwt.verify(refresh, process.env.REFRESH_TOKEN_SECRET);
+        } catch (err) {
+            return res
+                .status(403)
+                .json({ message: "Refresh token is invalid or expired" });
+        }
+
+        const user = await User.findOne({ email: decoded.email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const accessToken = generateAccessToken(user);
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 60 * 60 * 1000,
+            sameSite: "Strict",
+        });
+
+        res.status(200).json({ accessToken, refreshToken: refresh });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
