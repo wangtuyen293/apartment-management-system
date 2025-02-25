@@ -58,16 +58,9 @@ export const login = async (req, res) => {
             sameSite: "Strict",
         });
 
-        const response = {
-            email: user.email,
-            username: user.username,
-            tokenType: "Bearer",
-            expiresIn: process.env.ACCESS_TOKEN_LIFETIME,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-        };
-
-        res.status(200).json(response);
+        res.status(200).json({
+            user: { id: user._id, email: user.email, username: user.username },
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -101,15 +94,6 @@ export const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const emailVerificationToken = jwt.sign(
-            { email: newUser.email },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "1d",
-            }
-        );
-        const emailVerificationExpires = Date.now() + 5 * 60 * 1000;
-
         const newUser = new User({
             username,
             email,
@@ -121,6 +105,17 @@ export const register = async (req, res) => {
             emailVerificationToken,
             emailVerificationExpires,
         });
+
+        const emailVerificationToken = jwt.sign(
+            { email: newUser.email },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1d",
+            }
+        );
+
+        newUser.emailVerificationToken = emailVerificationToken;
+        newUser.emailVerificationExpires = Date.now() + 5 * 60 * 1000;
 
         await newUser.save();
 
@@ -173,6 +168,8 @@ export const refresh = async (req, res) => {
                 .status(403)
                 .json({ message: "Refresh token is invalid or expired" });
         }
+
+        let decoded;
 
         try {
             decoded = jwt.verify(refresh, process.env.REFRESH_TOKEN_SECRET);
@@ -233,5 +230,32 @@ export const verifyEmail = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const logout = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
+
+        if (refreshToken) {
+            await RefreshToken.findOneAndDelete({ token: refreshToken });
+        }
+
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+        });
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+        });
+
+        return res.status(200).json({ message: "Logout successful" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 };

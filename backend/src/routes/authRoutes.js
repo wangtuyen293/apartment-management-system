@@ -3,28 +3,31 @@ import passport from "passport";
 import "dotenv/config";
 import {
     login,
+    logout,
     refresh,
     register,
     verifyEmail,
 } from "../controllers/authController.js";
 
-const FRONTEND_URL = process.env.FRONTEND_URL;
 const router = express.Router();
 
-router.post("/login", login);
-router.post("/register", register);
-router.post("/refresh", refresh);
-router.get("/verify-email", verifyEmail);
+router.post("/auth/login", login);
+router.post("/auth/register", register);
+router.post("/auth/logout", logout);
+router.post("/auth/refresh", refresh);
+router.get("/auth/verify-email", verifyEmail);
 router.get(
-    "/google",
+    "/auth/google",
     passport.authenticate("google", { scope: ["profile", "email"] })
 );
-router.get("/google/callback", (req, res, next) => {
+router.get("/auth/google/callback", (req, res, next) => {
     passport.authenticate("google", { session: false }, (err, result, info) => {
-        if (err || !result) {
-            return res.status(400).json({
-                message: info?.message || "Login google failed",
-            });
+        if (err) {
+            return res.status(500).json({ message: "Internal Server Error" });
+        }
+
+        if (!result) {
+            return res.status(400).json({ message: info?.message || "Login Google failed" });
         }
 
         res.cookie("accessToken", result.accessToken, {

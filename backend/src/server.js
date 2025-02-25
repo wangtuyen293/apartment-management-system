@@ -14,7 +14,10 @@ const app = express();
 connectDB();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+}));
 
 app.use(
     session({
@@ -27,10 +30,10 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/apartments", apartmentRoutes);
 app.use("/api/v1/residents", residentRoutes);
+app.use("/api/v1/", authRoutes);
+app.use("/api/v1/", userRoutes);
 
 const PORT = process.env.PORT || 5000;
 
