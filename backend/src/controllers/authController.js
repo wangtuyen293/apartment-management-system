@@ -102,12 +102,10 @@ export const register = async (req, res) => {
             gender: gender || "Other",
             address: address || "",
             phoneNumber: phoneNumber || "",
-            emailVerificationToken,
-            emailVerificationExpires,
         });
 
         const emailVerificationToken = jwt.sign(
-            { email: newUser.email },
+            { email },
             process.env.JWT_SECRET,
             {
                 expiresIn: "1d",
@@ -115,7 +113,7 @@ export const register = async (req, res) => {
         );
 
         newUser.emailVerificationToken = emailVerificationToken;
-        newUser.emailVerificationExpires = Date.now() + 5 * 60 * 1000;
+        newUser.emailVerificationExpires = Date.now() + 60 * 60 * 1000;
 
         await newUser.save();
 

@@ -6,6 +6,7 @@ import UserProfilePage from "./pages/UserProfile";
 import LandingPage from "./pages/LandingPage";
 import ApartmentDetailPage from "./pages/ApartmentDetailPage";
 import FindApartments from "./pages/FindApartment";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
     return (
@@ -18,6 +19,7 @@ function App() {
                 <Route path="/profile" element={<UserProfilePage />} />
                 <Route path="/apartment/:id" element={<ApartmentDetailPage />} />
                 <Route path="/find" element={<FindApartments />} />
+                <Route path="/verify-email" element={<VerifyEmail />} />
             </Routes>
         </Router>
     );
