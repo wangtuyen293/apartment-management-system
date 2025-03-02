@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Nav, Card, Button, Image, NavDropdown } from "react-bootstrap";
 import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, Chat, Share, HouseDoor } from "react-bootstrap-icons";
-import loginImage from "../assets/fpt-login.jpg";
+import loginImage from "../assets/images/fpt-login.jpg";
 import { jwtDecode } from "jwt-decode";
 const posts = [
     { id: 1, title: "Bài đăng 1", content: "Nội dung của bài đăng 1...", author: "Admin", image: loginImage },

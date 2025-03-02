@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getApartmentDetail, requestForViewApartment, requestForRentApartment } from '../redux/apartmentSlice';
 import { Spinner, Button, Container, Row, Col, Card, Carousel } from 'react-bootstrap';
-import apartmentImage1 from '../assets/fpt-login.jpg';
+import apartmentImage1 from '../assets/images/fpt-login.jpg';
 import { jwtDecode } from "jwt-decode";
 
 const ApartmentDetailPage = () => {

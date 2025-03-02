@@ -2,9 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Spinner, Row, Col, Nav, Card, Button, Image, NavDropdown } from "react-bootstrap";
 import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, Chat, Share, HouseDoor } from "react-bootstrap-icons";
-import loginImage from "../assets/fpt-login.jpg";
+import loginImage from "../assets/images/fpt-login.jpg";
 import { jwtDecode } from "jwt-decode";
-import apartmentImage1 from "../assets/fpt-login.jpg";
+import apartmentImage1 from "../assets/images/fpt-login.jpg";
 import { getApartment, getApartmentDetail } from '../redux/apartmentSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
