@@ -20,6 +20,9 @@ function App() {
                 <Route path="/apartment/:id" element={<ApartmentDetailPage />} />
                 <Route path="/find" element={<FindApartments />} />
                 <Route path="/verify-email" element={<VerifyEmail />} />
+                <Route path="/customer/view" element={<CustomerRequestView />} />
+                <Route path="/customer/rent" element={<CustomerRequestRent />} />
+                <Route path="/apartment-manage" element={<ApartmentManagement />} />
             </Routes>
         </Router>
     );

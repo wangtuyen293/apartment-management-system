@@ -102,6 +102,15 @@ export const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        const emailVerificationToken = jwt.sign(
+            { email: email },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1d",
+            }
+        );
+        const emailVerificationExpires = Date.now() + 5 * 60 * 1000;
+
         const newUser = new User({
             username,
             email,

@@ -13,10 +13,9 @@ export const registerUser = createAsyncThunk(
                 `${API_URL}/api/v1/auth/register`,
                 userData
             );
-
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -98,8 +97,22 @@ const authSlice = createSlice({
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || "Login failed";
+            })
+            // Get User
+            .addCase(getUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+            })
+            .addCase(getUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || "Failed to retrieve user data";
             });
     },
 });
 
 export default authSlice.reducer;
+export const selectCurrentToken = (state) => state.auth.accessToken;

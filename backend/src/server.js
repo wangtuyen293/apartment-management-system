@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import apartmentRoutes from "./routes/apartmentRoutes.js";
 import residentRoutes from "./routes/residentRoutes.js";
+import contractRoutes from "./routes/contractRoutes.js";
 import "./config/passport.js";
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/api/v1/apartments", apartmentRoutes);
 app.use("/api/v1/residents", residentRoutes);
 app.use("/api/v1/", authRoutes);
 app.use("/api/v1/", userRoutes);
+app.use("/api/v1/contracts", contractRoutes);
 
 const PORT = process.env.PORT || 5000;
 
