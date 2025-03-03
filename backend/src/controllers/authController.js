@@ -3,7 +3,8 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import "dotenv/config";
 import User from "../models/users.js";
-import generateToken from "../config/generateToken.js";
+import { generateAccessToken, generateToken } from "../config/generateToken.js";
+import RefreshToken from "../models/refreshToken.js";
 
 export const login = async (req, res) => {
     try {
@@ -53,21 +54,13 @@ export const login = async (req, res) => {
         res.cookie("refreshToken", refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 1 * 24 * 60 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000,
             sameSite: "Strict",
         });
 
-        const response = {
-            email: user.email,
-            user: user,
-            username: user.username,
-            tokenType: "Bearer",
-            expiresIn: process.env.ACCESS_TOKEN_LIFETIME,
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-        };
-
-        res.status(200).json(response);
+        res.status(200).json({
+            user: { id: user._id, email: user.email, username: user.username },
+        });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -88,6 +81,14 @@ export const register = async (req, res) => {
 
         if (!username || !email || !password || !name) {
             return res.status(400).json({ message: "Missing required fields" });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return res.status(400).json({ message: "Invalid email format" });
+        }
+
+        if (password.length < 8) {
+            return res.status(400).json({ message: "Password must be at least 8 characters long" });
         }
 
         const existingUser = await User.findOne({
@@ -118,9 +119,18 @@ export const register = async (req, res) => {
             gender: gender || "Other",
             address: address || "",
             phoneNumber: phoneNumber || "",
-            emailVerificationToken,
-            emailVerificationExpires,
         });
+
+        const emailVerificationToken = jwt.sign(
+            { email },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1d",
+            }
+        );
+
+        newUser.emailVerificationToken = emailVerificationToken;
+        newUser.emailVerificationExpires = Date.now() + 60 * 60 * 1000;
 
         await newUser.save();
 
@@ -148,6 +158,58 @@ export const register = async (req, res) => {
             message:
                 "User registered successfully. Please check your email to verify your account.",
         });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const refresh = async (req, res) => {
+    try {
+        const { refresh } = req.body;
+
+        if (!refresh) {
+            return res
+                .status(400)
+                .json({ message: "Refresh token is required" });
+        }
+
+        const existingToken = await RefreshToken.findOne({
+            token: refresh,
+        });
+
+        if (!existingToken || existingToken.expiresAt < new Date()) {
+            return res
+                .status(403)
+                .json({ message: "Refresh token is invalid or expired" });
+        }
+
+        let decoded;
+
+        try {
+            decoded = jwt.verify(refresh, process.env.REFRESH_TOKEN_SECRET);
+        } catch (err) {
+            return res
+                .status(403)
+                .json({ message: "Refresh token is invalid or expired" });
+        }
+
+        const user = await User.findOne({ email: decoded.email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const accessToken = generateAccessToken(user);
+
+        res.cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            maxAge: 60 * 60 * 1000,
+            sameSite: "Strict",
+        });
+
+        res.status(200).json({ accessToken, refreshToken: refresh });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
@@ -186,13 +248,29 @@ export const verifyEmail = async (req, res) => {
     }
 };
 
-export const getUser = async (req, res) => {
+export const logout = async (req, res) => {
     try {
-        const { username } = req.query;
-        const user = await User.findOne({ username: username });
-        res.status(200).json(user);
+        const refreshToken = req.cookies.refreshToken;
+
+        if (refreshToken) {
+            await RefreshToken.findOneAndDelete({ token: refreshToken });
+        }
+
+        res.clearCookie("accessToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+        });
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+        });
+
+        return res.status(200).json({ message: "Logout successful" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+        return res.status(500).json({ message: "Internal Server Error" });
     }
 };

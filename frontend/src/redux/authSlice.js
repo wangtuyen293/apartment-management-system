@@ -3,6 +3,8 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000";
 
+axios.defaults.withCredentials = true;
+
 export const registerUser = createAsyncThunk(
     "auth/register",
     async (userData, { rejectWithValue }) => {
@@ -26,23 +28,34 @@ export const loginUser = createAsyncThunk(
                 `${API_URL}/api/v1/auth/login`,
                 userData
             );
+
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(error.response.data);
         }
     }
 );
 
-export const getUser = createAsyncThunk(
-    "auth/user",
-    async (username, { rejectWithValue }) => {
+export const logoutUser = createAsyncThunk(
+    "auth/logout",
+    async (_, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_URL}/api/v1/auth/user`, {
-                params: { username }
-            });
+            await axios.post(`${API_URL}/api/v1/auth/logout`);
+            return null;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const fetchUser = createAsyncThunk(
+    "auth/fetchUser",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_URL}/api/v1/me`);
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || error.message);
+            return rejectWithValue(error.response.data);
         }
     }
 );
@@ -51,19 +64,10 @@ const authSlice = createSlice({
     name: "auth",
     initialState: {
         user: null,
-        accessToken: null,
-        username: null,
         loading: false,
         error: null,
     },
-    reducers: {
-        logout: (state) => {
-            state.user = null;
-            state.accessToken = null;
-            state.username = null;
-            localStorage.removeItem("accessToken");
-        },
-    },
+    reducers: {},
     extraReducers: (builder) => {
         builder
             // Register
@@ -73,10 +77,7 @@ const authSlice = createSlice({
             })
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.user = action.payload.user;
-                state.accessToken = action.payload.accessToken;
-                state.username = action.payload.username;
-                localStorage.setItem("accessToken", action.payload.accessToken);
+                state.user = action.payload;
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -92,8 +93,6 @@ const authSlice = createSlice({
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload.user;
-                state.accessToken = action.payload.accessToken;
-                localStorage.setItem("accessToken", action.payload.accessToken);
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
@@ -115,6 +114,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { logout } = authSlice.actions;
 export default authSlice.reducer;
 export const selectCurrentToken = (state) => state.auth.accessToken;

@@ -1,15 +1,22 @@
 import User from "../models/users.js";
 
-export const getUser = async (req, res) => {
-    const userId = req.userId;
-
+export const getUserProfile = async (req, res) => {
     try {
-        const user = await User.findById(userId).select("-password");
+        const token = req.cookies.accessToken;
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id).select("-password");
+
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.json(user);
+
+        res.status(200).json({ user });
     } catch (error) {
-        res.status(500).json({ message: "Internal Server Error" });
+        console.error(error);
+        res.status(401).json({ message: "Invalid token" });
     }
 };

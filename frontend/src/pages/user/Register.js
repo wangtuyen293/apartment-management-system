@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import loginImage from "../../assets/fpt-login.jpg";
 import { registerUser } from "../../redux/authSlice";
@@ -23,63 +23,59 @@ const RegistrationForm = () => {
         password: "",
         confirmPassword: "",
     });
+    const [successMessage, setSuccessMessage] = useState("");
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { loading, error, token } = useSelector((state) => state.auth);
+    const { loading, error, user } = useSelector((state) => state.auth);
+
+    const validateInputs = () => {
+        let newErrors = {};
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = "Invalid email format";
+        }
+
+        if (!/^[0-9]{10}$/.test(formData.phoneNumber)) {
+            newErrors.phoneNumber = "Phone number must be 10 digits";
+        }
+
+        if (
+            !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(
+                formData.password
+            )
+        ) {
+            newErrors.password =
+                "Password must be at least 8 characters with one uppercase, one lowercase, and one number";
+        }
+
+        if (formData.confirmPassword !== formData.password) {
+            newErrors.confirmPassword = "Passwords do not match";
+        }
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-
-        // Validate input
-        if (name === "email") {
-            setErrors({
-                ...errors,
-                email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-                    ? ""
-                    : "Invalid email format",
-            });
-        }
-
-        if (name === "phoneNumber") {
-            setErrors({
-                ...errors,
-                phoneNumber: /^[0-9]{10}$/.test(value)
-                    ? ""
-                    : "Phone number must be 10 digits",
-            });
-        }
-
-        if (name === "password") {
-            setErrors({
-                ...errors,
-                password:
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/.test(value)
-                        ? ""
-                        : "Password must be at least 8 characters, with one uppercase letter, one lowercase letter, and one number",
-            });
-        }
-
-        if (name === "confirmPassword") {
-            setErrors({
-                ...errors,
-                confirmPassword:
-                    value === formData.password ? "" : "Passwords do not match",
-            });
-        }
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(registerUser(formData));
+        if (validateInputs()) {
+            dispatch(registerUser(formData));
+        }
     };
 
     useEffect(() => {
-        if (token) {
-            navigate("/");
+        if (user) {
+            setSuccessMessage(
+                "Registration successful! Please verify your registration!"
+            );
+            setTimeout(() => navigate("/login"), 2000);
         }
-    }, [token, navigate]);
+    }, [user, navigate]);
 
     return (
         <Container
@@ -101,7 +97,10 @@ const RegistrationForm = () => {
                 </Col>
                 <Col md={6}>
                     <h3 className="text-center mb-4">Registration Form</h3>
-                    {error && <p style={{ color: "red" }}>{error}</p>}
+                    {successMessage && (
+                        <Alert variant="success">{successMessage}</Alert>
+                    )}
+                    {error && <Alert variant="danger">{error}</Alert>}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
                             <Form.Control
@@ -132,7 +131,9 @@ const RegistrationForm = () => {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
+                            {errors.email && (
+                                <p className="text-danger">{errors.email}</p>
+                            )}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Control
@@ -143,7 +144,11 @@ const RegistrationForm = () => {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.phoneNumber && <p style={{ color: "red" }}>{errors.phoneNumber}</p>}
+                            {errors.phoneNumber && (
+                                <p className="text-danger">
+                                    {errors.phoneNumber}
+                                </p>
+                            )}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Select
@@ -168,7 +173,9 @@ const RegistrationForm = () => {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.password && <p style={{ color: "red" }}>{errors.password}</p>}
+                            {errors.password && (
+                                <p className="text-danger">{errors.password}</p>
+                            )}
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Control
@@ -179,13 +186,17 @@ const RegistrationForm = () => {
                                 onChange={handleChange}
                                 required
                             />
-                            {errors.confirmPassword && <p style={{ color: "red" }}>{errors.confirmPassword}</p>}
+                            {errors.confirmPassword && (
+                                <p className="text-danger">
+                                    {errors.confirmPassword}
+                                </p>
+                            )}
                         </Form.Group>
                         <Button
                             style={{ backgroundColor: "#78BCC4" }}
                             type="submit"
                             className="w-100"
-                            disabled={loading || Object.values(errors).some((error) => error)}
+                            disabled={loading}
                         >
                             {loading ? "Registering..." : "Register"}
                         </Button>

@@ -1,16 +1,42 @@
 import RefreshToken from "../models/refreshToken.js";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
-const generateToken = async (user) => {
-    const payload = { email: user.email, user: user };
+export const generateAccessToken = (user) => {
+    const payload = {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+    };
 
-    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
     });
+};
 
-    const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
-        expiresIn: "1d",
-    });
+export const generateRefreshToken = async (user) => {
+    const payload = {
+        id: user._id,
+        email: user.email,
+        username: user.username,
+    };
+    let refreshToken;
+    let tokenExists = true;
+
+    while (tokenExists) {
+        const randomString = crypto.randomBytes(64).toString("hex");
+        const refreshTokenPayload = { ...payload, random: randomString };
+
+        refreshToken = jwt.sign(
+            refreshTokenPayload,
+            process.env.REFRESH_TOKEN_SECRET,
+            {
+                expiresIn: "1d",
+            }
+        );
+
+        tokenExists = await RefreshToken.findOne({ token: refreshToken });
+    }
 
     await RefreshToken.create({
         userId: user._id,
@@ -18,7 +44,12 @@ const generateToken = async (user) => {
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
     });
 
-    return { accessToken, refreshToken };
+    return refreshToken;
 };
 
-export default generateToken;
+export const generateToken = async (user) => {
+    const accessToken = generateAccessToken(user);
+    const refreshToken = await generateRefreshToken(user);
+
+    return { accessToken, refreshToken };
+};
