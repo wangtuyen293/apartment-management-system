@@ -1,11 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import UserProfilePage from "./pages/UserProfile";
-import LandingPage from "./pages/LandingPage";
-import ApartmentDetailPage from "./pages/ApartmentDetailPage";
-import FindApartments from "./pages/FindApartment";
+import Register from "./pages/user/Register";
+import Login from "./pages/user/Login";
+import Home from "./pages/layout/Home";
+import UserProfilePage from "./pages/user/UserProfile";
+import LandingPage from "./pages/layout/LandingPage";
+import ApartmentDetailPage from "./pages/apartment/ApartmentDetailPage";
+import FindApartments from "./pages/apartment/FindApartment";
+import CustomerRequestView from "./pages/customerManagement/customerRequestView";
+import CustomerRequestRent from "./pages/customerManagement/customerRequestRent";
+import ApartmentManagement from "./pages/customerManagement/apartmentManagement";
 
 function App() {
     return (
@@ -18,6 +21,9 @@ function App() {
                 <Route path="/profile" element={<UserProfilePage />} />
                 <Route path="/apartment/:id" element={<ApartmentDetailPage />} />
                 <Route path="/find" element={<FindApartments />} />
+                <Route path="/customer/view" element={<CustomerRequestView />} />
+                <Route path="/customer/rent" element={<CustomerRequestRent />} />
+                <Route path="/apartment-manage" element={<ApartmentManagement />} />
             </Routes>
         </Router>
     );

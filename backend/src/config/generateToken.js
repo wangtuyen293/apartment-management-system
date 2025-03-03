@@ -1,7 +1,8 @@
 import RefreshToken from "../models/refreshToken.js";
+import jwt from "jsonwebtoken";
 
 const generateToken = async (user) => {
-    const payload = { email: user.email };
+    const payload = { email: user.email, user: user };
 
     const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",

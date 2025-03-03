@@ -59,6 +59,7 @@ export const login = async (req, res) => {
 
         const response = {
             email: user.email,
+            user: user,
             username: user.username,
             tokenType: "Bearer",
             expiresIn: process.env.ACCESS_TOKEN_LIFETIME,
@@ -101,7 +102,7 @@ export const register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const emailVerificationToken = jwt.sign(
-            { email: newUser.email },
+            { email: email },
             process.env.JWT_SECRET,
             {
                 expiresIn: "1d",
@@ -179,6 +180,17 @@ export const verifyEmail = async (req, res) => {
         await user.save();
 
         res.status(200).json({ message: "Email verified successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const getUser = async (req, res) => {
+    try {
+        const { username } = req.query;
+        const user = await User.findOne({ username: username });
+        res.status(200).json(user);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });

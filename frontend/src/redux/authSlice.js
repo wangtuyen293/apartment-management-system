@@ -11,10 +11,9 @@ export const registerUser = createAsyncThunk(
                 `${API_URL}/api/v1/auth/register`,
                 userData
             );
-
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -27,10 +26,23 @@ export const loginUser = createAsyncThunk(
                 `${API_URL}/api/v1/auth/login`,
                 userData
             );
-
             return response.data;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response?.data || error.message);
+        }
+    }
+);
+
+export const getUser = createAsyncThunk(
+    "auth/user",
+    async (username, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_URL}/api/v1/auth/user`, {
+                params: { username }
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || error.message);
         }
     }
 );
@@ -39,15 +51,17 @@ const authSlice = createSlice({
     name: "auth",
     initialState: {
         user: null,
-        token: null,
+        accessToken: null,
+        username: null,
         loading: false,
         error: null,
     },
     reducers: {
         logout: (state) => {
             state.user = null;
-            state.token = null;
-            localStorage.removeItem("token");
+            state.accessToken = null;
+            state.username = null;
+            localStorage.removeItem("accessToken");
         },
     },
     extraReducers: (builder) => {
@@ -60,8 +74,9 @@ const authSlice = createSlice({
             .addCase(registerUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload.user;
-                state.token = action.payload.token;
-                localStorage.setItem("token", action.payload.token);
+                state.accessToken = action.payload.accessToken;
+                state.username = action.payload.username;
+                localStorage.setItem("accessToken", action.payload.accessToken);
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.loading = false;
@@ -77,15 +92,29 @@ const authSlice = createSlice({
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
                 state.user = action.payload.user;
-                state.token = action.payload.token;
-                localStorage.setItem("token", action.payload.token);
+                state.accessToken = action.payload.accessToken;
+                localStorage.setItem("accessToken", action.payload.accessToken);
             })
             .addCase(loginUser.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload?.message || "Login failed";
+            })
+            // Get User
+            .addCase(getUser.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(getUser.fulfilled, (state, action) => {
+                state.loading = false;
+                state.user = action.payload;
+            })
+            .addCase(getUser.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || "Failed to retrieve user data";
             });
     },
 });
 
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;
+export const selectCurrentToken = (state) => state.auth.accessToken;

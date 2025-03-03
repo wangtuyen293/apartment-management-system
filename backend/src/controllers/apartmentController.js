@@ -1,9 +1,10 @@
 import Apartment from '../models/apartments.js';
 import User from '../models/users.js';
+import CustomerRequest from '../models/customerRequest.js';
 
 const getApartment = async (req, res) => {
     try {
-        const apartments = await Apartment.find();
+        const apartments = await Apartment.find().populate('user_id');
         res.json(apartments);
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
@@ -25,7 +26,7 @@ const getApartmentDetail = async (req, res) => {
 
 const requestForViewApartment = async (req, res) => {
     try {
-
+        const { date } = req.body;
         const apartment = await Apartment.findById(req.params.id);
         if (!apartment) {
             return res.status(404).json({ message: "Apartment not found" });
@@ -42,10 +43,17 @@ const requestForViewApartment = async (req, res) => {
             {
                 $set: {
                     status: "Khách hẹn xem",
-                    user_id: user._id
-                }
+                },
             }
         );
+
+        const viewRequest = new CustomerRequest({
+            apartment_id: apartment._id,
+            status: "Khách hẹn xem",
+            user_id: user._id,
+            date: date,
+        });
+        await viewRequest.save();
 
         if (updatedApartment.modifiedCount === 0) {
             return res.status(400).json({ message: "Failed to update apartment" });
@@ -62,13 +70,15 @@ const requestForViewApartment = async (req, res) => {
 
 const requestForRentApartment = async (req, res) => {
     try {
+        const { date, contractMonths } = req.body;  // Accessing date and contractMonths from request body
+        console.log(date);  // Should print the date correctly
+        console.log(contractMonths);  // Should print contractMonths correctly
 
         const apartment = await Apartment.findById(req.params.id);
         if (!apartment) {
             return res.status(404).json({ message: "Apartment not found" });
         }
 
-        console.log(req.params.userid);
         const user = await User.findOne({ _id: req.params.userid });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -79,10 +89,18 @@ const requestForRentApartment = async (req, res) => {
             {
                 $set: {
                     status: "Đang xét duyệt",
-                    user_id: user._id
                 }
             }
         );
+
+        const viewRequest = new CustomerRequest({
+            apartment_id: apartment._id,
+            status: "Đang xét duyệt",
+            user_id: user._id,
+            date: date,
+            contractMonths: contractMonths,
+        });
+        await viewRequest.save();
 
         if (updatedApartment.modifiedCount === 0) {
             return res.status(400).json({ message: "Failed to update apartment" });
@@ -96,5 +114,6 @@ const requestForRentApartment = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
 
 export { getApartment, getApartmentDetail, requestForViewApartment, requestForRentApartment };

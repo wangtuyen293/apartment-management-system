@@ -28,14 +28,14 @@ export const getApartmentDetail = createAsyncThunk(
     }
 );
 
-// New actions for updating apartment status (request for viewing or renting)
 export const requestForViewApartment = createAsyncThunk(
     "apartment/requestForViewApartment",
-    async ({ apartmentId, userId }, { rejectWithValue }) => {
+    async ({ apartmentId, userId, date }, { rejectWithValue }) => {
         try {
-            // POST request for viewing apartment
+
             const response = await axios.post(
-                `${API_URL}/api/v1/apartments/view/${apartmentId}/${userId}`
+                `${API_URL}/api/v1/apartments/view/${apartmentId}/${userId}`,
+                { date }
             );
             return response.data;
         } catch (error) {
@@ -46,11 +46,12 @@ export const requestForViewApartment = createAsyncThunk(
 
 export const requestForRentApartment = createAsyncThunk(
     "apartment/requestForRentApartment",
-    async ({ apartmentId, userId }, { rejectWithValue }) => {
+    async ({ apartmentId, userId, date, contractMonths }, { rejectWithValue }) => {
         try {
-            // POST request for renting apartment
+            // Send date and contractMonths as part of the request body
             const response = await axios.post(
-                `${API_URL}/api/v1/apartments/rent/${apartmentId}/${userId}`
+                `${API_URL}/api/v1/apartments/rent/${apartmentId}/${userId}`,
+                { date, contractMonths } // Send both values as an object
             );
             return response.data;
         } catch (error) {
@@ -58,6 +59,7 @@ export const requestForRentApartment = createAsyncThunk(
         }
     }
 );
+
 
 const apartmentSlice = createSlice({
     name: "apartment",

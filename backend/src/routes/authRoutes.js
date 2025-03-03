@@ -1,12 +1,13 @@
 import express from "express";
 import passport from "passport";
 import "dotenv/config";
-import { login, register, verifyEmail } from "../controllers/authController.js";
+import { login, register, verifyEmail, getUser } from "../controllers/authController.js";
 
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
 const router = express.Router();
 
+router.get("/user", getUser)
 router.post("/login", login);
 router.post("/register", register);
 // router.post("/refresh", refresh);
