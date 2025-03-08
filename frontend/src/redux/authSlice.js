@@ -98,19 +98,6 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload?.message || "Login failed";
             })
-            // Get User
-            .addCase(getUser.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(getUser.fulfilled, (state, action) => {
-                state.loading = false;
-                state.user = action.payload;
-            })
-            .addCase(getUser.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload?.message || "Failed to retrieve user data";
-            });
     },
 });
 

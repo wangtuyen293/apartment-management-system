@@ -1,159 +1,160 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Nav, Card, Button, Image, NavDropdown, Spinner, Table } from "react-bootstrap";
-import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, HouseDoor } from "react-bootstrap-icons";
-import loginImage from "../../assets/fpt-login.jpg";
-import { jwtDecode } from "jwt-decode";
+import {
+    Container,
+    Row,
+    Col,
+    Card,
+    Button,
+    Spinner,
+    Table,
+    Badge
+} from "react-bootstrap";
+import { logoutUser } from "../../redux/authSlice";
 import { getApartment } from '../../redux/apartmentSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import Sidebar from "../../components/SideBar";
+import { FaHome, FaList, FaUser, FaExclamationTriangle } from "react-icons/fa";
 
 const ApartmentManagement = () => {
-    const [userName, setUserName] = useState(null);
-    const [role, setRole] = useState(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { apartment, loading, error } = useSelector(state => state.apartment);
-
-    useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setRole(decoded.user.role);
-                setUserName(decoded.user.username);
-            } catch (error) {
-                console.error("Invalid token", error);
-            }
-        }
-    }, []);
+    const { user } = useSelector(state => state.auth);
 
     useEffect(() => {
         dispatch(getApartment());
     }, [dispatch]);
 
-
-    const handleLogout = useCallback(() => {
-        localStorage.removeItem("token");
-        setUserName(null);
-        setRole(null);
-        navigate("/");
-    }, [navigate]);
+    const handleLogout = () => {
+        dispatch(logoutUser());
+    };
 
     const handleProfileRedirect = () => {
         navigate("/profile");
     };
 
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'Trống':
+                return <Badge bg="success">Trống</Badge>;
+            case 'Đã cho thuê':
+                return <Badge bg="danger">Đã cho thuê</Badge>;
+            case 'Khách hẹn xem':
+                return <Badge bg="warning" text="dark">Khách hẹn xem</Badge>;
+            case 'Đã cọc':
+                return <Badge bg="warning" text="dark">Đã cọc</Badge>;
+            default:
+                return <Badge bg="secondary">{status}</Badge>;
+        }
+    };
 
     return (
-        <Container fluid style={{ backgroundColor: "#F7F8F3" }}>
-            <Row>
-                <Col xs={2} className="p-0 position-fixed" style={{ background: "linear-gradient(180deg, #FF4F70, #FF1A55)", height: "100vh", top: 0, left: 0, display: "flex", flexDirection: "column", borderRight: "1px solid #ddd" }}>
-                    <Nav className="flex-column">
-                        {role === "Admin" ? (
-                            <>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <House className="me-2 fs-5" /> Bảng tin
-                                </Nav.Link>
-                                <Nav.Link href="/apartment-manage" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <Gear className="me-2 fs-5" /> Tòa nhà
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <CreditCard className="me-2 fs-5" /> Phí dịch vụ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <FileText className="me-2 fs-5" /> Ghi chỉ số
-                                </Nav.Link>
-                                <NavDropdown title={<span className="d-flex align-items-center text-white fs-5"><HandThumbsUp className="me-2" /> Khách hàng</span>} id="customer-nav-dropdown" className="text-white">
-                                    <NavDropdown.Item href="/customer/view" >Khách hẹn xem</NavDropdown.Item>
-                                    <NavDropdown.Item href="#">Khách đã cọc</NavDropdown.Item>
-                                    <NavDropdown.Item href="/customer/rent">Khách yêu cầu thuê</NavDropdown.Item>
-                                    <NavDropdown.Item href="#">Hợp đồng</NavDropdown.Item>
-                                </NavDropdown>
-                            </>
-                        ) : (
-                            <>
-                                <Nav.Link href="/home" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <House className="me-2 fs-5" /> Trang chủ
-                                </Nav.Link>
-                                <Nav.Link href="/find" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <HouseDoor className="me-2 fs-5" /> Tìm kiếm căn hộ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <Gear className="me-2 fs-5" /> Dịch vụ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <CreditCard className="me-2 fs-5" /> Thanh toán
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <FileText className="me-2 fs-5" /> Điều khoản
-                                </Nav.Link>
-                            </>
-                        )}
-                    </Nav>
+        <Container fluid className="p-0">
+            <Row className="g-0">
+                <Sidebar user={user} handleProfileRedirect={handleProfileRedirect} handleLogout={handleLogout} />
 
-                    {/* Sidebar Footer */}
-                    <div className="text-center mt-auto p-3 text-white">
-                        <Image src={loginImage} roundedCircle width="80" height="80" />
-                        <p className="mt-2" onClick={handleProfileRedirect} style={{ cursor: "pointer", fontWeight: "bold" }}>
-                            {userName ? userName : "Người dùng"}
-                        </p>
-                        <Button variant="primary" className="d-flex align-items-center mx-auto" onClick={handleLogout} style={{ borderRadius: "30px", padding: "0.5rem 1.5rem" }}>
-                            <BoxArrowRight className="me-2" /> Đăng xuất
-                        </Button>
+                <Col xs={12} md={10} className="ms-auto p-0">
+                    <div className="bg-primary text-white py-4 px-4 shadow">
+                        <h1 className="h3 mb-0">
+                            <FaHome className="me-2" />
+                            Quản lý Căn hộ
+                        </h1>
+                        <p className="mb-0 opacity-75">Danh sách yêu cầu thuê phòng</p>
                     </div>
-                </Col>
 
-                {/* Content */}
-                <Col xs={10} className="p-5 ms-auto" style={{ marginLeft: "16.67%" }}>
-                    <Container>
-                        <h1 className="my-4 text-center text-primary font-weight-bold" style={{ fontSize: "2rem" }}>Danh sách khách yêu cầu thuê phòng</h1>
-
-                        {loading ? (
-                            <div className="d-flex justify-content-center align-items-center" style={{ height: "200px" }}>
-                                <div>
-                                    <Spinner animation="border" variant="primary" />
-                                    <p className="mt-3 text-muted">Đang tải dữ liệu...</p>
+                    <Container className="py-4">
+                        <Card className="border-0 shadow-sm">
+                            <Card.Header className="bg-white border-0 pt-4 pb-3">
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <h5 className="mb-0">
+                                        <FaList className="me-2 text-primary" />
+                                        Danh sách khách yêu cầu thuê phòng
+                                    </h5>
+                                    <Button variant="outline-primary" size="sm">
+                                        Làm mới
+                                    </Button>
                                 </div>
-                            </div>
-                        ) : error ? (
-                            <div className="alert alert-danger text-center" role="alert" style={{ borderRadius: "10px" }}>
-                                <strong>Lỗi!</strong> {error}
-                            </div>
-                        ) : (
-                            <div className="shadow-lg rounded p-4" style={{ backgroundColor: "#f9f9f9" }}>
-                                <Table striped bordered hover responsive>
-                                    <thead className="thead-dark">
-                                        <tr>
-                                            <th>Số phòng</th>
-                                            <th>Tầng</th>
-                                            <th>Tình trạng</th>
-                                            <th>Người thuê</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {apartment && apartment.length > 0 ? (
-                                            apartment.map((request) => (
-                                                <tr key={request._id} style={{ backgroundColor: "#ffffff" }}>
-                                                    <td>{request.apartment_number}</td>
-                                                    <td>{request.floor}</td>
-                                                    <td>{request.status}</td>
-                                                    <td>{request.user_id ? request.user_id.name : 'N/A'}</td>
+                            </Card.Header>
+                            <Card.Body>
+                                {loading ? (
+                                    <div className="text-center py-5">
+                                        <Spinner animation="border" variant="primary" />
+                                        <p className="mt-3 text-muted">Đang tải dữ liệu...</p>
+                                    </div>
+                                ) : error ? (
+                                    <div className="alert alert-danger d-flex align-items-center" role="alert">
+                                        <FaExclamationTriangle className="me-2" />
+                                        <div>
+                                            <strong>Lỗi!</strong> {error}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="table-responsive">
+                                        <Table hover className="align-middle mb-0">
+                                            <thead className="bg-light">
+                                                <tr>
+                                                    <th className="border-0">Số phòng</th>
+                                                    <th className="border-0">Tầng</th>
+                                                    <th className="border-0">Tình trạng</th>
+                                                    <th className="border-0">Người thuê</th>
+                                                    <th className="border-0 text-end">Thao tác</th>
                                                 </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="4" className="text-center" style={{ fontStyle: "italic", color: "#888" }}>
-                                                    Danh sách trống.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </Table>
-                            </div>
-                        )}
+                                            </thead>
+                                            <tbody>
+                                                {apartment && apartment.length > 0 ? (
+                                                    apartment.map((request) => (
+                                                        <tr key={request._id}>
+                                                            <td>
+                                                                <div className="d-flex align-items-center">
+                                                                    <div className="bg-light rounded-circle p-2 me-3">
+                                                                        <FaHome className="text-primary" />
+                                                                    </div>
+                                                                    <strong>{request.apartment_number}</strong>
+                                                                </div>
+                                                            </td>
+                                                            <td>{request.floor}</td>
+                                                            <td>{getStatusBadge(request.status)}</td>
+                                                            <td>
+                                                                {request.user_id ? (
+                                                                    <div className="d-flex align-items-center">
+                                                                        <div className="bg-light rounded-circle p-2 me-2">
+                                                                            <FaUser className="text-secondary" />
+                                                                        </div>
+                                                                        {request.user_id.name}
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-muted">N/A</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="text-end">
+                                                                <Button variant="outline-secondary" size="sm" className="me-2">
+                                                                    Chi tiết
+                                                                </Button>
+                                                                <Button variant="primary" size="sm">
+                                                                    Xử lý
+                                                                </Button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan="5" className="text-center py-5">
+                                                            <div className="text-muted">
+                                                                <p className="mb-0">Danh sách trống</p>
+                                                                <small>Chưa có yêu cầu thuê phòng nào</small>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </Table>
+                                    </div>
+                                )}
+                            </Card.Body>
+                        </Card>
                     </Container>
                 </Col>
-
             </Row>
         </Container>
     );

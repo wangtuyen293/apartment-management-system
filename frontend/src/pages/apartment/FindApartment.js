@@ -1,152 +1,425 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Spinner, Row, Col, Nav, Card, Button, Image, NavDropdown } from "react-bootstrap";
-import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, Chat, Share, HouseDoor } from "react-bootstrap-icons";
-import loginImage from "../../assets/fpt-login.jpg";
-import { jwtDecode } from "jwt-decode";
-import apartmentImage1 from "../../assets/fpt-login.jpg";
+import {
+    Container, Spinner, Row, Col, Card, Button, Form,
+    InputGroup, Badge, Dropdown, DropdownButton
+} from "react-bootstrap";
+import {
+    Search, Filter, House, CurrencyDollar, SquareFill, SortDown
+} from "react-bootstrap-icons";
+import apartmentImage1 from '../../assets/images/fpt-login.jpg';
 import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
+import { logoutUser } from "../../redux/authSlice";
 import { useDispatch, useSelector } from 'react-redux';
+import Sidebar from "../../components/SideBar";
 
 const HomePage = () => {
-    const [userName, setUserName] = useState(null);
-    const [role, setRole] = useState(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { apartment, loading, error } = useSelector(state => state.apartment);
+    const { user } = useSelector((state) => state.auth);
 
-    useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setRole(decoded.user.role);
-                setUserName(decoded.user.username);
-            } catch (error) {
-                console.error("Invalid token", error);
-            }
-        }
-    }, []);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredApartments, setFilteredApartments] = useState([]);
+    const [priceFilter, setPriceFilter] = useState(null);
+    const [areaFilter, setAreaFilter] = useState(null);
+    const [statusFilter, setStatusFilter] = useState(null);
+    const [sortOption, setSortOption] = useState(null);
 
     useEffect(() => {
         dispatch(getApartment());
     }, [dispatch]);
 
-    const handleViewDetails = (apartmentId) => {
+    useEffect(() => {
+        if (apartment) {
+            let results = [...apartment];
 
+            if (searchTerm) {
+                results = results.filter(apt =>
+                    apt.apartment_number.toString().includes(searchTerm) ||
+                    apt.floor.toString().includes(searchTerm)
+                );
+            }
+
+            if (priceFilter) {
+                switch (priceFilter) {
+                    case 'low':
+                        results = results.filter(apt => apt.price < 5000000);
+                        break;
+                    case 'medium':
+                        results = results.filter(apt => apt.price >= 5000000 && apt.price <= 10000000);
+                        break;
+                    case 'high':
+                        results = results.filter(apt => apt.price > 10000000);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (areaFilter) {
+                switch (areaFilter) {
+                    case 'small':
+                        results = results.filter(apt => apt.area < 50);
+                        break;
+                    case 'medium':
+                        results = results.filter(apt => apt.area >= 50 && apt.area <= 80);
+                        break;
+                    case 'large':
+                        results = results.filter(apt => apt.area > 80);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (statusFilter) {
+                results = results.filter(apt => apt.status === statusFilter);
+            }
+
+            if (sortOption) {
+                switch (sortOption) {
+                    case 'price_asc':
+                        results.sort((a, b) => a.price - b.price);
+                        break;
+                    case 'price_desc':
+                        results.sort((a, b) => b.price - a.price);
+                        break;
+                    case 'area_asc':
+                        results.sort((a, b) => a.area - b.area);
+                        break;
+                    case 'area_desc':
+                        results.sort((a, b) => b.area - a.area);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            setFilteredApartments(results);
+        }
+    }, [apartment, searchTerm, priceFilter, areaFilter, statusFilter, sortOption]);
+
+    const handleViewDetails = (apartmentId) => {
         dispatch(getApartmentDetail(apartmentId));
         navigate(`/apartment/${apartmentId}`);
     };
 
-    const handleLogout = useCallback(() => {
-        localStorage.removeItem("accessToken");
-        setUserName(null);
-        setRole(null);
-        navigate("/");
-    }, [navigate]);
+    const handleLogout = () => {
+        dispatch(logoutUser());
+    };
 
     const handleProfileRedirect = () => {
         navigate("/profile");
     };
 
+    const handleClearFilters = () => {
+        setSearchTerm("");
+        setPriceFilter(null);
+        setAreaFilter(null);
+        setStatusFilter(null);
+        setSortOption(null);
+    };
+
+    const formatPrice = (price) => {
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+
     return (
-        <Container fluid style={{ backgroundColor: "#F7F8F3" }}>
-            <Row>
-                <Col xs={2} className="p-0 position-fixed" style={{ background: "linear-gradient(180deg, #FF4F70, #FF1A55)", height: "100vh", top: 0, left: 0, display: "flex", flexDirection: "column", borderRight: "1px solid #ddd" }}>
-                    <Nav className="flex-column">
-                        {role === "Admin" ? (
-                            <>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <House className="me-2 fs-5" /> Bảng tin
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <Gear className="me-2 fs-5" /> Tòa nhà
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <CreditCard className="me-2 fs-5" /> Phí dịch vụ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <FileText className="me-2 fs-5" /> Ghi chỉ số
-                                </Nav.Link>
-                                <NavDropdown title={<span className="d-flex align-items-center text-white fs-5"><HandThumbsUp className="me-2" /> Khách hàng</span>} id="customer-nav-dropdown" className="text-white">
-                                    <NavDropdown.Item href="#" >Khách hẹn xem</NavDropdown.Item>
-                                    <NavDropdown.Item href="#">Khách đã cọc</NavDropdown.Item>
-                                    <NavDropdown.Item href="#">Khách đã thuê</NavDropdown.Item>
-                                    <NavDropdown.Item href="#">Hợp đồng</NavDropdown.Item>
-                                </NavDropdown>
-                            </>
-                        ) : (
-                            <>
-                                <Nav.Link href="/home" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <House className="me-2 fs-5" /> Trang chủ
-                                </Nav.Link>
-                                <Nav.Link href="/find" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <HouseDoor className="me-2 fs-5" /> Tìm kiếm căn hộ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <Gear className="me-2 fs-5" /> Dịch vụ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <CreditCard className="me-2 fs-5" /> Thanh toán
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <FileText className="me-2 fs-5" /> Điều khoản
-                                </Nav.Link>
-                            </>
-                        )}
-                    </Nav>
+        <Container fluid className="p-0" style={{ backgroundColor: "#F5F7FA" }}>
+            <Row className="g-0">
+                <Sidebar user={user} handleProfileRedirect={handleProfileRedirect} handleLogout={handleLogout} />
 
-                    {/* Sidebar Footer */}
-                    <div className="text-center mt-auto p-3 text-white">
-                        <Image src={loginImage} roundedCircle width="80" height="80" />
-                        <p className="mt-2" onClick={handleProfileRedirect} style={{ cursor: "pointer", fontWeight: "bold" }}>
-                            {userName ? userName : "Người dùng"}
-                        </p>
-                        <Button variant="primary" className="d-flex align-items-center mx-auto" onClick={handleLogout} style={{ borderRadius: "30px", padding: "0.5rem 1.5rem" }}>
-                            <BoxArrowRight className="me-2" /> Đăng xuất
-                        </Button>
+                <Col xs={10} className="p-0 ms-auto" style={{ marginLeft: "16.67%" }}>
+
+                    <div className="bg-success text-white py-4 px-4">
+                        <Container>
+                            <h1 className="display-5 fw-bold">Tìm kiếm căn hộ lý tưởng cho bạn</h1>
+                            <p className="fs-5">Khám phá các căn hộ của chúng tôi</p>
+                        </Container>
                     </div>
-                </Col>
 
-                {/* Content */}
-                <Col xs={10} className="p-5 ms-auto" style={{ marginLeft: "16.67%" }}>
-                    <Container className="my-5">
-                        <Row>
-                            {loading ? (
-                                <Col className="text-center">
-                                    <Spinner animation="border" variant="primary" />
-                                    <p className="mt-3">Loading apartments...</p>
-                                </Col>
-                            ) : error ? (
-                                <Col className="text-center">
-                                    <p className="text-danger">Error: {error}</p>
-                                </Col>
-                            ) : (
-                                apartment && apartment.map((apt) => (
-                                    <Col md={4} key={apt._id} className="mb-4">
-                                        <div className="card shadow-lg border-0 rounded">
-                                            <img src={apartmentImage1} className="card-img-top" alt="Apartment" />
-                                            <div className="card-body">
-                                                <h5 className="card-title">{`Căn hộ ${apt.apartment_number}`}</h5>
-                                                <p className="card-text">
-                                                    <strong>Tầng:</strong> {apt.floor}<br />
-                                                    <strong>Diện tích:</strong> {apt.area} m²<br />
-                                                    <strong>Giá cho thuê:</strong> {apt.price} VND<br />
-                                                    <strong>Tình trạng:</strong> {apt.status}
-                                                </p>
-                                                <Button
-                                                    variant="primary"
-                                                    onClick={() => handleViewDetails(apt._id)}
-                                                >
-                                                    Xem chi tiết
-                                                </Button>
-                                            </div>
-                                        </div>
+                    <Container fluid className="py-4 bg-white shadow-sm sticky-top">
+                        <Row className="align-items-center">
+                            <Col md={4}>
+                                <InputGroup>
+                                    <InputGroup.Text className="bg-white">
+                                        <Search />
+                                    </InputGroup.Text>
+                                    <Form.Control
+                                        placeholder="Tìm kiếm số căn hộ hoặc số tầng..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </InputGroup>
+                            </Col>
+                            <Col md={7}>
+                                <Row className="g-2">
+                                    <Col>
+                                        <DropdownButton
+                                            variant="outline-secondary"
+                                            title={<><CurrencyDollar /> Giá cả</>}
+                                            size="sm"
+                                        >
+                                            <Dropdown.Item onClick={() => setPriceFilter('low')}>
+                                                Dưới 5,000,000 VND
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setPriceFilter('medium')}>
+                                                5,000,000 - 10,000,000 VND
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setPriceFilter('high')}>
+                                                Trên 10,000,000 VND
+                                            </Dropdown.Item>
+                                            <Dropdown.Divider />
+                                            <Dropdown.Item onClick={() => setPriceFilter(null)}>
+                                                Xóa bộ lọc
+                                            </Dropdown.Item>
+                                        </DropdownButton>
                                     </Col>
-                                ))
-                            )}
+                                    <Col>
+                                        <DropdownButton
+                                            variant="outline-secondary"
+                                            title={<><SquareFill /> Diện tích</>}
+                                            size="sm"
+                                        >
+                                            <Dropdown.Item onClick={() => setAreaFilter('small')}>
+                                                Dưới 50 m²
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setAreaFilter('medium')}>
+                                                50 - 80 m²
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setAreaFilter('large')}>
+                                                Trên 80 m²
+                                            </Dropdown.Item>
+                                            <Dropdown.Divider />
+                                            <Dropdown.Item onClick={() => setAreaFilter(null)}>
+                                                Xóa bộ lọc
+                                            </Dropdown.Item>
+                                        </DropdownButton>
+                                    </Col>
+                                    <Col>
+                                        <DropdownButton
+                                            variant="outline-secondary"
+                                            title={<><House /> Tình trạng</>}
+                                            size="sm"
+                                        >
+                                            <Dropdown.Item onClick={() => setStatusFilter('Trống')}>
+                                                Trống
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setStatusFilter('Đã cho thuê')}>
+                                                Đã cho thuê
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setStatusFilter('Đã cọc')}>
+                                                Đã cọc
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setStatusFilter('Khách hẹn xem')}>
+                                                Khách hẹn xem
+                                            </Dropdown.Item>
+                                            <Dropdown.Divider />
+                                            <Dropdown.Item onClick={() => setStatusFilter(null)}>
+                                                Xóa bộ lọc
+                                            </Dropdown.Item>
+                                        </DropdownButton>
+                                    </Col>
+                                    <Col>
+                                        <DropdownButton
+                                            variant="outline-secondary"
+                                            title={<><SortDown /> Sắp xếp</>}
+                                            size="sm"
+                                        >
+                                            <Dropdown.Item onClick={() => setSortOption('price_asc')}>
+                                                Giá: từ thấp lên cao
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setSortOption('price_desc')}>
+                                                Giá: từ cao xuống thấp
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setSortOption('area_asc')}>
+                                                Diện tích: từ nhỏ đến lớn
+                                            </Dropdown.Item>
+                                            <Dropdown.Item onClick={() => setSortOption('area_desc')}>
+                                                Diện tích: từ lớn đến nhỏ
+                                            </Dropdown.Item>
+                                            <Dropdown.Divider />
+                                            <Dropdown.Item onClick={() => setSortOption(null)}>
+                                                Xóa sắp xếp
+                                            </Dropdown.Item>
+                                        </DropdownButton>
+                                    </Col>
+                                </Row>
+                            </Col>
+                            <Col md={1}>
+                                <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={handleClearFilters}
+                                    className="w-100"
+                                >
+                                    Xóa lọc
+                                </Button>
+                            </Col>
                         </Row>
                     </Container>
+
+                    <Container className="mt-3">
+                        <Row>
+                            <Col>
+                                {(searchTerm || priceFilter || areaFilter || statusFilter || sortOption) && (
+                                    <div className="mb-3">
+                                        <h6 className="d-inline me-2">Bộ lọc:</h6>
+                                        {searchTerm && (
+                                            <Badge bg="primary" className="me-2 p-2">
+                                                Tìm kiếm: {searchTerm}
+                                                <Button
+                                                    size="sm"
+                                                    variant="primary"
+                                                    className="ms-2 p-0 border-0"
+                                                    onClick={() => setSearchTerm("")}
+                                                >
+                                                    &times;
+                                                </Button>
+                                            </Badge>
+                                        )}
+                                        {priceFilter && (
+                                            <Badge bg="info" className="me-2 p-2">
+                                                Giá cả: {priceFilter === 'low' ? 'Under 5M' : priceFilter === 'medium' ? '5M-10M' : 'Above 10M'}
+                                                <Button
+                                                    size="sm"
+                                                    variant="info"
+                                                    className="ms-2 p-0 border-0"
+                                                    onClick={() => setPriceFilter(null)}
+                                                >
+                                                    &times;
+                                                </Button>
+                                            </Badge>
+                                        )}
+                                        {areaFilter && (
+                                            <Badge bg="success" className="me-2 p-2">
+                                                Diện tích: {areaFilter === 'small' ? 'Under 50m²' : areaFilter === 'medium' ? '50-80m²' : 'Above 80m²'}
+                                                <Button
+                                                    size="sm"
+                                                    variant="success"
+                                                    className="ms-2 p-0 border-0"
+                                                    onClick={() => setAreaFilter(null)}
+                                                >
+                                                    &times;
+                                                </Button>
+                                            </Badge>
+                                        )}
+                                        {statusFilter && (
+                                            <Badge bg="warning" className="me-2 p-2 text-dark">
+                                                Tình trạng: {statusFilter}
+                                                <Button
+                                                    size="sm"
+                                                    variant="warning"
+                                                    className="ms-2 p-0 border-0"
+                                                    onClick={() => setStatusFilter(null)}
+                                                >
+                                                    &times;
+                                                </Button>
+                                            </Badge>
+                                        )}
+                                        {sortOption && (
+                                            <Badge bg="secondary" className="me-2 p-2">
+                                                Sắp xếp: {
+                                                    sortOption === 'price_asc' ? 'Price ↑' :
+                                                        sortOption === 'price_desc' ? 'Price ↓' :
+                                                            sortOption === 'area_asc' ? 'Area ↑' : 'Area ↓'
+                                                }
+                                                <Button
+                                                    size="sm"
+                                                    variant="secondary"
+                                                    className="ms-2 p-0 border-0"
+                                                    onClick={() => setSortOption(null)}
+                                                >
+                                                    &times;
+                                                </Button>
+                                            </Badge>
+                                        )}
+                                    </div>
+                                )}
+                            </Col>
+                        </Row>
+                    </Container>
+
+                    <Container className="my-4">
+                        <h3 className="mb-4">Căn hộ có sẵn</h3>
+
+                        {loading ? (
+                            <div className="text-center py-5">
+                                <Spinner animation="border" variant="primary" />
+                                <p className="mt-3">Loading apartments...</p>
+                            </div>
+                        ) : error ? (
+                            <div className="alert alert-danger">
+                                <p className="mb-0">Error: {error}</p>
+                            </div>
+                        ) : filteredApartments.length === 0 ? (
+                            <div className="alert alert-info">
+                                <p className="mb-0">Không có căn hộ nào khớp với bộ lọc, thử 1 bộ lọc khác.</p>
+                            </div>
+                        ) : (
+                            <Row>
+                                {filteredApartments.map((apt) => (
+                                    <Col lg={4} md={6} key={apt._id} className="mb-4">
+                                        <Card className="h-100 shadow-sm border-0 rounded-3 apartment-card">
+                                            <div className="position-relative">
+                                                <Card.Img
+                                                    variant="top"
+                                                    src={apartmentImage1}
+                                                    className="img-fluid"
+                                                    style={{ height: "200px", objectFit: "cover" }}
+                                                />
+                                                <Badge
+                                                    bg={apt.status === 'Trống' ? 'success' : apt.status === 'Đã cho thuê' ? 'danger' : apt.status === 'Đang xét duyệt' ? 'primary' : 'warning'}
+                                                    className="position-absolute top-0 end-0 m-2 py-2 px-3"
+                                                >
+                                                    {apt.status}
+                                                </Badge>
+                                            </div>
+                                            <Card.Body>
+                                                <Card.Title className="fs-4 d-flex justify-content-between align-items-center">
+                                                    <span>Căn hộ {apt.apartment_number}</span>
+                                                    <Badge bg="primary" pill>{apt.area} m²</Badge>
+                                                </Card.Title>
+                                                <Card.Text>
+                                                    <Row className="mt-3">
+                                                        <Col xs={6}>
+                                                            <div className="text-muted mb-2">
+                                                                <i className="bi bi-building me-2"></i> Tầng {apt.apartment_number / 100}
+                                                            </div>
+                                                        </Col>
+                                                        <Col xs={6}>
+                                                            <div className="text-muted mb-2">
+                                                                <i className="bi bi-square me-2"></i> Diện tích:  {apt.area} m²
+                                                            </div>
+                                                        </Col>
+                                                    </Row>
+                                                </Card.Text>
+                                                <div className="d-flex justify-content-between align-items-center mt-3">
+                                                    <h5 className="text-primary mb-0">{formatPrice(apt.price)} VND</h5>
+                                                    <Button
+                                                        variant="outline-primary"
+                                                        onClick={() => handleViewDetails(apt._id)}
+                                                    >
+                                                        Xem chi tiết
+                                                    </Button>
+                                                </div>
+                                            </Card.Body>
+                                        </Card>
+                                    </Col>
+                                ))}
+                            </Row>
+                        )}
+                    </Container>
+
+                    {/* Footer info */}
+                    <div className="bg-light py-4 mt-4">
+                        <Container>
+                            <p className="text-center text-muted mb-0">
+                                ApaMan
+                            </p>
+                        </Container>
+                    </div>
                 </Col>
             </Row>
         </Container>

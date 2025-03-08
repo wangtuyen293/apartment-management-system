@@ -20,9 +20,6 @@ const AppNavbar = () => {
                     <Nav.Link as={Link} to="/" active={location.pathname === "/"}>
                         Trang Chủ
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/apartments" active={location.pathname === "/apartments"}>
-                        Danh Sách Căn Hộ
-                    </Nav.Link>
                     {userRole === "resident" && (
                         <>
                             <Nav.Link as={Link} to="/transactions" active={location.pathname === "/transactions"}>
@@ -57,10 +54,10 @@ const AppNavbar = () => {
                         </>
                     ) : (
                         <>
-                            <Button variant="dark" as={Link} to="/auth/login">
+                            <Button variant="dark" as={Link} to="/login">
                                 Đăng Nhập
                             </Button>
-                            <Button variant="outline-dark" as={Link} to="/auth/register">
+                            <Button variant="outline-dark" as={Link} to="/register">
                                 Đăng Ký
                             </Button>
                         </>

@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
+import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../redux/authSlice";
+import { loginUser } from "../../redux/authSlice";
 import { FcGoogle } from "react-icons/fc";
 import { motion } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
-import loginImage from "../assets/fpt-login.jpg";
+import loginImage from '../../assets/images/fpt-login.jpg';;
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({ username: "", password: "" });
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { accessToken, username, loading, error } = useSelector((state) => state.auth);
+    const { user, loading, error } = useSelector((state) => state.auth);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,6 +21,7 @@ const LoginForm = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         dispatch(loginUser(formData));
+        console.log(user);
     };
 
     const handleGoogleLogin = () => {
@@ -28,10 +29,10 @@ const LoginForm = () => {
     };
 
     useEffect(() => {
-        if (accessToken) {
+        if (user) {
             navigate("/home");
         }
-    }, [accessToken, navigate]);
+    }, [user, navigate]);
 
     return (
         <Container

@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { Navbar, Nav, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
-import { Carousel } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import loginImage from "../../assets/fpt-login.jpg";
-import apartmentImage1 from "../../assets/fpt-login.jpg";
+import apartmentImage1 from '../../assets/images/fpt-login.jpg';
 import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
+import AppNavbar from '../../components/AppNavbar';
+import Banner from '../../components/Banner';
 
 const LandingPage = () => {
     const dispatch = useDispatch();

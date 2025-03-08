@@ -70,9 +70,7 @@ const requestForViewApartment = async (req, res) => {
 
 const requestForRentApartment = async (req, res) => {
     try {
-        const { date, contractMonths } = req.body;  // Accessing date and contractMonths from request body
-        console.log(date);  // Should print the date correctly
-        console.log(contractMonths);  // Should print contractMonths correctly
+        const { date, contractMonths } = req.body;
 
         const apartment = await Apartment.findById(req.params.id);
         if (!apartment) {

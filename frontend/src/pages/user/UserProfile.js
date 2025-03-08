@@ -3,7 +3,7 @@ import { Container, Row, Col, Nav, Card, Button, Image, NavDropdown } from "reac
 import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, Chat, Share, HouseDoor } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import loginImage from "../../assets/fpt-login.jpg";
+import loginImage from '../../assets/images/fpt-login.jpg';
 
 const UserProfilePage = () => {
     const [user, setUser] = useState(null);

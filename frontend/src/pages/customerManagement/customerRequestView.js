@@ -1,158 +1,258 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Nav, Card, Button, Image, NavDropdown, Spinner, Table } from "react-bootstrap";
-import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, HouseDoor } from "react-bootstrap-icons";
-import loginImage from "../../assets/fpt-login.jpg";
-import { jwtDecode } from "jwt-decode";
+import {
+    Container,
+    Row,
+    Col,
+    Card,
+    Button,
+    Spinner,
+    Table,
+    Badge,
+    Form,
+    InputGroup
+} from "react-bootstrap";
+import {
+    Calendar3,
+    Search,
+    Eye,
+    Person,
+    Telephone,
+    HouseDoor,
+    Calendar2Check,
+    InfoCircle,
+    HandThumbsUp,
+    HandThumbsDown
+} from "react-bootstrap-icons";
 import { getCustomerViewApartment } from '../../redux/residentSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { logoutUser } from "../../redux/authSlice";
+import Sidebar from "../../components/SideBar";
 
 const CustomerRequestView = () => {
-    const [userName, setUserName] = useState(null);
-    const [role, setRole] = useState(null);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { resident, loading, error } = useSelector(state => state.resident);
-
-    useEffect(() => {
-        const token = localStorage.getItem("accessToken");
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setRole(decoded.user.role);
-                setUserName(decoded.user.username);
-            } catch (error) {
-                console.error("Invalid token", error);
-            }
-        }
-    }, []);
+    const { user } = useSelector(state => state.auth);
 
     useEffect(() => {
         dispatch(getCustomerViewApartment());
     }, [dispatch]);
 
-
-    const handleLogout = useCallback(() => {
-        localStorage.removeItem("token");
-        setUserName(null);
-        setRole(null);
-        navigate("/");
-    }, [navigate]);
+    const handleLogout = () => {
+        dispatch(logoutUser());
+    };
 
     const handleProfileRedirect = () => {
         navigate("/profile");
     };
 
+    const formatDate = (dateString) => {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(dateString).toLocaleDateString('vi-VN', options);
+    };
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'Pending':
+                return <Badge bg="warning" text="dark">Đang chờ</Badge>;
+            case 'Confirmed':
+                return <Badge bg="success">Đã xác nhận</Badge>;
+            case 'Cancelled':
+                return <Badge bg="danger">Đã hủy</Badge>;
+            default:
+                return <Badge bg="secondary">Đang chờ</Badge>;
+        }
+    };
+
+    const handleApprove = (id) => {
+        getStatusBadge('Confirmed');
+    };
+
+    const handleReject = (id) => {
+        getStatusBadge('Cancelled');
+    };
+
     return (
-        <Container fluid style={{ backgroundColor: "#F7F8F3" }}>
-            <Row>
-                <Col xs={2} className="p-0 position-fixed" style={{ background: "linear-gradient(180deg, #FF4F70, #FF1A55)", height: "100vh", top: 0, left: 0, display: "flex", flexDirection: "column", borderRight: "1px solid #ddd" }}>
-                    <Nav className="flex-column">
-                        {role === "Admin" ? (
-                            <>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <House className="me-2 fs-5" /> Bảng tin
-                                </Nav.Link>
-                                <Nav.Link href="/apartment-manage" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <Gear className="me-2 fs-5" /> Tòa nhà
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <CreditCard className="me-2 fs-5" /> Phí dịch vụ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <FileText className="me-2 fs-5" /> Ghi chỉ số
-                                </Nav.Link>
-                                <NavDropdown title={<span className="d-flex align-items-center text-white fs-5"><HandThumbsUp className="me-2" /> Khách hàng</span>} id="customer-nav-dropdown" className="text-white">
-                                    <NavDropdown.Item href="/customer/view" >Khách hẹn xem</NavDropdown.Item>
-                                    <NavDropdown.Item href="#">Khách đã cọc</NavDropdown.Item>
-                                    <NavDropdown.Item href="/customer/rent">Khách yêu cầu thuê</NavDropdown.Item>
-                                    <NavDropdown.Item href="#">Hợp đồng</NavDropdown.Item>
-                                </NavDropdown>
-                            </>
-                        ) : (
-                            <>
-                                <Nav.Link href="/home" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <House className="me-2 fs-5" /> Trang chủ
-                                </Nav.Link>
-                                <Nav.Link href="/find" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <HouseDoor className="me-2 fs-5" /> Tìm kiếm căn hộ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <Gear className="me-2 fs-5" /> Dịch vụ
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <CreditCard className="me-2 fs-5" /> Thanh toán
-                                </Nav.Link>
-                                <Nav.Link href="#" className="d-flex align-items-center p-3 text-white hover-effect">
-                                    <FileText className="me-2 fs-5" /> Điều khoản
-                                </Nav.Link>
-                            </>
-                        )}
-                    </Nav>
+        <Container fluid className="p-0">
+            <Row className="g-0">
+                <Sidebar user={user} handleProfileRedirect={handleProfileRedirect} handleLogout={handleLogout} />
 
-                    {/* Sidebar Footer */}
-                    <div className="text-center mt-auto p-3 text-white">
-                        <Image src={loginImage} roundedCircle width="80" height="80" />
-                        <p className="mt-2" onClick={handleProfileRedirect} style={{ cursor: "pointer", fontWeight: "bold" }}>
-                            {userName ? userName : "Người dùng"}
-                        </p>
-                        <Button variant="primary" className="d-flex align-items-center mx-auto" onClick={handleLogout} style={{ borderRadius: "30px", padding: "0.5rem 1.5rem" }}>
-                            <BoxArrowRight className="me-2" /> Đăng xuất
-                        </Button>
+                <Col xs={12} md={10} className="ms-auto p-0">
+                    {/* Header */}
+                    <div className="bg-info bg-gradient text-white py-4 px-4 shadow">
+                        <div className="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h1 className="h3 mb-0">
+                                    <Calendar2Check className="me-2" />
+                                    Lịch hẹn xem căn hộ
+                                </h1>
+                                <p className="mb-0 opacity-75">Quản lý các lịch hẹn xem phòng với khách hàng</p>
+                            </div>
+                            <div>
+                                <Button
+                                    variant="outline-light"
+                                    size="sm"
+                                    onClick={() => dispatch(getCustomerViewApartment())}
+                                >
+                                    <Eye className="me-1" /> Xem tất cả
+                                </Button>
+                            </div>
+                        </div>
                     </div>
-                </Col>
 
-                {/* Content */}
-                <Col xs={10} className="p-5 ms-auto" style={{ marginLeft: "16.67%" }}>
-                    <Container>
-                        <h1 className="my-4 text-center text-primary font-weight-bold" style={{ fontSize: "2rem" }}>Danh sách khách hẹn xem phòng</h1>
+                    <Container className="py-4">
+                        {/* Search & Filter */}
+                        <Card className="mb-4 border-0 shadow-sm">
+                            <Card.Body>
+                                <Row>
+                                    <Col md={8}>
+                                        <InputGroup>
+                                            <InputGroup.Text className="bg-light border-end-0">
+                                                <Search />
+                                            </InputGroup.Text>
+                                            <Form.Control
+                                                placeholder="Tìm kiếm theo tên khách hàng hoặc số phòng..."
+                                                className="border-start-0 bg-light"
+                                            />
+                                        </InputGroup>
+                                    </Col>
+                                    <Col md={4}>
+                                        <InputGroup>
+                                            <InputGroup.Text className="bg-light border-end-0">
+                                                <Calendar3 />
+                                            </InputGroup.Text>
+                                            <Form.Control
+                                                type="date"
+                                                className="border-start-0 bg-light"
+                                            />
+                                        </InputGroup>
+                                    </Col>
+                                </Row>
+                            </Card.Body>
+                        </Card>
 
-                        {loading ? (
-                            <div className="d-flex justify-content-center align-items-center" style={{ height: "200px" }}>
-                                <div>
-                                    <Spinner animation="border" variant="primary" />
-                                    <p className="mt-3 text-muted">Đang tải dữ liệu...</p>
+                        {/* Main Content */}
+                        <Card className="border-0 shadow-sm">
+                            <Card.Header className="bg-white py-3 border-0">
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <h5 className="mb-0 text-info">
+                                        <Calendar2Check className="me-2" />
+                                        Danh sách khách hẹn xem phòng
+                                    </h5>
+                                    <div>
+                                        <Badge bg="secondary" className="me-2">Tổng: {resident ? resident.length : 0}</Badge>
+                                        <Button variant="outline-info" size="sm">
+                                            <Calendar3 className="me-1" /> Lịch tháng
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        ) : error ? (
-                            <div className="alert alert-danger text-center" role="alert" style={{ borderRadius: "10px" }}>
-                                <strong>Lỗi!</strong> {error}
-                            </div>
-                        ) : (
-                            <div className="shadow-lg rounded p-4" style={{ backgroundColor: "#f9f9f9" }}>
-                                <Table striped bordered hover responsive>
-                                    <thead className="thead-dark">
-                                        <tr>
-                                            <th>Tên khách hàng</th>
-                                            <th>Số điện thoại</th>
-                                            <th>Số phòng</th>
-                                            <th>Loại yêu cầu</th>
-                                            <th>Ngày xem phòng</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {resident && resident.length > 0 ? (
-                                            resident.map((request) => (
-                                                <tr key={request._id} style={{ backgroundColor: "#ffffff" }}>
-                                                    <td>{request.username}</td>
-                                                    <td>{request.phoneNumber}</td>
-                                                    <td>{request.apartment}</td>
-                                                    <td>{request.status}</td>
-                                                    <td>{new Date(request.date).toLocaleDateString()}</td>
+                            </Card.Header>
+
+                            <Card.Body className="p-0">
+                                {loading ? (
+                                    <div className="text-center py-5">
+                                        <Spinner animation="border" variant="info" />
+                                        <p className="mt-3 text-muted">Đang tải dữ liệu lịch hẹn...</p>
+                                    </div>
+                                ) : error ? (
+                                    <div className="alert alert-danger m-4" role="alert">
+                                        <InfoCircle className="me-2" />
+                                        <strong>Lỗi!</strong> {error}
+                                    </div>
+                                ) : (
+                                    <div className="table-responsive">
+                                        <Table hover className="mb-0">
+                                            <thead className="bg-light">
+                                                <tr>
+                                                    <th className="px-4 py-3 border-0">Khách hàng</th>
+                                                    <th className="py-3 border-0">Căn hộ</th>
+                                                    <th className="py-3 border-0">Trạng thái</th>
+                                                    <th className="py-3 border-0">Ngày xem</th>
+                                                    <th className="py-3 border-0 text-end pe-4">Thao tác</th>
                                                 </tr>
-                                            ))
-                                        ) : (
-                                            <tr>
-                                                <td colSpan="4" className="text-center" style={{ fontStyle: "italic", color: "#888" }}>Danh sách trống.</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </Table>
-                            </div>
-                        )}
+                                            </thead>
+                                            <tbody>
+                                                {resident && resident.length > 0 ? (
+                                                    resident.map((request) => (
+                                                        <tr key={request._id}>
+                                                            <td className="px-4 py-3">
+                                                                <div className="d-flex align-items-center">
+                                                                    <div className="bg-info bg-opacity-10 rounded-circle p-2 me-3">
+                                                                        <Person className="text-info" />
+                                                                    </div>
+                                                                    <div>
+                                                                        <h6 className="mb-0">{request.username}</h6>
+                                                                        <small className="text-muted d-flex align-items-center">
+                                                                            <Telephone className="me-1" size={12} />
+                                                                            {request.phoneNumber}
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-3">
+                                                                <div className="d-flex align-items-center">
+                                                                    <div className="bg-secondary bg-opacity-10 rounded p-1 me-2">
+                                                                        <HouseDoor className="text-secondary" />
+                                                                    </div>
+                                                                    <span>Phòng {request.apartment}</span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-3">
+                                                                {getStatusBadge()}
+                                                            </td>
+                                                            <td className="py-3">
+                                                                <div className="d-flex align-items-center">
+                                                                    <Calendar3 className="text-muted me-2" />
+                                                                    <div>
+                                                                        <div>{formatDate(request.date)}</div>
+                                                                        <small className="text-muted">
+                                                                            {new Date(request.date).toLocaleTimeString('vi-VN', {
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit'
+                                                                            })}
+                                                                        </small>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="py-3 text-end pe-4">
+                                                                <Button
+                                                                    variant="success"
+                                                                    size="sm"
+                                                                    className="me-2"
+                                                                    onClick={() => handleApprove(request._id)}
+                                                                >
+                                                                    <HandThumbsUp className="me-1" /> Đồng ý
+                                                                </Button>
+                                                                <Button
+                                                                    variant="outline-danger"
+                                                                    size="sm"
+                                                                    onClick={() => handleReject(request._id)}
+                                                                >
+                                                                    <HandThumbsDown className="me-1" /> Từ chối
+                                                                </Button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                ) : (
+                                                    <tr>
+                                                        <td colSpan="5" className="text-center py-5">
+                                                            <div className="py-4">
+                                                                <Calendar2Check size={40} className="text-muted mb-3" />
+                                                                <h5 className="text-muted">Không có lịch hẹn</h5>
+                                                                <p className="text-muted mb-0">Hiện tại chưa có khách hàng nào đặt lịch hẹn xem phòng.</p>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        </Table>
+                                    </div>
+                                )}
+                            </Card.Body>
+                        </Card>
                     </Container>
                 </Col>
-
             </Row>
         </Container>
     );

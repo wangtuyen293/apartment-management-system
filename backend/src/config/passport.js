@@ -15,7 +15,6 @@ passport.use(
             try {
                 const email = profile.emails[0].value.toLowerCase();
                 let user = await User.findOne({ email });
-
                 if (user && user.authProvider !== "google") {
                     return done(null, false, {
                         message: "Please log in using email and password.",

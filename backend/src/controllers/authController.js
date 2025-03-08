@@ -59,7 +59,7 @@ export const login = async (req, res) => {
         });
 
         res.status(200).json({
-            user: { id: user._id, email: user.email, username: user.username },
+            user: { id: user._id, email: user.email, username: user.username, role: user.role },
         });
     } catch (error) {
         console.log(error);
@@ -101,15 +101,6 @@ export const register = async (req, res) => {
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-
-        const emailVerificationToken = jwt.sign(
-            { email: email },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "1d",
-            }
-        );
-        const emailVerificationExpires = Date.now() + 5 * 60 * 1000;
 
         const newUser = new User({
             username,
