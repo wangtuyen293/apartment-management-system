@@ -1,4 +1,4 @@
-import RefreshToken from "../models/refreshToken.js";
+import RefreshToken from "../models/RefreshToken.js";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 

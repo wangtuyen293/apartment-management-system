@@ -1,6 +1,6 @@
-import Apartment from '../models/apartments.js';
-import User from '../models/users.js';
-import CustomerRequest from '../models/customerRequest.js';
+import Apartment from '../models/Apartments.js';
+import User from '../models/User.js';
+import CustomerRequest from '../models/CustomerRequest.js';
 
 const getCustomerViewApartment = async (req, res) => {
     try {

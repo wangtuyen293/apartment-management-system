@@ -2,9 +2,9 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import "dotenv/config";
-import User from "../models/users.js";
+import User from "../models/User.js";
 import { generateAccessToken, generateToken } from "../config/generateToken.js";
-import RefreshToken from "../models/refreshToken.js";
+import RefreshToken from "../models/RefreshToken.js";
 
 export const login = async (req, res) => {
     try {

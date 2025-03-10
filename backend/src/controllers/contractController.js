@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { PDFDocument } from 'pdf-lib';
-import User from '../models/users.js';
+import User from '../models/User.js';
 import * as fontkit from 'fontkit'; // Import fontkit (no need to register)
 
 export const depositContract = async (req, res) => {
