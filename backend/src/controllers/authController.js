@@ -59,7 +59,7 @@ export const login = async (req, res) => {
         });
 
         res.status(200).json({
-            user: { id: user._id, email: user.email, username: user.username, role: user.role },
+            user: { id: user._id, email: user.email, username: user.username, role: user.role, phoneNumber: user.phoneNumber, name: user.name, address: user.address, gender: user.gender },
         });
     } catch (error) {
         console.log(error);
