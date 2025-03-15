@@ -1,13 +1,10 @@
-import React, { useEffect } from 'react';
-import { Navbar, Nav, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import apartmentImage1 from '../../assets/images/fpt-login.jpg';
-import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
-import AppNavbar from '../../components/AppNavbar';
-import Banner from '../../components/Banner';
-import AppFooter from '../../components/AppFooter';
-import ProfileSideBar from '../../components/ProfileSideBar';
+import React, { useEffect } from "react";
+import { Button, Container, Row, Col, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import apartmentImage1 from "../../assets/images/fpt-login.jpg";
+import { getApartment, getApartmentDetail } from "../../redux/apartmentSlice";
+import Banner from "../../components/Banner";
 
 const LandingPage = () => {
     const dispatch = useDispatch();
@@ -27,11 +24,8 @@ const LandingPage = () => {
 
     return (
         <>
-            <AppNavbar />
             <Banner />
-            <ProfileSideBar/>
 
-            {/* Apartment Listings Section */}
             <Container className="my-5">
                 <Row>
                     {loading ? (
@@ -82,7 +76,6 @@ const LandingPage = () => {
                     )}
                 </Row>
             </Container>
-            <AppFooter/>
         </>
     );
 };
