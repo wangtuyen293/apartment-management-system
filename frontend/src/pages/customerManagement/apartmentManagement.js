@@ -110,18 +110,18 @@ const ApartmentManagement = () => {
                                                                     <div className="bg-light rounded-circle p-2 me-3">
                                                                         <FaHome className="text-primary" />
                                                                     </div>
-                                                                    <strong>{request.apartment_number}</strong>
+                                                                    <strong>{request.apartmentNumber}</strong>
                                                                 </div>
                                                             </td>
                                                             <td>{request.floor}</td>
                                                             <td>{getStatusBadge(request.status)}</td>
                                                             <td>
-                                                                {request.userId ? (
+                                                                {request.tenantId ? (
                                                                     <div className="d-flex align-items-center">
                                                                         <div className="bg-light rounded-circle p-2 me-2">
                                                                             <FaUser className="text-secondary" />
                                                                         </div>
-                                                                        {request.userId.name}
+                                                                        {request.tenantId.name}
                                                                     </div>
                                                                 ) : (
                                                                     <span className="text-muted">N/A</span>

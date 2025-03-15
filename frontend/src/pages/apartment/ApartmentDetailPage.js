@@ -44,7 +44,7 @@ const ApartmentDetailPage = () => {
 
     const handleSubmitDate = () => {
         if (selectedDate) {
-            dispatch(requestForViewApartment({ apartmentId: id, userId: user.id, date: selectedDate }));
+            dispatch(requestForViewApartment({ apartmentId: id, tenantId: user.id, date: selectedDate }));
             setShowModal(false);
             alert('Yêu cầu xem căn hộ đã được gửi thành công!');
             window.location.reload();
@@ -55,7 +55,7 @@ const ApartmentDetailPage = () => {
 
     const handleSubmitRentRequest = () => {
         if (selectedDate && contractMonths) {
-            dispatch(requestForRentApartment({ apartmentId: id, userId: user.id, date: selectedDate, contractMonths }));
+            dispatch(requestForRentApartment({ apartmentId: id, tenantId: user.id, date: selectedDate, contractMonths }));
             setShowRentModal(false);
             alert('Yêu cầu thuê phòng đã được gửi thành công!');
             window.location.reload();
@@ -124,7 +124,7 @@ const ApartmentDetailPage = () => {
                                 <div className="bg-white rounded shadow-sm mb-4 p-3">
                                     <h2 className="border-bottom pb-3 d-flex align-items-center">
                                         <FaHome className="me-2 text-primary" />
-                                        Căn hộ {apartmentDetail.apartment_number}
+                                        Căn hộ {apartmentDetail.apartmentNumber}
                                         <Badge
                                             bg={getStatusVariant(apartmentDetail.status)}
                                             className="ms-3 fs-6"
@@ -143,7 +143,7 @@ const ApartmentDetailPage = () => {
                                                         <img
                                                             className="d-block w-100"
                                                             src={apartmentImage1}
-                                                            alt={`Apartment ${apartmentDetail.apartment_number}`}
+                                                            alt={`Apartment ${apartmentDetail.apartmentNumber}`}
                                                             style={{ objectFit: 'cover', height: '500px' }}
                                                         />
                                                         <div className="position-absolute bottom-0 start-0 w-100 bg-gradient-dark p-3 text-white">
@@ -156,7 +156,7 @@ const ApartmentDetailPage = () => {
                                                         <img
                                                             className="d-block w-100"
                                                             src={apartmentImage1}
-                                                            alt={`Apartment ${apartmentDetail.apartment_number}`}
+                                                            alt={`Apartment ${apartmentDetail.apartmentNumber}`}
                                                             style={{ objectFit: 'cover', height: '500px' }}
                                                         />
                                                         <div className="position-absolute bottom-0 start-0 w-100 bg-gradient-dark p-3 text-white">

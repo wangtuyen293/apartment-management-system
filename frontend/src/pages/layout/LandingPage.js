@@ -52,7 +52,7 @@ const LandingPage = () => {
                                         alt="Apartment"
                                     />
                                     <div className="card-body">
-                                        <h5 className="card-title">{`Căn hộ ${apt.apartment_number}`}</h5>
+                                        <h5 className="card-title">{`Căn hộ ${apt.apartmentNumber}`}</h5>
                                         <p className="card-text">
                                             <strong>Tầng:</strong> {apt.floor}
                                             <br />
