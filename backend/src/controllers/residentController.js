@@ -1,4 +1,4 @@
-import Apartment from '../models/Apartments.js';
+import Apartment from '../models/Apartment.js';
 import User from '../models/User.js';
 import CustomerRequest from '../models/CustomerRequest.js';
 
@@ -13,13 +13,13 @@ const getCustomerViewApartment = async (req, res) => {
         const customerView = [];
 
         for (const user of users) {
-            const username = await User.findById(user.user_id);
+            const username = await User.findById(user.userId);
             const apartment = await Apartment.findById(user.apartment_id);
 
             customerView.push({
                 _id: user._id,
                 username: username ? username.name : 'Unknown',
-                apartment: apartment ? apartment.apartment_number : 'Unknown',
+                apartment: apartment ? apartment.apartmentNumber : 'Unknown',
                 phoneNumber: username.phoneNumber,
                 status: user.status,
                 date: user.date
@@ -45,13 +45,13 @@ const getCustomerRequestRentApartment = async (req, res) => {
         const customerView = [];
 
         for (const user of users) {
-            const username = await User.findById(user.user_id);
+            const username = await User.findById(user.userId);
             const apartment = await Apartment.findById(user.apartment_id);
 
             customerView.push({
                 _id: user._id,
                 username: username ? username.name : 'Unknown',
-                apartment: apartment ? apartment.apartment_number : 'Unknown',
+                apartment: apartment ? apartment.apartmentNumber : 'Unknown',
                 phoneNumber: username.phoneNumber,
                 status: user.status,
                 date: user.date,
@@ -70,7 +70,6 @@ const getCustomerRequestRentApartment = async (req, res) => {
 const ApproveRentApartment = async (req, res) => {
     try {
         const { requestId } = req.body;
-        console.log(requestId)
         const request = await CustomerRequest.findById(requestId);
 
         if (!request) {
@@ -82,7 +81,7 @@ const ApproveRentApartment = async (req, res) => {
             {
                 $set: {
                     status: "Đã cho thuê",
-                    user_id: request.user_id,
+                    tenantId: request.tenantId,
                 }
             }
         );

@@ -2,7 +2,16 @@ import mongoose from "mongoose";
 
 const apartmentSchema = new mongoose.Schema(
     {
-        apartment_number: {
+        name: {
+            type: String,
+            // required: true,
+            trim: true,
+        },
+        description: {
+            type: String,
+            trim: true,
+        },
+        apartmentNumber: {
             type: String,
             required: true,
         },
@@ -17,13 +26,28 @@ const apartmentSchema = new mongoose.Schema(
         price: {
             type: Number,
             required: true,
+            min: 0,
+        },
+        rentalTerms: {
+            leaseDuration: { type: String }, // Example: "6 months", "1 year"
+            monthlyRent: { type: Number, min: 0 },
         },
         status: {
             type: String,
-            enum: ["Khách hẹn xem", "Đã cọc", "Đã cho thuê", "Trống", "Đang xét duyệt"],
+            enum: ["Khách hẹn xem", "Đã cọc", "Đã cho thuê", "Trống", "Đang xét duyệt", "Đã bán"],
             default: "Trống",
         },
-        user_id: {
+        images: [
+            {
+                url: { type: String, required: true },
+                description: { type: String },
+            },
+        ],
+        ownerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+        },
+        tenantId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },

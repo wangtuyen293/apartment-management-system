@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
-import { Navbar, Nav, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import apartmentImage1 from '../../assets/images/fpt-login.jpg';
-import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
-import AppNavbar from '../../components/AppNavbar';
-import Banner from '../../components/Banner';
+import React, { useEffect } from "react";
+import { Button, Container, Row, Col, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import apartmentImage1 from "../../assets/images/fpt-login.jpg";
+import { getApartment, getApartmentDetail } from "../../redux/apartmentSlice";
+import Banner from "../../components/Banner";
 
 const LandingPage = () => {
     const dispatch = useDispatch();
@@ -24,11 +23,9 @@ const LandingPage = () => {
     };
 
     return (
-        <div>
-            <AppNavbar />
+        <>
             <Banner />
 
-            {/* Apartment Listings Section */}
             <Container className="my-5">
                 <Row>
                     {loading ? (
@@ -51,7 +48,7 @@ const LandingPage = () => {
                                         alt="Apartment"
                                     />
                                     <div className="card-body">
-                                        <h5 className="card-title">{`Căn hộ ${apt.apartment_number}`}</h5>
+                                        <h5 className="card-title">{`Căn hộ ${apt.apartmentNumber}`}</h5>
                                         <p className="card-text">
                                             <strong>Tầng:</strong> {apt.floor}
                                             <br />
@@ -79,7 +76,7 @@ const LandingPage = () => {
                     )}
                 </Row>
             </Container>
-        </div>
+        </>
     );
 };
 

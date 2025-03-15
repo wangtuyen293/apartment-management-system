@@ -31,11 +31,6 @@ const userSchema = new mongoose.Schema(
             type: String,
             unique: true,
         },
-        authProvider: {
-            type: String,
-            enum: ["email", "google"],
-            default: "email",
-        },
         name: {
             type: String,
             required: true,

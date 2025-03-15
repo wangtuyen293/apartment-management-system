@@ -3,17 +3,17 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import "dotenv/config";
 import User from "../models/User.js";
-import { generateAccessToken, generateToken } from "../config/generateToken.js";
+import { generateAccessToken, generateToken } from "../utils/generateToken.js";
 import RefreshToken from "../models/RefreshToken.js";
 
 export const login = async (req, res) => {
-    try {
-        const { username, password } = req.body;
+    const { username, password } = req.body;
 
+    try {
         if (!username || !password) {
             return res
                 .status(400)
-                .json({ message: "Username and password is required" });
+                .json({ message: "Username and password are required" });
         }
 
         const user = await User.findOne({ username });
@@ -39,7 +39,7 @@ export const login = async (req, res) => {
         if (!user.isVerified) {
             return res
                 .status(400)
-                .json({ message: "Email has not been verified." });
+                .json({ message: "Please verify your email before logging in." });
         }
 
         const { accessToken, refreshToken } = await generateToken(user);
@@ -59,7 +59,21 @@ export const login = async (req, res) => {
         });
 
         res.status(200).json({
-            user: { id: user._id, email: user.email, username: user.username, role: user.role, phoneNumber: user.phoneNumber, name: user.name, address: user.address, gender: user.gender },
+            message: "Login successful",
+            user: {
+                id: user._id,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                phoneNumber: user.phoneNumber,
+                name: user.name,
+                address: user.address,
+                gender: user.gender,
+            },
+            tokenType: "Bearer",
+            expiresIn: 3600,
+            accessToken,
+            refreshToken,
         });
     } catch (error) {
         console.log(error);
@@ -88,7 +102,11 @@ export const register = async (req, res) => {
         }
 
         if (password.length < 8) {
-            return res.status(400).json({ message: "Password must be at least 8 characters long" });
+            return res
+                .status(400)
+                .json({
+                    message: "Password must be at least 8 characters long",
+                });
         }
 
         const existingUser = await User.findOne({

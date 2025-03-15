@@ -6,22 +6,18 @@ import { loginUser } from "../../redux/authSlice";
 import { FcGoogle } from "react-icons/fc";
 import { motion } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
-import loginImage from '../../assets/images/fpt-login.jpg';;
+import loginImage from "../../assets/images/fpt-login.jpg";
 
 const LoginForm = () => {
-    const [formData, setFormData] = useState({ username: "", password: "" });
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { user, loading, error } = useSelector((state) => state.auth);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
     const handleSubmit = (e) => {
         e.preventDefault();
-        dispatch(loginUser(formData));
-        console.log(user);
+        dispatch(loginUser({ username, password }));
     };
 
     const handleGoogleLogin = () => {
@@ -66,8 +62,8 @@ const LoginForm = () => {
                             <Form.Control
                                 name="username"
                                 placeholder="Username"
-                                value={formData.username}
-                                onChange={handleChange}
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
                                 required
                             />
                         </Form.Group>
@@ -76,16 +72,22 @@ const LoginForm = () => {
                                 type="password"
                                 name="password"
                                 placeholder="Password"
-                                value={formData.password}
-                                onChange={handleChange}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 required
                             />
                         </Form.Group>
                         <div className="d-flex justify-content-between mb-3">
-                            <a href="/forgot-password" className="text-danger text-decoration-none text-decoration-underline-hover">
+                            <a
+                                href="/forgot-password"
+                                className="text-danger text-decoration-none text-decoration-underline-hover"
+                            >
                                 Forgot Password?
                             </a>
-                            <a href="/register" className="text-primary text-decoration-none">
+                            <a
+                                href="/register"
+                                className="text-primary text-decoration-none"
+                            >
                                 Register
                             </a>
                         </div>

@@ -30,11 +30,11 @@ export const getApartmentDetail = createAsyncThunk(
 
 export const requestForViewApartment = createAsyncThunk(
     "apartment/requestForViewApartment",
-    async ({ apartmentId, userId, date }, { rejectWithValue }) => {
+    async ({ apartmentId, tenantId, date }, { rejectWithValue }) => {
         try {
 
             const response = await axios.post(
-                `${API_URL}/api/v1/apartments/view/${apartmentId}/${userId}`,
+                `${API_URL}/api/v1/apartments/view/${apartmentId}/${tenantId}`,
                 { date }
             );
             return response.data;
@@ -46,11 +46,11 @@ export const requestForViewApartment = createAsyncThunk(
 
 export const requestForRentApartment = createAsyncThunk(
     "apartment/requestForRentApartment",
-    async ({ apartmentId, userId, date, contractMonths }, { rejectWithValue }) => {
+    async ({ apartmentId, tenantId, date, contractMonths }, { rejectWithValue }) => {
         try {
             // Send date and contractMonths as part of the request body
             const response = await axios.post(
-                `${API_URL}/api/v1/apartments/rent/${apartmentId}/${userId}`,
+                `${API_URL}/api/v1/apartments/rent/${apartmentId}/${tenantId}`,
                 { date, contractMonths } // Send both values as an object
             );
             return response.data;

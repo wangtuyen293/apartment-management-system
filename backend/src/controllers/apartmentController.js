@@ -1,10 +1,10 @@
-import Apartment from '../models/Apartments.js';
+import Apartment from '../models/Apartment.js';
 import User from '../models/User.js';
 import CustomerRequest from '../models/CustomerRequest.js';
 
 const getApartment = async (req, res) => {
     try {
-        const apartments = await Apartment.find().populate('user_id');
+        const apartments = await Apartment.find().populate('tenantId');
         res.json(apartments);
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
@@ -32,7 +32,6 @@ const requestForViewApartment = async (req, res) => {
             return res.status(404).json({ message: "Apartment not found" });
         }
 
-        console.log(req.params.userid);
         const user = await User.findOne({ _id: req.params.userid });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -50,7 +49,7 @@ const requestForViewApartment = async (req, res) => {
         const viewRequest = new CustomerRequest({
             apartment_id: apartment._id,
             status: "Khách hẹn xem",
-            user_id: user._id,
+            userId: user._id,
             date: date,
         });
         await viewRequest.save();
@@ -62,7 +61,6 @@ const requestForViewApartment = async (req, res) => {
         return res.status(200).json({ message: "Apartment status updated successfully" });
 
     } catch (error) {
-        // Handle errors
         console.error(error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
@@ -94,7 +92,7 @@ const requestForRentApartment = async (req, res) => {
         const viewRequest = new CustomerRequest({
             apartment_id: apartment._id,
             status: "Đang xét duyệt",
-            user_id: user._id,
+            userId: user._id,
             date: date,
             contractMonths: contractMonths,
         });

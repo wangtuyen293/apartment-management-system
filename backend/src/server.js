@@ -3,6 +3,7 @@ import "dotenv/config";
 import cors from "cors";
 import passport from "passport";
 import session from "express-session";
+import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -13,6 +14,7 @@ import serviceRoutes from "./routes/serviceRoutes.js";
 import "./config/passport.js";
 
 const app = express();
+
 connectDB();
 
 app.use(express.json());
@@ -20,6 +22,7 @@ app.use(cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
 }));
+app.use(cookieParser());
 
 app.use(
     session({
@@ -34,8 +37,8 @@ app.use(passport.session());
 
 app.use("/api/v1/apartments", apartmentRoutes);
 app.use("/api/v1/residents", residentRoutes);
-app.use("/api/v1/", authRoutes);
-app.use("/api/v1/", userRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/contracts", contractRoutes);
 app.use("/api/v1/services", serviceRoutes);
 

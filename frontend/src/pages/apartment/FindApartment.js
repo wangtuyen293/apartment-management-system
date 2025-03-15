@@ -36,7 +36,7 @@ const HomePage = () => {
 
             if (searchTerm) {
                 results = results.filter(apt =>
-                    apt.apartment_number.toString().includes(searchTerm) ||
+                    apt.apartmentNumber.toString().includes(searchTerm) ||
                     apt.floor.toString().includes(searchTerm)
                 );
             }
@@ -378,14 +378,14 @@ const HomePage = () => {
                                             </div>
                                             <Card.Body>
                                                 <Card.Title className="fs-4 d-flex justify-content-between align-items-center">
-                                                    <span>Căn hộ {apt.apartment_number}</span>
+                                                    <span>Căn hộ {apt.apartmentNumber}</span>
                                                     <Badge bg="primary" pill>{apt.area} m²</Badge>
                                                 </Card.Title>
                                                 <Card.Text>
                                                     <Row className="mt-3">
                                                         <Col xs={6}>
                                                             <div className="text-muted mb-2">
-                                                                <i className="bi bi-building me-2"></i> Tầng {apt.apartment_number / 100}
+                                                                <i className="bi bi-building me-2"></i> Tầng {apt.apartmentNumber / 100}
                                                             </div>
                                                         </Col>
                                                         <Col xs={6}>

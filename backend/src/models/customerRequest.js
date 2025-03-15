@@ -6,7 +6,7 @@ const customerRequest = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Apartment",
         },
-        user_id: {
+        userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
