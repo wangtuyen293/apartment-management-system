@@ -116,12 +116,12 @@ const ApartmentManagement = () => {
                                                             <td>{request.floor}</td>
                                                             <td>{getStatusBadge(request.status)}</td>
                                                             <td>
-                                                                {request.user_id ? (
+                                                                {request.userId ? (
                                                                     <div className="d-flex align-items-center">
                                                                         <div className="bg-light rounded-circle p-2 me-2">
                                                                             <FaUser className="text-secondary" />
                                                                         </div>
-                                                                        {request.user_id.name}
+                                                                        {request.userId.name}
                                                                     </div>
                                                                 ) : (
                                                                     <span className="text-muted">N/A</span>

@@ -4,7 +4,7 @@ import CustomerRequest from '../models/CustomerRequest.js';
 
 const getApartment = async (req, res) => {
     try {
-        const apartments = await Apartment.find().populate('user_id');
+        const apartments = await Apartment.find().populate('userId');
         res.json(apartments);
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
@@ -50,7 +50,7 @@ const requestForViewApartment = async (req, res) => {
         const viewRequest = new CustomerRequest({
             apartment_id: apartment._id,
             status: "Khách hẹn xem",
-            user_id: user._id,
+            userId: user._id,
             date: date,
         });
         await viewRequest.save();
@@ -94,7 +94,7 @@ const requestForRentApartment = async (req, res) => {
         const viewRequest = new CustomerRequest({
             apartment_id: apartment._id,
             status: "Đang xét duyệt",
-            user_id: user._id,
+            userId: user._id,
             date: date,
             contractMonths: contractMonths,
         });

@@ -13,7 +13,7 @@ const getCustomerViewApartment = async (req, res) => {
         const customerView = [];
 
         for (const user of users) {
-            const username = await User.findById(user.user_id);
+            const username = await User.findById(user.userId);
             const apartment = await Apartment.findById(user.apartment_id);
 
             customerView.push({
@@ -45,7 +45,7 @@ const getCustomerRequestRentApartment = async (req, res) => {
         const customerView = [];
 
         for (const user of users) {
-            const username = await User.findById(user.user_id);
+            const username = await User.findById(user.userId);
             const apartment = await Apartment.findById(user.apartment_id);
 
             customerView.push({
@@ -82,7 +82,7 @@ const ApproveRentApartment = async (req, res) => {
             {
                 $set: {
                     status: "Đã cho thuê",
-                    user_id: request.user_id,
+                    userId: request.userId,
                 }
             }
         );

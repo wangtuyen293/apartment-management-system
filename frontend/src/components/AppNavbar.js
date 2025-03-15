@@ -1,8 +1,8 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { Navbar, Nav, Container, Button, Dropdown, Image } from "react-bootstrap";
-import loginImage from "../assets/images/fpt-login.jpg";
-// import { logout } from "../redux/authSlice"; // Import the logout action
+import avatar from "../assets/images/avatar/avatar.jpg";
+// import { logout } from "../redux/authSlice";
 import "../assets/css/AppNavbar.css";
 
 const AppNavbar = () => {
@@ -29,7 +29,10 @@ const AppNavbar = () => {
                     <Nav.Link as={Link} to="/" active={location.pathname === "/"}>
                         Trang Chủ
                     </Nav.Link>
-                    {userRole === "resident" && (
+                    <Nav.Link as={Link} to="/" active={location.pathname === "/"}>
+                        Căn Hộ
+                    </Nav.Link>
+                    {userRole === "User" && (
                         <>
                             <Nav.Link as={Link} to="/transactions" active={location.pathname === "/transactions"}>
                                 Giao Dịch
@@ -39,7 +42,7 @@ const AppNavbar = () => {
                             </Nav.Link>
                         </>
                     )}
-                    {userRole === "manager" && (
+                    {userRole === "Manager" && (
                         <>
                             <Nav.Link as={Link} to="/admin" active={location.pathname === "/admin"}>
                                 Quản Lý
@@ -56,7 +59,7 @@ const AppNavbar = () => {
                         <Dropdown align="end">
                             <Dropdown.Toggle variant="white" id="dropdown-basic" className="d-flex align-items-center">
                                 <Image
-                                    src={user?.avatar || loginImage}
+                                    src={user?.avatar || avatar}
                                     roundedCircle
                                     width="32"
                                     height="32"

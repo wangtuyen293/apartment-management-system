@@ -11,16 +11,18 @@ import {
 
 const router = express.Router();
 
-router.post("/auth/login", login);
-router.post("/auth/register", register);
-router.post("/auth/logout", logout);
-router.post("/auth/refresh", refresh);
-router.get("/auth/verify-email", verifyEmail);
+router.post("/login", login);
+router.post("/register", register);
+router.post("/logout", logout);
+router.post("/refresh", refresh);
+// router.post("/forgot-password", refresh);
+// router.post("/reset-password", refresh);
+router.get("/verify-email", verifyEmail);
 router.get(
-    "/auth/google",
+    "/google",
     passport.authenticate("google", { scope: ["profile", "email"] })
 );
-router.get("/auth/google/callback", (req, res, next) => {
+router.get("/google/callback", (req, res, next) => {
     passport.authenticate("google", { session: false }, (err, result, info) => {
         if (err) {
             return res.status(500).json({ message: "Internal Server Error" });
