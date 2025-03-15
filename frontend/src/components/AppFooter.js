@@ -5,7 +5,7 @@ import "../assets/css/AppFooter.css";
 
 const AppFooter = () => {
     return (
-        <footer className="footer bg-dark text-light py-4 mt-5">
+        <footer className="footer bg-dark text-light py-4">
             <Container>
                 <Row>
                     <Col md={4} className="mb-3">

@@ -7,6 +7,7 @@ import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
 import AppNavbar from '../../components/AppNavbar';
 import Banner from '../../components/Banner';
 import AppFooter from '../../components/AppFooter';
+import ProfileSideBar from '../../components/ProfileSideBar';
 
 const LandingPage = () => {
     const dispatch = useDispatch();
@@ -28,6 +29,7 @@ const LandingPage = () => {
         <>
             <AppNavbar />
             <Banner />
+            <ProfileSideBar/>
 
             {/* Apartment Listings Section */}
             <Container className="my-5">
