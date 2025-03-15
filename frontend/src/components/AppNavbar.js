@@ -1,14 +1,22 @@
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
-import "../assets/css/AppNavbar.css"
+import { Navbar, Nav, Container, Button, Dropdown, Image } from "react-bootstrap";
+import loginImage from "../assets/images/fpt-login.jpg";
+// import { logout } from "../redux/authSlice"; // Import the logout action
+import "../assets/css/AppNavbar.css";
 
 const AppNavbar = () => {
     const location = useLocation();
-    const [user, setUser] = useState(null);
-
+    const dispatch = useDispatch();
+    
+    const { user } = useSelector((state) => state.auth);
+    
     const isAuthenticated = user !== null;
     const userRole = user?.role || "guest";
+
+    const handleLogout = () => {
+        // dispatch(logout());
+    };
 
     return (
         <Navbar expand="lg" className="custom-navbar shadow-sm fixed-top">
@@ -16,6 +24,7 @@ const AppNavbar = () => {
                 <Navbar.Brand as={Link} to="/" className="fw-bolder text-primary">
                     FPT PLAZA
                 </Navbar.Brand>
+
                 <Nav className="me-auto">
                     <Nav.Link as={Link} to="/" active={location.pathname === "/"}>
                         Trang Chủ
@@ -44,14 +53,31 @@ const AppNavbar = () => {
 
                 <Nav className="gap-2">
                     {isAuthenticated ? (
-                        <>
-                            <Button variant="dark" as={Link} to="/profile">
-                                Hồ Sơ
-                            </Button>
-                            <Button variant="outline-dark" onClick={() => setUser(null)}>
-                                Đăng Xuất
-                            </Button>
-                        </>
+                        <Dropdown align="end">
+                            <Dropdown.Toggle variant="white" id="dropdown-basic" className="d-flex align-items-center">
+                                <Image
+                                    src={user?.avatar || loginImage}
+                                    roundedCircle
+                                    width="32"
+                                    height="32"
+                                    className="me-2"
+                                />
+                                {user.name}
+                            </Dropdown.Toggle>
+
+                            <Dropdown.Menu>
+                                <Dropdown.Item as={Link} to="/profile">
+                                    Hồ Sơ
+                                </Dropdown.Item>
+                                <Dropdown.Item as={Link} to="/settings">
+                                    Cài Đặt
+                                </Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item onClick={handleLogout}>
+                                    Đăng Xuất
+                                </Dropdown.Item>
+                            </Dropdown.Menu>
+                        </Dropdown>
                     ) : (
                         <>
                             <Button variant="dark" as={Link} to="/login">

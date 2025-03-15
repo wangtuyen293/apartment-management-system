@@ -6,6 +6,7 @@ import apartmentImage1 from '../../assets/images/fpt-login.jpg';
 import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
 import AppNavbar from '../../components/AppNavbar';
 import Banner from '../../components/Banner';
+import AppFooter from '../../components/AppFooter';
 
 const LandingPage = () => {
     const dispatch = useDispatch();
@@ -24,7 +25,7 @@ const LandingPage = () => {
     };
 
     return (
-        <div>
+        <>
             <AppNavbar />
             <Banner />
 
@@ -79,7 +80,8 @@ const LandingPage = () => {
                     )}
                 </Row>
             </Container>
-        </div>
+            <AppFooter/>
+        </>
     );
 };
 
