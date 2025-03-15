@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import "dotenv/config";
 import User from "../models/User.js";
-import { generateToken } from "./generateToken.js";
+import { generateToken } from "../utils/generateToken.js";
 
 passport.use(
     new GoogleStrategy(
@@ -15,11 +15,6 @@ passport.use(
             try {
                 const email = profile.emails[0].value.toLowerCase();
                 let user = await User.findOne({ email });
-                if (user && user.authProvider !== "google") {
-                    return done(null, false, {
-                        message: "Please log in using email and password.",
-                    });
-                }
 
                 if (!user) {
                     const username = email.split("@")[0];
@@ -30,7 +25,6 @@ passport.use(
                         email,
                         name,
                         providerId: profile.id,
-                        authProvider: "google",
                         isVerified: true,
                     });
 
