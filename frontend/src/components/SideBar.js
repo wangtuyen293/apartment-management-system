@@ -58,7 +58,20 @@ const Sidebar = ({ user, handleProfileRedirect, handleLogout }) => {
                             <Nav.Link href="/apartment-manage" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <Gear className="me-2" /> Tòa nhà
                             </Nav.Link>
-                            <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">
+                            <NavDropdown
+                                title={
+                                    <span className="text-white d-flex align-items-center">
+                                        <HandThumbsUp className="me-2" /> Dịch vụ
+                                    </span>
+                                }
+                                id="customer-dropdown"
+                                className="custom-dropdown"
+                            >
+                                <NavDropdown.Item href="/service/manage">Quản lý dịch vụ</NavDropdown.Item>
+                                <NavDropdown.Item href="/service/request">Quản lý yêu cầu dịch vụ</NavDropdown.Item>
+                                <NavDropdown.Item href="/service/payment">Thanh toán phí dịch vụ</NavDropdown.Item>
+                            </NavDropdown>
+                            <Nav.Link href="service_payment" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <CreditCard className="me-2" /> Phí dịch vụ
                             </Nav.Link>
                             <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">
@@ -87,7 +100,7 @@ const Sidebar = ({ user, handleProfileRedirect, handleLogout }) => {
                             <Nav.Link href="/find" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <HouseDoor className="me-2" /> Tìm kiếm căn hộ
                             </Nav.Link>
-                            <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">
+                            <Nav.Link href="/service" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <Gear className="me-2" /> Dịch vụ
                             </Nav.Link>
                             <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">

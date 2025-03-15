@@ -1,22 +1,26 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { persistStore, persistReducer } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import authReducer from "./authSlice.js";
-import apartmentReducer from "./apartmentSlice.js";
-import residentReducer from "./residentSlice.js";
+import { persistStore, persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import authReducer from "./authSlice";
+import apartmentReducer from "./apartmentSlice";
+import residentReducer from "./residentSlice";
+import serviceReducer from "./serviceSlice";
+import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 
+// Cấu hình redux-persist cho auth
 const persistConfig = {
-    key: 'root',
+    key: "auth",
     storage,
 };
 
-const persistedReducer = persistReducer(persistConfig, authReducer);
+const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 
 const store = configureStore({
     reducer: {
-        auth: persistedReducer,
+        auth: persistedAuthReducer,
         apartment: apartmentReducer,
         resident: residentReducer,
+        service: serviceReducer,
     },
 });
 

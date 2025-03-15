@@ -10,6 +10,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import CustomerRequestView from "./pages/customerManagement/customerRequestView";
 import CustomerRequestRent from "./pages/customerManagement/customerRequestRent";
 import ApartmentManagement from "./pages/customerManagement/apartmentManagement";
+import ServiceManagementPage from "./pages/service/ServiceManagementPage";
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/customer/view" element={<CustomerRequestView />} />
                 <Route path="/customer/rent" element={<CustomerRequestRent />} />
                 <Route path="/apartment-manage" element={<ApartmentManagement />} />
+                <Route path="/service/manage" element={<ServiceManagementPage />} />
             </Routes>
         </Router>
     );
