@@ -17,7 +17,7 @@ router.post("/logout", logout);
 router.post("/refresh", refresh);
 // router.post("/forgot-password", refresh);
 // router.post("/reset-password", refresh);
-router.get("/verify-email", verifyEmail);
+router.post("/verify-email", verifyEmail);
 router.get(
     "/google",
     passport.authenticate("google", { scope: ["profile", "email"] })

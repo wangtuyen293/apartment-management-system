@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser } from "../redux/authSlice";
+import { logoutUser } from "../../redux/authSlice";
 import { FaUser, FaLock, FaHome, FaHistory, FaTools, FaCog, FaSignOutAlt, FaList } from "react-icons/fa";
-import avatarImage from "../assets/images/avatar/avatar.jpg";
-import "../assets/css/ProfileSidebar.css";
+import avatarImage from "../../assets/images/avatar/avatar.jpg";
+import "../../assets/css/ProfileSidebar.css";
 
 const ProfileSideBar = () => {
     const dispatch = useDispatch();

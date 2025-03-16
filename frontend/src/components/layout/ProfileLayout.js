@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { Container, Row, Col } from "react-bootstrap";
-import ProfileSideBar from "../ProfileSideBar";
+import ProfileSideBar from "../sidebar/ProfileSideBar";
 
 const ProfileLayout = () => {
     return (

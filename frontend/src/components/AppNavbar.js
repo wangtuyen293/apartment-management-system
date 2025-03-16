@@ -13,7 +13,7 @@ const AppNavbar = () => {
     const { user } = useSelector((state) => state.auth);
     
     const isAuthenticated = user !== null;
-    const userRole = user?.role || "guest";
+    const userRole = user?.role || "Guest";
 
     const handleLogout = () => {
         dispatch(logoutUser());
@@ -36,7 +36,7 @@ const AppNavbar = () => {
                     </Nav.Link>
                     {userRole === "User" && (
                         <>
-                            <Nav.Link as={Link} to="/transactions" active={location.pathname === "/transactions"}>
+                            <Nav.Link as={Link} to="/profile/transactions" active={location.pathname === "/transactions"}>
                                 Giao Dịch
                             </Nav.Link>
                             <Nav.Link as={Link} to="/services" active={location.pathname === "/services"}>

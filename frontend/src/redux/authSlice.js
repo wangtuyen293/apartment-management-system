@@ -39,9 +39,10 @@ export const loginUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk(
     "auth/logout",
-    async (_, { rejectWithValue }) => {
+    async (_, { dispatch, rejectWithValue }) => {
         try {
             await axios.post(`${API_URL}/auth/logout`);
+            dispatch(resetAuthState());
             return null;
         } catch (error) {
             return rejectWithValue(error.response.data);
@@ -72,6 +73,12 @@ const authSlice = createSlice({
     reducers: {
         setAccessToken: (state, action) => {
             state.accessToken = action.payload;
+        },
+        resetAuthState: (state) => {
+            state.user = null;
+            state.accessToken = null;
+            state.loading = false;
+            state.error = null;
         },
     },
     extraReducers: (builder) => {
@@ -124,5 +131,6 @@ const authSlice = createSlice({
 });
 
 export const { setAccessToken } = authSlice.actions;
+export const { resetAuthState } = authSlice.actions;
 export default authSlice.reducer;
 export const selectCurrentToken = (state) => state.auth.accessToken;
