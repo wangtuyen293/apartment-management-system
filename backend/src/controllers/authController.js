@@ -33,7 +33,7 @@ export const login = async (req, res) => {
         if (!user.isActive) {
             return res
                 .status(400)
-                .json({ message: "User account is inactive." });
+                .json({ message: "Account is inactive. Please contact support." });
         }
 
         if (!user.isVerified) {
@@ -45,17 +45,17 @@ export const login = async (req, res) => {
         const { accessToken, refreshToken } = await generateToken(user);
 
         res.cookie("accessToken", accessToken, {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 60 * 60 * 1000,
             sameSite: "Strict",
+            path: "/",
         });
 
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "Strict",
+            path: "/",
         });
 
         res.status(200).json({
@@ -70,13 +70,9 @@ export const login = async (req, res) => {
                 address: user.address,
                 gender: user.gender,
             },
-            tokenType: "Bearer",
-            expiresIn: 3600,
-            accessToken,
-            refreshToken,
         });
     } catch (error) {
-        console.log(error);
+        console.error("Login error:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -212,10 +208,10 @@ export const refresh = async (req, res) => {
         const accessToken = generateAccessToken(user);
 
         res.cookie("accessToken", accessToken, {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 60 * 60 * 1000,
             sameSite: "Strict",
+            path: "/",
         });
 
         res.status(200).json({ accessToken, refreshToken: refresh });
@@ -266,20 +262,20 @@ export const logout = async (req, res) => {
         }
 
         res.clearCookie("accessToken", {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
+            path: "/",
         });
 
         res.clearCookie("refreshToken", {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
+            path: "/",
         });
 
         return res.status(200).json({ message: "Logout successful" });
     } catch (error) {
-        console.error(error);
+        console.error("Logout error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };

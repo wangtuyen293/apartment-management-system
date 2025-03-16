@@ -1,12 +1,13 @@
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Navbar, Nav, Container, Button, Dropdown, Image } from "react-bootstrap";
 import avatar from "../assets/images/avatar/avatar.jpg";
-// import { logout } from "../redux/authSlice";
+import { logoutUser } from "../redux/authSlice";
 import "../assets/css/AppNavbar.css";
 
 const AppNavbar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const dispatch = useDispatch();
     
     const { user } = useSelector((state) => state.auth);
@@ -15,7 +16,8 @@ const AppNavbar = () => {
     const userRole = user?.role || "guest";
 
     const handleLogout = () => {
-        // dispatch(logout());
+        dispatch(logoutUser());
+        navigate("/");
     };
 
     return (
