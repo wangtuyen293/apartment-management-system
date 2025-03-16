@@ -1,7 +1,4 @@
-import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { resetAuthState } from "./redux/authSlice";
 import Register from "./pages/user/Register";
 import Login from "./pages/user/Login";
 import Home from "./pages/layout/Home";
@@ -25,12 +22,6 @@ import ServiceManagementPage from "./pages/service/ServiceManagementPage";
 import MyApartmentPage from "./pages/apartment/MyApartment";
 
 function App() {
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        dispatch(resetAuthState());
-    }, [dispatch]);
-
     return (
         <Router>
             <Routes>

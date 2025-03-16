@@ -7,6 +7,11 @@ export const generateAccessToken = (user) => {
         id: user._id,
         email: user.email,
         username: user.username,
+        role: user.role,
+        phoneNumber: user.phoneNumber,
+        name: user.name,
+        address: user.address,
+        gender: user.gender,
     };
 
     return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
@@ -19,6 +24,11 @@ export const generateRefreshToken = async (user) => {
         id: user._id,
         email: user.email,
         username: user.username,
+        role: user.role,
+        phoneNumber: user.phoneNumber,
+        name: user.name,
+        address: user.address,
+        gender: user.gender,
     };
     let refreshToken;
     let tokenExists = true;

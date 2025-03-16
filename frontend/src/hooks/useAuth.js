@@ -1,22 +1,24 @@
-import { useSelector } from 'react-redux'
-import { selectCurrentToken } from "../redux/authSlice"
-import { jwtDecode } from 'jwt-decode'
+import { jwtDecode } from "jwt-decode";
+import { useCookies } from "react-cookie";
 
 const useAuth = () => {
-    const token = useSelector(selectCurrentToken)
-    let isManager = false
-    let status = "Customer"
+    const [cookies] = useCookies(["accessToken"]);
+    const token = cookies.accessToken;
 
-    if (token) {
-        const decoded = jwtDecode(token)
-        const username = decoded.username;
-        const role = decoded.role;
-        const id = decoded.id;
-
-
-        return { username, role, status, id }
+    if (!token) {
+        return { username: "", role: "Guest", isManager: false, id: null };
     }
 
-    return { username: '', role: [], isManager, status }
-}
+    try {
+        const decoded = jwtDecode(token);
+        const { username, role, id } = decoded;
+        const isManager = role === "Manager";
+
+        return { username, role, isManager, id };
+    } catch (error) {
+        console.error("Error decoding token:", error);
+        return { username: "", role: "Guest", isManager: false, id: null };
+    }
+};
+
 export default useAuth;

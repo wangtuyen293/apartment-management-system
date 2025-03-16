@@ -133,4 +133,3 @@ const authSlice = createSlice({
 export const { setAccessToken } = authSlice.actions;
 export const { resetAuthState } = authSlice.actions;
 export default authSlice.reducer;
-export const selectCurrentToken = (state) => state.auth.accessToken;

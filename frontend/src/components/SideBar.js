@@ -71,7 +71,7 @@ const Sidebar = () => {
 
                 {/* Navigation Links */}
                 <Nav className="flex-column flex-grow-1 py-3">
-                    {user.role === "Admin" ? (
+                    {user.role === "Manager" ? (
                         <>
                             <Nav.Link href="/home" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <House className="me-2" /> Bảng tin
