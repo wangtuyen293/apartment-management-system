@@ -100,8 +100,8 @@ const Sidebar = ({ user, handleProfileRedirect, handleLogout }) => {
                             <Nav.Link href="/find" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <HouseDoor className="me-2" /> Tìm kiếm căn hộ
                             </Nav.Link>
-                            <Nav.Link href="/service" className="text-white d-flex align-items-center py-2 nav-hover">
-                                <Gear className="me-2" /> Dịch vụ
+                            <Nav.Link href="/myapartment" className="text-white d-flex align-items-center py-2 nav-hover">
+                                <Gear className="me-2" /> Căn hộ của tôi
                             </Nav.Link>
                             <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <CreditCard className="me-2" /> Thanh toán

@@ -16,6 +16,7 @@ import ProfileLayout from "./components/layout/ProfileLayout";
 import ContractPage from "./pages/contract/ContractPage";
 import TransactionHistoryPage from "./pages/transaction/TransactionHistoryPage";
 import ServiceManagementPage from "./pages/service/ServiceManagementPage";
+import MyApartmentPage from "./pages/apartment/MyApartment";
 
 function App() {
     return (
@@ -56,6 +57,7 @@ function App() {
                     element={<ApartmentManagement />}
                 />
                 <Route path="/service/manage" element={<ServiceManagementPage />} />
+                <Route path="/myapartment" element={<MyApartmentPage />} />
             </Routes>
         </Router>
     );

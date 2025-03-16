@@ -1,7 +1,7 @@
 import ServiceCategory from '../models/ServiceCategory.js';
 import ServiceOrder from '../models/ServiceOrder.js';
 import ServiceRequest from '../models/ServiceRequest.js';
-import Apartment from '../models/Apartments.js';
+import Apartment from '../models/Apartment.js';
 
 // ========================== CRUD: ServiceCategory ==========================
 
