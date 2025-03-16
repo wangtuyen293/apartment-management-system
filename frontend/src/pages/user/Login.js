@@ -2,15 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../redux/authSlice";
+import { useCookies } from "react-cookie";
 import { FcGoogle } from "react-icons/fc";
 import { motion } from "framer-motion";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { loginUser, setAccessToken } from "../../redux/authSlice";
 import loginImage from "../../assets/images/fpt-login.jpg";
 
 const LoginForm = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const [cookies] = useCookies(['accessToken'])
+
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { user, loading, error } = useSelector((state) => state.auth);
@@ -23,6 +26,12 @@ const LoginForm = () => {
     const handleGoogleLogin = () => {
         window.location.href = "http://localhost:5000/api/v1/auth/google";
     };
+
+    useEffect(() => {
+        if (cookies.accessToken) {
+            dispatch(setAccessToken(cookies.accessToken));
+        }
+    }, [cookies.accessToken, dispatch]);
 
     useEffect(() => {
         if (user) {

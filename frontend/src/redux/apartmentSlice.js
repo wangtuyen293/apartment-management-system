@@ -3,7 +3,6 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000";
 
-// Existing actions for fetching apartments
 export const getApartment = createAsyncThunk(
     "apartment/getApartment",
     async (_, { rejectWithValue }) => {
@@ -48,14 +47,31 @@ export const requestForRentApartment = createAsyncThunk(
     "apartment/requestForRentApartment",
     async ({ apartmentId, tenantId, date, contractMonths }, { rejectWithValue }) => {
         try {
-            // Send date and contractMonths as part of the request body
+
             const response = await axios.post(
                 `${API_URL}/api/v1/apartments/rent/${apartmentId}/${tenantId}`,
-                { date, contractMonths } // Send both values as an object
+                { date, contractMonths }
             );
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || "An error occurred");
+        }
+    }
+);
+
+export const addApartment = createAsyncThunk(
+    'apartment/addApartment',
+    async (formData, { rejectWithValue }) => {
+        try {
+            console.log(formData)
+            const response = await axios.post(`${API_URL}/api/v1/apartments/add`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || 'Error adding apartment');
         }
     }
 );
@@ -126,7 +142,21 @@ const apartmentSlice = createSlice({
             .addCase(requestForRentApartment.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Failed to request for rent apartment";
-            });
+            })
+            // Add new apartment
+            .addCase(addApartment.pending, (state) => {
+                state.loading = true;
+                state.rentRequestStatus = null;
+                state.error = null;
+            })
+            .addCase(addApartment.fulfilled, (state, action) => {
+                state.loading = false;
+                state.apartment = action.payload;
+            })
+            .addCase(addApartment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed ";
+            })
     },
 });
 

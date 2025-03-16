@@ -23,7 +23,7 @@ export const login = async (req, res) => {
                 .json({ message: "Username or password is incorrect" });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res
                 .status(400)
@@ -33,7 +33,7 @@ export const login = async (req, res) => {
         if (!user.isActive) {
             return res
                 .status(400)
-                .json({ message: "User account is inactive." });
+                .json({ message: "Account is inactive. Please contact support." });
         }
 
         if (!user.isVerified) {
@@ -45,17 +45,17 @@ export const login = async (req, res) => {
         const { accessToken, refreshToken } = await generateToken(user);
 
         res.cookie("accessToken", accessToken, {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 60 * 60 * 1000,
             sameSite: "Strict",
+            path: "/",
         });
 
         res.cookie("refreshToken", refreshToken, {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "Strict",
+            path: "/",
         });
 
         res.status(200).json({
@@ -70,13 +70,9 @@ export const login = async (req, res) => {
                 address: user.address,
                 gender: user.gender,
             },
-            tokenType: "Bearer",
-            expiresIn: 3600,
-            accessToken,
-            refreshToken,
         });
     } catch (error) {
-        console.log(error);
+        console.error("Login error:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
@@ -120,6 +116,8 @@ export const register = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        const emailVerificationOTP = Math.floor(100000 + Math.random() * 900000).toString();
+
         const newUser = new User({
             username,
             email,
@@ -128,18 +126,9 @@ export const register = async (req, res) => {
             gender: gender || "Other",
             address: address || "",
             phoneNumber: phoneNumber || "",
+            emailVerificationOTP,
+            emailVerificationOTPExpires: Date.now() + 5 * 60 * 1000,
         });
-
-        const emailVerificationToken = jwt.sign(
-            { email },
-            process.env.JWT_SECRET,
-            {
-                expiresIn: "1d",
-            }
-        );
-
-        newUser.emailVerificationToken = emailVerificationToken;
-        newUser.emailVerificationExpires = Date.now() + 60 * 60 * 1000;
 
         await newUser.save();
 
@@ -151,14 +140,18 @@ export const register = async (req, res) => {
             },
         });
 
-        const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${emailVerificationToken}`;
+        const verificationLink = `${process.env.FRONTEND_URL}/verify-email?email=${encodeURIComponent(email)}`;
 
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: newUser.email,
             subject: "Email Verification",
-            text: `Please verify your email by clicking the following link: ${verificationLink} or verify by OTP ${emailVerificationToken}`,
-            html: `<p>Please verify your email by clicking the following link: <a href="${verificationLink}">${verificationLink}</a></p>`,
+            text: `Please verify your email by clicking the following link: ${verificationLink} and use the OTP to verify: ${emailVerificationOTP}`,
+            html: `
+                <p>Please verify your email by clicking the following link:</p>
+                <a href="${verificationLink}">${verificationLink}</a>
+                <p>And use the OTP to verify: <strong>${emailVerificationOTP}</strong></p>
+            `,
         };
 
         await transporter.sendMail(mailOptions);
@@ -212,10 +205,10 @@ export const refresh = async (req, res) => {
         const accessToken = generateAccessToken(user);
 
         res.cookie("accessToken", accessToken, {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 60 * 60 * 1000,
             sameSite: "Strict",
+            path: "/",
         });
 
         res.status(200).json({ accessToken, refreshToken: refresh });
@@ -227,27 +220,25 @@ export const refresh = async (req, res) => {
 
 export const verifyEmail = async (req, res) => {
     try {
-        const { token } = req.query;
+        const { email, otp } = req.body;
 
-        if (!token) {
-            return res.status(400).json({ message: "Invalid token" });
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP are required" });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findOne({
-            email: decoded.email,
-            emailVerificationExpires: { $gt: Date.now() },
+            email,
+            emailVerificationOTP: otp,
+            emailVerificationOTPExpires: { $gt: Date.now() },
         });
 
         if (!user) {
-            return res
-                .status(400)
-                .json({ message: "Token is invalid or has expired" });
+            return res.status(400).json({ message: "Invalid or expired OTP" });
         }
 
         user.isVerified = true;
-        user.emailVerificationToken = null;
-        user.emailVerificationExpires = null;
+        user.emailVerificationOTP = null;
+        user.emailVerificationOTPExpires = null;
         await user.save();
 
         res.status(200).json({ message: "Email verified successfully" });
@@ -266,20 +257,20 @@ export const logout = async (req, res) => {
         }
 
         res.clearCookie("accessToken", {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
+            path: "/",
         });
 
         res.clearCookie("refreshToken", {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
+            path: "/",
         });
 
         return res.status(200).json({ message: "Logout successful" });
     } catch (error) {
-        console.error(error);
+        console.error("Logout error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };

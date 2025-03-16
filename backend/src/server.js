@@ -10,12 +10,18 @@ import userRoutes from "./routes/userRoutes.js";
 import apartmentRoutes from "./routes/apartmentRoutes.js";
 import residentRoutes from "./routes/residentRoutes.js";
 import contractRoutes from "./routes/contractRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
 import "./config/passport.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const app = express();
 
 connectDB();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 app.use(express.json());
 app.use(cors({
@@ -23,6 +29,12 @@ app.use(cors({
     credentials: true,
 }));
 app.use(cookieParser());
+
+const resourcesPath = path.join(__dirname, 'controllers/resources');
+console.log('Resources path:', resourcesPath);
+app.use('/resources', express.static(resourcesPath));
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use(
     session({
@@ -40,6 +52,7 @@ app.use("/api/v1/residents", residentRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/contracts", contractRoutes);
+app.use("/api/v1/payments/", paymentRoutes);
 app.use("/api/v1/services", serviceRoutes);
 
 const PORT = process.env.PORT || 5000;

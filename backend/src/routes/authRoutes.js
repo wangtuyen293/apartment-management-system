@@ -17,7 +17,7 @@ router.post("/logout", logout);
 router.post("/refresh", refresh);
 // router.post("/forgot-password", refresh);
 // router.post("/reset-password", refresh);
-router.get("/verify-email", verifyEmail);
+router.post("/verify-email", verifyEmail);
 router.get(
     "/google",
     passport.authenticate("google", { scope: ["profile", "email"] })
@@ -47,6 +47,7 @@ router.get("/google/callback", (req, res, next) => {
         });
 
         res.json(result);
+
     })(req, res, next);
 });
 

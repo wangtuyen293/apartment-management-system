@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import loginImage from '../../assets/images/fpt-login.jpg';
+import loginImage from "../../assets/images/fpt-login.jpg";
 import { registerUser } from "../../redux/authSlice";
 import { useNavigate } from "react-router-dom";
 
@@ -63,6 +63,7 @@ const RegistrationForm = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
         if (validateInputs()) {
             dispatch(registerUser(formData));
         }
@@ -71,9 +72,8 @@ const RegistrationForm = () => {
     useEffect(() => {
         if (user) {
             setSuccessMessage(
-                "Registration successful! Please verify your registration!"
+                "Registration successful! Please verify your email!"
             );
-            setTimeout(() => navigate("/login"), 2000);
         }
     }, [user, navigate]);
 

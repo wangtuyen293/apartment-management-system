@@ -24,7 +24,7 @@ import {
     HandThumbsUp,
     HandThumbsDown
 } from "react-bootstrap-icons";
-import { getCustomerViewApartment } from '../../redux/residentSlice';
+import { getCustomerViewApartment, ApproveViewApartment, RejectViewApartment } from '../../redux/residentSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from "../../redux/authSlice";
 import Sidebar from "../../components/SideBar";
@@ -66,11 +66,37 @@ const CustomerRequestView = () => {
     };
 
     const handleApprove = (id) => {
-        getStatusBadge('Confirmed');
+        dispatch(ApproveViewApartment(id))
+            .then((resultAction) => {
+                if (ApproveViewApartment.fulfilled.match(resultAction)) {
+                    alert('Xác nhận thành công!');
+                    getStatusBadge('Confirmed');
+                    window.location.reload();
+                } else if (ApproveViewApartment.rejected.match(resultAction)) {
+
+                    console.error("Payment error:", resultAction.payload);
+                }
+            })
+            .catch((error) => {
+                console.error("Unexpected error:", error);
+            });
     };
 
     const handleReject = (id) => {
-        getStatusBadge('Cancelled');
+        dispatch(RejectViewApartment(id))
+            .then((resultAction) => {
+                if (RejectViewApartment.fulfilled.match(resultAction)) {
+                    alert('Từ chối thành công!');
+                    getStatusBadge('Confirmed');
+                    window.location.reload();
+                } else if (RejectViewApartment.rejected.match(resultAction)) {
+
+                    console.error("Payment error:", resultAction.payload);
+                }
+            })
+            .catch((error) => {
+                console.error("Unexpected error:", error);
+            });
     };
 
     return (
@@ -182,10 +208,10 @@ const CustomerRequestView = () => {
                                                                         <Person className="text-info" />
                                                                     </div>
                                                                     <div>
-                                                                        <h6 className="mb-0">{request.username}</h6>
+                                                                        <h6 className="mb-0">{request.userId.name}</h6>
                                                                         <small className="text-muted d-flex align-items-center">
                                                                             <Telephone className="me-1" size={12} />
-                                                                            {request.phoneNumber}
+                                                                            {request.userId.phoneNumber}
                                                                         </small>
                                                                     </div>
                                                                 </div>
@@ -195,7 +221,7 @@ const CustomerRequestView = () => {
                                                                     <div className="bg-secondary bg-opacity-10 rounded p-1 me-2">
                                                                         <HouseDoor className="text-secondary" />
                                                                     </div>
-                                                                    <span>Phòng {request.apartment}</span>
+                                                                    <span>Phòng {request.apartment_id.apartmentNumber}</span>
                                                                 </div>
                                                             </td>
                                                             <td className="py-3">

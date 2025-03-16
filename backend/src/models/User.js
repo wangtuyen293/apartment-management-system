@@ -29,7 +29,6 @@ const userSchema = new mongoose.Schema(
         },
         providerId: {
             type: String,
-            unique: true,
         },
         name: {
             type: String,
@@ -50,10 +49,10 @@ const userSchema = new mongoose.Schema(
             enum: ["User", "Manager"],
             default: "User",
         },
-        emailVerificationToken: {
+        emailVerificationOTP: {
             type: String,
         },
-        emailVerificationExpires: {
+        emailVerificationOTPExpires: {
             type: Date,
         }
     },

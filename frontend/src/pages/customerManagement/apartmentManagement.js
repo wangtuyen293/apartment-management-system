@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Container,
@@ -8,41 +8,97 @@ import {
     Button,
     Spinner,
     Table,
-    Badge
+    Badge,
+    Form,
+    Modal,
 } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../redux/authSlice";
-import { getApartment } from '../../redux/apartmentSlice';
-import { useDispatch, useSelector } from 'react-redux';
+import { addApartment, getApartment } from "../../redux/apartmentSlice";
 import Sidebar from "../../components/SideBar";
 import { FaHome, FaList, FaUser, FaExclamationTriangle } from "react-icons/fa";
 
 const ApartmentManagement = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { apartment, loading, error } = useSelector(state => state.apartment);
-    const { user } = useSelector(state => state.auth);
+    const { apartment, loading, error } = useSelector((state) => state.apartment);
+    const { user } = useSelector((state) => state.auth);
+    const [showModal, setShowModal] = useState(false);
+    const [apartmentData, setApartmentData] = useState({
+        apartmentNumber: "",
+        description: "",
+        floor: "",
+        area: "",
+        price: "",
+        images: []
+    });
 
     useEffect(() => {
         dispatch(getApartment());
     }, [dispatch]);
 
-    const handleLogout = () => {
-        dispatch(logoutUser());
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setApartmentData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
-    const handleProfileRedirect = () => {
-        navigate("/profile");
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        setApartmentData(prev => ({
+            ...prev,
+            images: files
+        }));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        try {
+
+            const formData = new FormData();
+            Object.entries(apartmentData).forEach(([key, value]) => {
+                if (key === 'images') {
+                    value.forEach(image => formData.append('images', image));
+                } else {
+                    formData.append(key, value);
+                }
+            });
+
+            const result = await dispatch(addApartment(formData)).unwrap();
+            console.log('Apartment added successfully:', result);
+
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+
+            await dispatch(getApartment());
+            setApartmentData({
+                apartmentNumber: "",
+                description: "",
+                floor: "",
+                area: "",
+                price: "",
+                images: []
+            });
+            setShowModal(false);
+        } catch (error) {
+            console.error('Error adding apartment:', error);
+            alert('Có lỗi xảy ra khi thêm căn hộ');
+        }
     };
 
     const getStatusBadge = (status) => {
         switch (status) {
-            case 'Trống':
+            case "Trống":
                 return <Badge bg="success">Trống</Badge>;
-            case 'Đã cho thuê':
+            case "Đã cho thuê":
                 return <Badge bg="danger">Đã cho thuê</Badge>;
-            case 'Khách hẹn xem':
+            case "Khách hẹn xem":
                 return <Badge bg="warning" text="dark">Khách hẹn xem</Badge>;
-            case 'Đã cọc':
+            case "Đã cọc":
                 return <Badge bg="warning" text="dark">Đã cọc</Badge>;
             default:
                 return <Badge bg="secondary">{status}</Badge>;
@@ -52,8 +108,7 @@ const ApartmentManagement = () => {
     return (
         <Container fluid className="p-0">
             <Row className="g-0">
-                <Sidebar user={user} handleProfileRedirect={handleProfileRedirect} handleLogout={handleLogout} />
-
+                <Sidebar />
                 <Col xs={12} md={10} className="ms-auto p-0">
                     <div className="bg-primary text-white py-4 px-4 shadow">
                         <h1 className="h3 mb-0">
@@ -71,8 +126,12 @@ const ApartmentManagement = () => {
                                         <FaList className="me-2 text-primary" />
                                         Danh sách khách yêu cầu thuê phòng
                                     </h5>
-                                    <Button variant="outline-primary" size="sm">
-                                        Làm mới
+                                    <Button
+                                        variant="outline-primary"
+                                        size="sm"
+                                        onClick={() => setShowModal(true)}
+                                    >
+                                        Thêm căn hộ
                                     </Button>
                                 </div>
                             </Card.Header>
@@ -155,6 +214,97 @@ const ApartmentManagement = () => {
                         </Card>
                     </Container>
                 </Col>
+
+                <Modal show={showModal} onHide={() => setShowModal(false)}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Thêm mới căn hộ</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={handleSubmit}>
+                            <Form.Group className="mb-3">
+                                <Form.Label>Số căn hộ</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="apartmentNumber"
+                                    value={apartmentData.apartmentNumber}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Mô tả</Form.Label>
+                                <Form.Control
+                                    as="textarea"
+                                    name="description"
+                                    value={apartmentData.description}
+                                    onChange={handleInputChange}
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Tầng</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="floor"
+                                    value={apartmentData.floor}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Diện tích (m²)</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="area"
+                                    value={apartmentData.area}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Giá (VNĐ)</Form.Label>
+                                <Form.Control
+                                    type="number"
+                                    name="price"
+                                    value={apartmentData.price}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </Form.Group>
+
+                            <Form.Group className="mb-3">
+                                <Form.Label>Hình ảnh</Form.Label>
+                                <Form.Control
+                                    type="file"
+                                    multiple
+                                    onChange={handleImageChange}
+                                    accept="image/*"
+                                />
+                                {apartmentData.images.length > 0 && (
+                                    <div className="mt-2">
+                                        <p>Đã chọn {apartmentData.images.length} ảnh</p>
+                                        <div className="d-flex flex-wrap gap-2">
+                                            {apartmentData.images.map((image, index) => (
+                                                <small key={index}>{image.name}</small>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </Form.Group>
+
+                            <Button
+                                variant="primary"
+                                type="submit"
+                                disabled={loading}
+                            >
+                                {loading ? "Đang thêm..." : "Thêm căn hộ"}
+                            </Button>
+                        </Form>
+                    </Modal.Body>
+                </Modal>
             </Row>
         </Container>
     );
