@@ -18,7 +18,11 @@ passport.use(
 
                 if (!user) {
                     const username = email.split("@")[0];
-                    let name = profile.displayName || `${profile.name?.givenName || ""} ${profile.name?.familyName || ""}`.trim();
+                    let name =
+                        profile.displayName ||
+                        `${profile.name?.givenName || ""} ${
+                            profile.name?.familyName || ""
+                        }`.trim();
 
                     user = new User({
                         username,
@@ -29,11 +33,14 @@ passport.use(
                     });
 
                     await user.save();
+                } else if (!user.providerId) {
+                    user.providerId = profile.id;
+                    await user.save();
                 }
 
                 if (!user.isActive) {
                     return done(null, false, {
-                        message: "User account is inactive.",
+                        message: "Account is inactive. Please contact support.",
                     });
                 }
 

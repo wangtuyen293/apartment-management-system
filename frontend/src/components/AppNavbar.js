@@ -120,6 +120,10 @@ const AppNavbar = () => {
                                 <Dropdown.Item as={Link} to="/profile">
                                     Hồ Sơ
                                 </Dropdown.Item>
+                                <Dropdown.Divider />
+                                <Dropdown.Item onClick={handleLogout}>
+                                    Đăng Xuất
+                                </Dropdown.Item>
                             </Dropdown.Menu>
                         </Dropdown>
                     ) : (

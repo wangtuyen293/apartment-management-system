@@ -43,9 +43,10 @@ export const logoutUser = createAsyncThunk(
         try {
             await axios.post(`${API_URL}/auth/logout`);
             dispatch(resetAuthState());
+
             return null;
         } catch (error) {
-            return rejectWithValue(error.response.data);
+            return rejectWithValue(error.response.data || error.message);
         }
     }
 );
@@ -54,7 +55,10 @@ export const fetchUser = createAsyncThunk(
     "auth/fetchUser",
     async (_, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_URL}/api/v1/me`);
+            const response = await axios.get(`${API_URL}/users/me`, {
+                withCredentials: true,
+            });
+
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response.data || error.message);
@@ -73,6 +77,9 @@ const authSlice = createSlice({
     reducers: {
         setAccessToken: (state, action) => {
             state.accessToken = action.payload;
+        },
+        setUser: (state, action) => {
+            state.user = action.payload;
         },
         resetAuthState: (state) => {
             state.user = null;
@@ -130,6 +137,5 @@ const authSlice = createSlice({
     },
 });
 
-export const { setAccessToken } = authSlice.actions;
-export const { resetAuthState } = authSlice.actions;
+export const { setAccessToken, setUser, resetAuthState } = authSlice.actions;
 export default authSlice.reducer;

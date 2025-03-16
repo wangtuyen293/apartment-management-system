@@ -12,7 +12,7 @@ import loginImage from "../../assets/images/fpt-login.jpg";
 const LoginForm = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [cookies] = useCookies(['accessToken'])
+    const [cookies] = useCookies(["accessToken"]);
 
     const navigate = useNavigate();
     const dispatch = useDispatch();

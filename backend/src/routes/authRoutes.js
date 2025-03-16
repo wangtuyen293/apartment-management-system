@@ -23,7 +23,7 @@ router.get(
     passport.authenticate("google", { scope: ["profile", "email"] })
 );
 router.get("/google/callback", (req, res, next) => {
-    passport.authenticate("google", { session: false }, (err, result, info) => {
+    passport.authenticate("google", { session: false, failureRedirect: `${process.env.FRONTEND_URL}/login` }, (err, result, info) => {
         if (err) {
             return res.status(500).json({ message: "Internal Server Error" });
         }
@@ -33,21 +33,20 @@ router.get("/google/callback", (req, res, next) => {
         }
 
         res.cookie("accessToken", result.accessToken, {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 60 * 60 * 1000,
             sameSite: "Strict",
+            path: "/",
         });
 
         res.cookie("refreshToken", result.refreshToken, {
-            httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             maxAge: 24 * 60 * 60 * 1000,
             sameSite: "Strict",
+            path: "/",
         });
 
-        res.json(result);
-
+        res.redirect(`${process.env.FRONTEND_URL}/home`);
     })(req, res, next);
 });
 

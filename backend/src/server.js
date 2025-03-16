@@ -24,11 +24,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
 }));
-app.use(cookieParser());
 
 const resourcesPath = path.join(__dirname, 'controllers/resources');
 console.log('Resources path:', resourcesPath);
