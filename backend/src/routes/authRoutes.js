@@ -47,6 +47,7 @@ router.get("/google/callback", (req, res, next) => {
         });
 
         res.json(result);
+
     })(req, res, next);
 });
 

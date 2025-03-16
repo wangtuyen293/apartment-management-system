@@ -17,6 +17,10 @@ import Layout from "./components/layout/Layout";
 import ProfileLayout from "./components/layout/ProfileLayout";
 import ContractPage from "./pages/contract/ContractPage";
 import TransactionHistoryPage from "./pages/transaction/TransactionHistoryPage";
+import Success from "./pages/payment/success";
+import Cancel from "./pages/payment/cancel";
+import ViewAllPayment from "./pages/payment/viewAllPayment";
+import FeeManagement from "./pages/customerManagement/FeeManagement";
 
 function App() {
     const dispatch = useDispatch();
@@ -62,6 +66,13 @@ function App() {
                     path="/apartment-manage"
                     element={<ApartmentManagement />}
                 />
+                <Route path="/customer/view" element={<CustomerRequestView />} />
+                <Route path="/customer/rent" element={<CustomerRequestRent />} />
+                <Route path="/apartment-manage" element={<ApartmentManagement />} />
+                <Route path="/success" element={<Success />} />
+                <Route path="/cancel" element={<Cancel />} />
+                <Route path="/view-payment" element={<ViewAllPayment />} />
+                <Route path="/fee-manage" element={<FeeManagement />} />
             </Routes>
         </Router>
     );

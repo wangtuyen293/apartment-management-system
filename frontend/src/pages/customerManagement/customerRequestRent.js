@@ -50,10 +50,19 @@ const CustomerRequestRent = () => {
         navigate("/profile");
     };
 
-    const handleApprove = (requestId) => {
-        console.log(requestId);
-        dispatch(ApproveRentApartment(requestId));
-        window.location.reload();
+    const handleApprove = (requestId, date, duration) => {
+        dispatch(ApproveRentApartment({ requestId, date, duration })).then((resultAction) => {
+            if (ApproveRentApartment.fulfilled.match(resultAction)) {
+                alert('Xác nhận thành công!');
+                getStatusBadge('Confirmed');
+                window.location.reload();
+            } else if (ApproveRentApartment.rejected.match(resultAction)) {
+                console.error("Payment error:", resultAction.payload);
+            }
+        })
+            .catch((error) => {
+                console.error("Unexpected error:", error);
+            });
     };
 
     const handleReject = (requestId) => {
@@ -61,7 +70,6 @@ const CustomerRequestRent = () => {
         window.location.reload();
     };
 
-    // Function to determine badge color based on request status
     const getStatusBadge = (status) => {
         switch (status) {
             case 'Pending':
@@ -121,7 +129,7 @@ const CustomerRequestRent = () => {
                                     </div>
                                 ) : error ? (
                                     <div className="alert alert-danger m-4" role="alert">
-                                        <strong>Lỗi!</strong> {error}
+                                        <strong>Danh sách trống!</strong> {error}
                                     </div>
                                 ) : (
                                     <div className="table-responsive">
@@ -184,7 +192,7 @@ const CustomerRequestRent = () => {
                                                                         variant="success"
                                                                         size="sm"
                                                                         className="me-2"
-                                                                        onClick={() => handleApprove(request._id)}
+                                                                        onClick={() => handleApprove(request._id, request.date, request.contractMonths)}
                                                                     >
                                                                         <HandThumbsUp className="me-1" /> Phê duyệt
                                                                     </Button>

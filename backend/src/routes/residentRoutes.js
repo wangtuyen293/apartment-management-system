@@ -1,11 +1,19 @@
 import express from 'express';
-import { getCustomerViewApartment, getCustomerRequestRentApartment, ApproveRentApartment, RejectRentApartment } from '../controllers/residentController.js';
+import { getCustomerViewApartment, getCustomerRequestRentApartment, ApproveRentApartment, RejectRentApartment, ApproveViewApartment, RejectViewApartment, getAllResidents, updateIndex, sendBill } from '../controllers/residentController.js';
 
 const router = express.Router();
 
 router.route('/view').get(getCustomerViewApartment);
 router.route('/pending').get(getCustomerRequestRentApartment);
-router.route('/approve').post(ApproveRentApartment);
-router.route('/reject').post(RejectRentApartment);
+router.route('/all').get(getAllResidents);
+
+router.route('/approve-view').post(ApproveViewApartment);
+router.route('/reject-view').post(RejectViewApartment);
+
+router.route('/approve-rent').post(ApproveRentApartment);
+router.route('/reject-rent').post(RejectRentApartment);
+
+router.route('/update-index').post(updateIndex);
+router.route('/send-bill').post(sendBill);
 
 export default router;

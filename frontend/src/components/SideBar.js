@@ -1,9 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Nav, NavDropdown, Image, Button, Col, Container } from "react-bootstrap";
 import { House, Gear, CreditCard, FileText, BoxArrowRight, HandThumbsUp, HouseDoor } from "react-bootstrap-icons";
 import loginImage from '../assets/images/fpt-login.jpg';
+import { logoutUser } from "../redux/authSlice";
+import { useDispatch, useSelector } from 'react-redux';
 
-const Sidebar = ({ user, handleProfileRedirect, handleLogout }) => {
+const Sidebar = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    const { user } = useSelector((state) => state.auth);
+    const handleLogout = () => {
+        dispatch(logoutUser())
+            .then(() => {
+                console.log("Logout thành công, chuyển hướng về login");
+                navigate("/login");
+                window.location.reload();
+            })
+            .catch((error) => {
+                console.error("Logout thất bại:", error);
+            });
+    };
+    const handleProfileRedirect = () => {
+        navigate("/profile");
+    };
     return (
         <Col
             xs={2}
@@ -61,7 +82,7 @@ const Sidebar = ({ user, handleProfileRedirect, handleLogout }) => {
                             <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <CreditCard className="me-2" /> Phí dịch vụ
                             </Nav.Link>
-                            <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">
+                            <Nav.Link href="/fee-manage" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <FileText className="me-2" /> Ghi chỉ số
                             </Nav.Link>
                             <NavDropdown
@@ -90,7 +111,7 @@ const Sidebar = ({ user, handleProfileRedirect, handleLogout }) => {
                             <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <Gear className="me-2" /> Dịch vụ
                             </Nav.Link>
-                            <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">
+                            <Nav.Link href="/view-payment" className="text-white d-flex align-items-center py-2 nav-hover">
                                 <CreditCard className="me-2" /> Thanh toán
                             </Nav.Link>
                             <Nav.Link href="#" className="text-white d-flex align-items-center py-2 nav-hover">

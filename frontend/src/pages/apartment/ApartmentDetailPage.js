@@ -1,28 +1,87 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getApartmentDetail, requestForViewApartment, requestForRentApartment } from '../../redux/apartmentSlice';
 import {
     Spinner, Button, Container, Row, Col, Card, Carousel, Modal, Form,
     Badge, ListGroup, Tabs, Tab, OverlayTrigger, Tooltip
 } from 'react-bootstrap';
 import { FaMapMarkerAlt, FaRulerCombined, FaMoneyBillWave, FaCalendarAlt, FaInfoCircle, FaHome, FaArrowLeft, FaEye, FaHandshake, FaMoneyCheck } from 'react-icons/fa';
 import apartmentImage1 from '../../assets/images/fpt-login.jpg';
-import { jwtDecode } from "jwt-decode";
-import Sidebar from '../../components/SideBar';
 import { logoutUser } from "../../redux/authSlice";
+import { openDepositContract, signDepositContract } from '../../redux/contractSlice';
+import { getApartmentDetail, requestForViewApartment, requestForRentApartment } from '../../redux/apartmentSlice';
+import Sidebar from '../../components/SideBar';
+import SignatureCanvas from 'react-signature-canvas';
+import { payForDeposit } from '../../redux/paymentSlice';
 
 const ApartmentDetailPage = () => {
     const { id } = useParams();
+
+
+    //modal
     const [showModal, setShowModal] = useState(false);
     const [showRentModal, setShowRentModal] = useState(false);
+    const [showPickDayModal, setShowPickDayModal] = useState(false);
+    const [showContractModal, setShowContractModal] = useState(false);
+    const [showSignModal, setShowSignModal] = useState(false);
+    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+
+    //sign 
+    const sigCanvas = useRef(null);
+    const [signature, setSignature] = useState(null);
+    const clearSignature = () => {
+        sigCanvas.current.clear();
+    };
+
+    const saveSignature = () => {
+        const signatureImage = sigCanvas.current.toDataURL('image/png');
+        setSignature(signatureImage);
+        dispatch(signDepositContract({ apartmentId: id, userId: user.id, signature: signatureImage }))
+            .then((resultAction) => {
+                if (signDepositContract.fulfilled.match(resultAction)) {
+                    setShowSignModal(false);
+                    setIsSuccessModalOpen(true);
+                } else {
+                    console.error('Failed to sign contract:', resultAction.payload);
+                }
+            })
+            .catch((error) => {
+                console.error('Error occurred:', error);
+            });
+
+    }
+
+    const handleCloseModal = () => {
+        setIsSuccessModalOpen(false);
+    };
+
+    const handlePayDeposit = () => {
+        dispatch(payForDeposit({ userId: user.id, apartmentId: id }))
+            .then((resultAction) => {
+                if (payForDeposit.fulfilled.match(resultAction)) {
+                    const checkoutUrl = resultAction.payload.checkoutUrl;
+                    window.location.href = checkoutUrl;
+                } else if (payForDeposit.rejected.match(resultAction)) {
+
+                    console.error("Payment error:", resultAction.payload);
+                }
+            })
+            .catch((error) => {
+                console.error("Unexpected error:", error);
+            });
+    }
+
     const [selectedDate, setSelectedDate] = useState(null);
     const [contractMonths, setContractMonths] = useState('6');
+    const [isChecked, setIsChecked] = useState(false);
+
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const { apartmentDetail, loading, error, viewRequestStatus, rentRequestStatus } = useSelector(state => state.apartment);
     const { user } = useSelector((state) => state.auth);
+    const { contractPath, loading: contractLoading, error: contractError } = useSelector(state => state.contract);
     const isAuthenticated = user;
 
     useEffect(() => {
@@ -35,11 +94,26 @@ const ApartmentDetailPage = () => {
             navigate('/login');
             return;
         }
-        else if (action === 'Hẹn xem căn hộ') {
+        if (action === 'Hẹn xem căn hộ') {
             setShowModal(true);
         } else if (action === 'Yêu cầu thuê phòng') {
             setShowRentModal(true);
+        } else if (action === 'Đặt cọc ngay') {
+            setShowPickDayModal(true);
         }
+    };
+
+    const handleGenerateContract = () => {
+        dispatch(openDepositContract({
+            apartmentId: id,
+            userId: user.id,
+            date: selectedDate
+        })).then((result) => {
+            if (result.meta.requestStatus === 'fulfilled') {
+                setShowPickDayModal(false);
+                setShowContractModal(true);
+            }
+        });
     };
 
     const handleSubmitDate = () => {
@@ -64,6 +138,11 @@ const ApartmentDetailPage = () => {
         }
     };
 
+    const handleConfirmContract = () => {
+        setShowContractModal(false);
+        setShowSignModal(true);
+    }
+
     const handleLogout = () => {
         dispatch(logoutUser());
     };
@@ -73,14 +152,12 @@ const ApartmentDetailPage = () => {
     };
 
     const isViewDisabled =
-        apartmentDetail && (apartmentDetail.status === "Đang xét duyệt" || apartmentDetail.status === "Đã cọc");
+        apartmentDetail && (apartmentDetail.status === "Đang xét duyệt" || apartmentDetail.status === "Đã cọc" || apartmentDetail.status === "Đã cho thuê");
 
-    // Format price with commas
     const formatPrice = (price) => {
         return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     };
 
-    // Get status badge variant
     const getStatusVariant = (status) => {
         switch (status) {
             case 'Đã cọc': return 'warning';
@@ -212,7 +289,7 @@ const ApartmentDetailPage = () => {
                                                     <FaInfoCircle className="me-2" />
                                                     <div>
                                                         {isViewDisabled
-                                                            ? 'Căn hộ này hiện đang trong quá trình xét duyệt hoặc đã có người đặt cọc.'
+                                                            ? 'Căn hộ này hiện đang không có sẵn.'
                                                             : 'Căn hộ này hiện có sẵn để thuê. Đặt lịch xem ngay!'}
                                                     </div>
                                                 </div>
@@ -243,9 +320,10 @@ const ApartmentDetailPage = () => {
                                                         size="lg"
                                                         className="d-flex align-items-center justify-content-center"
                                                         onClick={() => handleAction('Đặt cọc ngay')}
-                                                        disabled={isViewDisabled}
+                                                        disabled={isViewDisabled || contractLoading}
                                                     >
-                                                        <FaMoneyCheck className="me-2" /> Đặt cọc ngay
+                                                        <FaMoneyCheck className="me-2" />
+                                                        {contractLoading ? 'Đang tạo hợp đồng...' : 'Đặt cọc ngay'}
                                                     </Button>
                                                 </div>
 
@@ -253,6 +331,8 @@ const ApartmentDetailPage = () => {
                                                     <div className="alert alert-success mt-3">{viewRequestStatus}</div>}
                                                 {rentRequestStatus &&
                                                     <div className="alert alert-success mt-3">{rentRequestStatus}</div>}
+                                                {contractError &&
+                                                    <div className="alert alert-danger mt-3">{contractError}</div>}
                                             </Card.Body>
                                         </Card>
                                     </Col>
@@ -365,6 +445,47 @@ const ApartmentDetailPage = () => {
                 </Modal.Footer>
             </Modal>
 
+            <Modal show={showPickDayModal} onHide={() => setShowPickDayModal(false)} centered>
+                <Modal.Header closeButton className="bg-light">
+                    <Modal.Title className="d-flex align-items-center">
+                        <FaCalendarAlt className="me-2 text-primary" />
+                        Chọn ngày kí hợp đồng
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group controlId="viewDate" className="mb-3">
+                            <Form.Label>Chọn ngày:</Form.Label>
+                            <Form.Control
+                                type="date"
+                                value={selectedDate}
+                                onChange={(e) => setSelectedDate(e.target.value)}
+                                isInvalid={selectedDate && new Date(selectedDate) < new Date().setHours(0, 0, 0, 0)}
+                                className="border-primary"
+                            />
+                            <Form.Control.Feedback type="invalid">
+                                Vui lòng chọn ngày hợp lệ (không chọn ngày trong quá khứ).
+                            </Form.Control.Feedback>
+                            <Form.Text className="text-muted">
+                                Chọn ngày phù hợp để chúng tôi sắp xếp lịch kí hợp đồng.
+                            </Form.Text>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="outline-secondary" onClick={() => setShowModal(false)}>
+                        Đóng
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={handleGenerateContract}
+                        disabled={!selectedDate || new Date(selectedDate) < new Date()}
+                    >
+                        Gửi yêu cầu
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
             {/* Modal for rent request */}
             <Modal show={showRentModal} onHide={() => setShowRentModal(false)} centered>
                 <Modal.Header closeButton className="bg-light">
@@ -404,7 +525,6 @@ const ApartmentDetailPage = () => {
                             </Form.Text>
                         </Form.Group>
                     </Form>
-
                     <div className="alert alert-info mt-3">
                         <div className="d-flex">
                             <div className="me-2"><FaInfoCircle /></div>
@@ -428,7 +548,112 @@ const ApartmentDetailPage = () => {
                 </Modal.Footer>
             </Modal>
 
-            {/* Add custom CSS for gradient background in carousel */}
+            <Modal
+                show={showContractModal}
+                onHide={() => setShowContractModal(false)}
+                centered
+                size="lg"
+                dialogClassName="modal-90w"
+            >
+                <Modal.Header closeButton className="bg-light">
+                    <Modal.Title className="d-flex align-items-center">
+                        <FaMoneyCheck className="me-2 text-primary" />
+                        Hợp đồng cọc
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {contractPath ? (
+                        <div style={{ height: '70vh', border: '1px solid #ccc' }}>
+                            <iframe
+                                src={`http://localhost:5000${contractPath}`}
+                                width="100%"
+                                height="100%"
+                                title="Hợp đồng cọc"
+                                style={{ border: 'none' }}
+                            />
+                        </div>
+                    ) : (
+                        <div className="text-center py-3">
+                            {contractLoading ? (
+                                <Spinner animation="border" variant="primary" />
+                            ) : (
+                                'Không thể tải hợp đồng'
+                            )}
+                        </div>
+                    )}
+
+                    <div className="mt-3">
+                        <Form.Check
+                            type="checkbox"
+                            label="Tôi đồng ý với những điều khoản mà hợp đồng đưa ra."
+                            checked={isChecked}
+                            onChange={() => setIsChecked(!isChecked)}
+                        />
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="outline-secondary"
+                        onClick={() => setShowContractModal(false)}
+                    >
+                        Đóng
+                    </Button>
+                    {contractPath && (
+                        <Button
+                            variant="primary"
+                            onClick={handleConfirmContract}
+                            disabled={!isChecked}
+                        >
+                            Xác nhận ký
+                        </Button>
+                    )}
+                </Modal.Footer>
+            </Modal>
+
+            <Modal
+                show={showSignModal}
+                onHide={() => setShowSignModal(false)}
+                centered
+            >
+                <Modal.Header closeButton>
+                    <Modal.Title>Ký điện tử</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <SignatureCanvas
+                        ref={sigCanvas}
+                        penColor="black"
+                        canvasProps={{ width: 500, height: 200, className: 'sigCanvas' }}
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={clearSignature}>
+                        Xóa
+                    </Button>
+                    <Button variant="primary" onClick={saveSignature}>
+                        Lưu
+                    </Button>
+                    <Button variant="danger" onClick={() => setShowSignModal(false)}>
+                        Đóng
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            <Modal show={isSuccessModalOpen} onHide={handleCloseModal}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Đã ký hợp đồng</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Vui lòng thanh toán tiền đặt cọc cho căn hộ</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseModal}>
+                        Đóng
+                    </Button>
+                    <Button variant="primary" onClick={handlePayDeposit}>
+                        Thanh toán
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+
             <style jsx="true">{`
                 .bg-gradient-dark {
                     background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
@@ -440,6 +665,9 @@ const ApartmentDetailPage = () => {
                 }
                 .apartment-carousel .carousel-indicators {
                     margin-bottom: 1rem;
+                }
+                .modal-90w {
+                    max-width: 90%;
                 }
             `}</style>
         </div>

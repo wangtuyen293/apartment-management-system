@@ -4,6 +4,8 @@ import storage from 'redux-persist/lib/storage';
 import authReducer from "./authSlice.js";
 import apartmentReducer from "./apartmentSlice.js";
 import residentReducer from "./residentSlice.js";
+import contractReducer from "./contractSlice.js";
+import paymentReducer from "./paymentSlice.js";
 
 const persistConfig = {
     key: 'root',
@@ -17,6 +19,9 @@ const store = configureStore({
         auth: persistedReducer,
         apartment: apartmentReducer,
         resident: residentReducer,
+        contract: contractReducer,
+        payment: paymentReducer,
+        bill: paymentReducer,
     },
 });
 

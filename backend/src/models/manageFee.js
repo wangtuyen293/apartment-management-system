@@ -5,6 +5,7 @@ const manageFeeSchema = new mongoose.Schema(
         amount: {
             type: Number,
             required: true,
+            default: 500000,
         },
         billing_date: {
             type: Date,
@@ -13,6 +14,11 @@ const manageFeeSchema = new mongoose.Schema(
         apartment_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Apartment",
+            required: true,
+        },
+        user_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
             required: true,
         },
     },

@@ -105,14 +105,6 @@ const HomePage = () => {
         navigate(`/apartment/${apartmentId}`);
     };
 
-    const handleLogout = () => {
-        dispatch(logoutUser());
-    };
-
-    const handleProfileRedirect = () => {
-        navigate("/profile");
-    };
-
     const handleClearFilters = () => {
         setSearchTerm("");
         setPriceFilter(null);
@@ -128,7 +120,7 @@ const HomePage = () => {
     return (
         <Container fluid className="p-0" style={{ backgroundColor: "#F5F7FA" }}>
             <Row className="g-0">
-                <Sidebar user={user} handleProfileRedirect={handleProfileRedirect} handleLogout={handleLogout} />
+                <Sidebar />
 
                 <Col xs={10} className="p-0 ms-auto" style={{ marginLeft: "16.67%" }}>
 
@@ -370,7 +362,7 @@ const HomePage = () => {
                                                     style={{ height: "200px", objectFit: "cover" }}
                                                 />
                                                 <Badge
-                                                    bg={apt.status === 'Trống' ? 'success' : apt.status === 'Đã cho thuê' ? 'danger' : apt.status === 'Đang xét duyệt' ? 'primary' : 'warning'}
+                                                    bg={apt.status === 'Trống' ? 'success' : apt.status === 'Đã cho thuê' ? 'danger' : apt.status === 'Đang xét duyệt' ? 'primary' : apt.status === 'Đã cọc' ? 'secondary' : 'warning'}
                                                     className="position-absolute top-0 end-0 m-2 py-2 px-3"
                                                 >
                                                     {apt.status}

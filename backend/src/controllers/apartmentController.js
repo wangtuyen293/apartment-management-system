@@ -1,6 +1,29 @@
 import Apartment from '../models/Apartment.js';
 import User from '../models/User.js';
 import CustomerRequest from '../models/CustomerRequest.js';
+import multer from 'multer';
+import path from 'path';
+
+const storage = multer.diskStorage({
+    destination: './uploads/',
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    },
+});
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 5000000 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        const fileTypes = /jpeg|jpg|png|gif/;
+        const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = fileTypes.test(file.mimetype);
+        if (extname && mimetype) {
+            return cb(null, true);
+        }
+        cb(new Error('Chỉ chấp nhận file ảnh (jpeg, jpg, png, gif)!'));
+    },
+}).array('images', 4);
 
 const getApartment = async (req, res) => {
     try {
@@ -111,5 +134,41 @@ const requestForRentApartment = async (req, res) => {
     }
 };
 
+const addApartment = async (req, res) => {
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
 
-export { getApartment, getApartmentDetail, requestForViewApartment, requestForRentApartment };
+        try {
+
+            const images = req.files ? req.files.map(file => ({
+                url: `/uploads/${file.filename}`,
+            })) : [];
+
+            const apartmentData = {
+                apartmentNumber: req.body.apartmentNumber,
+                description: req.body.description,
+                floor: req.body.floor,
+                area: req.body.area,
+                price: req.body.price,
+                status: 'Trống',
+                images: images,
+            };
+
+            const apartment = new Apartment(apartmentData);
+            await apartment.save();
+
+            res.status(201).json(apartment);
+        } catch (error) {
+            console.error('Error adding apartment:', error);
+            res.status(500).json({
+                message: 'Error adding apartment',
+                error: error.message
+            });
+        }
+    });
+};
+
+
+export { getApartment, getApartmentDetail, requestForViewApartment, requestForRentApartment, addApartment };

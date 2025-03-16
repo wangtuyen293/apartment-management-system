@@ -29,7 +29,6 @@ const userSchema = new mongoose.Schema(
         },
         providerId: {
             type: String,
-            unique: true,
         },
         name: {
             type: String,

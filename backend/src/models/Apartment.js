@@ -2,18 +2,13 @@ import mongoose from "mongoose";
 
 const apartmentSchema = new mongoose.Schema(
     {
-        name: {
+        apartmentNumber: {
             type: String,
-            // required: true,
-            trim: true,
+            required: true,
         },
         description: {
             type: String,
             trim: true,
-        },
-        apartmentNumber: {
-            type: String,
-            required: true,
         },
         floor: {
             type: Number,
@@ -43,14 +38,16 @@ const apartmentSchema = new mongoose.Schema(
                 description: { type: String },
             },
         ],
-        ownerId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-        },
         tenantId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
+        startRentDate: {
+            type: Date
+        },
+        endRentDate: {
+            type: Date
+        }
     },
     { timestamps: true }
 );
