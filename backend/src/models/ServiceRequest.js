@@ -2,14 +2,19 @@ import mongoose from "mongoose";
 
 const serviceRequestSchema = new mongoose.Schema(
     {
-        service_order_id: {
+        service_category_id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "ServiceOrder",
+            ref: "ServiceCategory",
             required: true
         },
         user_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
+            required: true
+        },
+        apartment_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Apartment",
             required: true
         },
         status: {

@@ -51,7 +51,7 @@ const apartmentSchema = new mongoose.Schema(
         services: [
             {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: "ServiceOrder",
+                ref: "ServiceRequest",
             }
         ]
     },

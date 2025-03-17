@@ -20,6 +20,7 @@ import ViewAllPayment from "./pages/payment/viewAllPayment";
 import FeeManagement from "./pages/customerManagement/FeeManagement";
 import ServiceManagementPage from "./pages/service/ServiceManagementPage";
 import MyApartmentPage from "./pages/apartment/MyApartment";
+import ServiceRequestPage from "./pages/service/ServiceRequestPage";
 
 function App() {
     return (
@@ -68,6 +69,8 @@ function App() {
                 <Route path="/fee-manage" element={<FeeManagement />} />
                 <Route path="/service/manage" element={<ServiceManagementPage />} />
                 <Route path="/myapartment" element={<MyApartmentPage />} />
+                <Route path="/service/request" element={<ServiceRequestPage />} />
+
             </Routes>
         </Router>
     );

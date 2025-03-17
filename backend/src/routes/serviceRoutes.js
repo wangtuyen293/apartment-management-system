@@ -30,7 +30,7 @@ router.route("/requests").get(getAllServiceRequests).post(createServiceRequest);
 router.route("/requests/:id").put(updateServiceRequest).delete(deleteServiceRequest);
 
 // ========================== Routes để thêm/xóa ServiceOrder vào Apartment ==========================
-router.route("/apartments/add").post(addServiceOrderToApartment);
-router.route("/apartments/remove").post(removeServiceOrderFromApartment);
+router.route("/apartments/add/:id").post(addServiceOrderToApartment);
+router.route("/apartments/remove/:id").post(removeServiceOrderFromApartment);
 
 export default router;

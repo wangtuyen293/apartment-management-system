@@ -98,7 +98,7 @@ const deleteServiceOrder = async (req, res) => {
 // Lấy danh sách tất cả yêu cầu dịch vụ
 const getAllServiceRequests = async (req, res) => {
     try {
-        const requests = await ServiceRequest.find().populate("service_order_id user_id");
+        const requests = await ServiceRequest.find().populate("service_category_id user_id");
         res.status(200).json(requests);
     } catch (error) {
         res.status(500).json({ message: "Error fetching service requests", error: error.message });
@@ -108,8 +108,8 @@ const getAllServiceRequests = async (req, res) => {
 // Tạo yêu cầu dịch vụ mới
 const createServiceRequest = async (req, res) => {
     try {
-        const { service_order_id, user_id, status, note, requested_date } = req.body;
-        const newRequest = new ServiceRequest({ service_order_id, user_id, status, note, requested_date });
+        const { service_category_id, user_id, apartment_id, status, note, requested_date } = req.body;
+        const newRequest = new ServiceRequest({ service_category_id, user_id, apartment_id, status, note, requested_date });
         await newRequest.save();
         res.status(201).json(newRequest);
     } catch (error) {
@@ -143,12 +143,12 @@ const deleteServiceRequest = async (req, res) => {
 // Thêm ServiceOrder vào Apartment
 const addServiceOrderToApartment = async (req, res) => {
     try {
-        const { apartment_id, service_order_id } = req.body;
+        const { apartment_id } = req.body;
 
         const apartment = await Apartment.findById(apartment_id);
         if (!apartment) return res.status(404).json({ message: "Apartment not found" });
 
-        apartment.services.push(service_order_id);
+        apartment.services.push(req.params.id);
         await apartment.save();
 
         res.status(200).json({ message: "Service order added to apartment successfully", apartment });
@@ -160,12 +160,12 @@ const addServiceOrderToApartment = async (req, res) => {
 // Xóa ServiceOrder khỏi Apartment
 const removeServiceOrderFromApartment = async (req, res) => {
     try {
-        const { apartment_id, service_order_id } = req.body;
+        const { apartment_id } = req.body;
 
         const apartment = await Apartment.findById(apartment_id);
         if (!apartment) return res.status(404).json({ message: "Apartment not found" });
 
-        apartment.services = apartment.services.filter(id => id.toString() !== service_order_id);
+        apartment.services = apartment.services.filter(id => id.toString() !== req.params.id);
         await apartment.save();
 
         res.status(200).json({ message: "Service order removed from apartment successfully", apartment });

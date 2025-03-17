@@ -129,9 +129,9 @@ export const createServiceRequest = createAsyncThunk(
 // Cập nhật trạng thái yêu cầu dịch vụ
 export const updateServiceRequest = createAsyncThunk(
     "serviceRequest/update",
-    async ({ id, requestData }, { rejectWithValue }) => {
+    async ({ id, data }, { rejectWithValue }) => { // Đổi requestData thành data
         try {
-            const response = await axios.put(`${API_URL}/requests/${id}`, requestData);
+            const response = await axios.put(`${API_URL}/requests/${id}`, data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || "Lỗi không xác định");
@@ -157,9 +157,9 @@ export const deleteServiceRequest = createAsyncThunk(
 // Thêm ServiceOrder vào Apartment
 export const addServiceOrderToApartment = createAsyncThunk(
     "apartment/addServiceOrder",
-    async (orderData, { rejectWithValue }) => {
+    async ({ id, data }, { rejectWithValue }) => {
         try {
-            const response = await axios.post(`${API_URL}/apartments/add`, orderData);
+            const response = await axios.post(`${API_URL}/apartments/add/${id}`, data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || "Lỗi không xác định");
@@ -170,9 +170,9 @@ export const addServiceOrderToApartment = createAsyncThunk(
 // Xóa ServiceOrder khỏi Apartment
 export const removeServiceOrderFromApartment = createAsyncThunk(
     "apartment/removeServiceOrder",
-    async (orderData, { rejectWithValue }) => {
+    async ({ id, data }, { rejectWithValue }) => {
         try {
-            const response = await axios.post(`${API_URL}/apartments/remove`, orderData);
+            const response = await axios.post(`${API_URL}/apartments/remove/${id}`, data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || "Lỗi không xác định");
