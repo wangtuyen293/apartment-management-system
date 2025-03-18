@@ -51,21 +51,6 @@ export const logoutUser = createAsyncThunk(
     }
 );
 
-export const fetchUser = createAsyncThunk(
-    "auth/fetchUser",
-    async (_, { rejectWithValue }) => {
-        try {
-            const response = await axios.get(`${API_URL}/users/me`, {
-                withCredentials: true,
-            });
-
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response.data || error.message);
-        }
-    }
-);
-
 const authSlice = createSlice({
     name: "auth",
     initialState: {

@@ -13,7 +13,8 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { logoutUser, setAccessToken, setUser, fetchUser } from "../../redux/authSlice";
+import { logoutUser, setAccessToken, setUser } from "../../redux/authSlice";
+import { fetchUser } from "../../redux/userSlice";
 import Sidebar from "../../components/SideBar";
 import loginImage from "../../assets/images/fpt-login.jpg";
 import {

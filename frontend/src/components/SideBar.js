@@ -19,13 +19,9 @@ import {
     Bell,
 } from "react-bootstrap-icons";
 import loginImage from "../assets/images/fpt-login.jpg";
-import {
-    fetchUser,
-    logoutUser,
-    setAccessToken,
-    setUser,
-} from "../redux/authSlice";
 import { getUserNotifications } from "../redux/notificationSlice";
+import { logoutUser, setAccessToken, setUser } from "../redux/authSlice";
+import { fetchUser } from "../redux/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useCookies } from "react-cookie";
 import axios from "axios";

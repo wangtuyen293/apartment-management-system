@@ -113,7 +113,7 @@ const AppNavbar = () => {
                                     height="32"
                                     className="me-2"
                                 />
-                                {user.name}
+                                {user?.name}
                             </Dropdown.Toggle>
 
                             <Dropdown.Menu>

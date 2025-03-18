@@ -9,6 +9,7 @@ import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist
 import contractReducer from "./contractSlice.js";
 import paymentReducer from "./paymentSlice.js";
 import notificationReducer from "./notificationSlice.js";
+import userReducer from "./userSlice.js";
 
 // Cấu hình redux-persist cho auth
 const persistConfig = {
@@ -21,6 +22,7 @@ const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 const store = configureStore({
     reducer: {
         auth: persistedAuthReducer,
+        user: userReducer,
         apartment: apartmentReducer,
         resident: residentReducer,
         contract: contractReducer,

@@ -23,3 +23,36 @@ export const getUserProfile = async (req, res) => {
         res.status(401).json({ message: "Invalid token" });
     }
 };
+
+export const updateUserProfile = async (req, res) => {
+    try {
+        const token = req.cookies.accessToken;
+
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        const user = await User.findById(decoded.id).select("-password");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        user.name = req.body.name || user.name;
+        user.username = req.body.username || user.username;
+        user.email = req.body.email || user.email;
+        user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+        user.address = req.body.address || user.address;
+        user.gender = req.body.gender || user.gender;
+
+        const updatedUser = await user.save();
+
+        res.json({
+            message: "Profile updated successfully",
+            user: updatedUser,
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
