@@ -26,7 +26,7 @@ const MyApartmentPage = () => {
         dispatch(getAllServiceCategories()); // Lấy danh mục dịch vụ
     }, [dispatch]);
 
-    const userApartments = apartment?.filter(apartment => apartment.tenantId?._id === user?.id) || [];
+    const userApartments = apartment?.filter(apartment => apartment.tenantId?._id === user?._id) || [];
 
     // Mở modal
     const handleShowModal = (apartment) => {
@@ -52,7 +52,7 @@ const MyApartmentPage = () => {
 
         const requestData = {
             service_category_id: selectedCategory,
-            user_id: user.id,
+            user_id: user._id,
             apartment_id: selectedApartment._id,
             status: "Pending",
             note,
@@ -114,7 +114,7 @@ const MyApartmentPage = () => {
                                         <tbody>
                                             {userApartments.map(apartment => (
                                                 <tr key={apartment._id}>
-                                                    <td>{apartment.tenantId?.name || "Không có tên"}</td>
+                                                    <td>{apartment.tenantId?.name || "Chưa có chủ sỡ hữu"}</td>
                                                     <td>{apartment.apartmentNumber}</td>
                                                     <td>{apartment.area} m²</td>
                                                     <td>{apartment.price.toLocaleString()} VND</td>

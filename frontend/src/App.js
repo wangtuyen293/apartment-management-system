@@ -21,6 +21,8 @@ import FeeManagement from "./pages/customerManagement/FeeManagement";
 import ServiceManagementPage from "./pages/service/ServiceManagementPage";
 import MyApartmentPage from "./pages/apartment/MyApartment";
 import ServiceRequestPage from "./pages/service/ServiceRequestPage";
+import NotificationPage from "./pages/notification/NotificationPage";
+import CreateNotification from "./pages/notification/CreateNotification";
 
 function App() {
     return (
@@ -70,6 +72,8 @@ function App() {
                 <Route path="/service/manage" element={<ServiceManagementPage />} />
                 <Route path="/myapartment" element={<MyApartmentPage />} />
                 <Route path="/service/request" element={<ServiceRequestPage />} />
+                <Route path="/notification" element={<NotificationPage />} />
+                <Route path="/notification/create" element={<CreateNotification />} />
 
             </Routes>
         </Router>

@@ -12,6 +12,7 @@ import residentRoutes from "./routes/residentRoutes.js";
 import contractRoutes from "./routes/contractRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import serviceRoutes from "./routes/serviceRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import "./config/passport.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -54,6 +55,7 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/contracts", contractRoutes);
 app.use("/api/v1/payments/", paymentRoutes);
 app.use("/api/v1/services", serviceRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 
 const PORT = process.env.PORT || 5000;
 

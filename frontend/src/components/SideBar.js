@@ -16,6 +16,7 @@ import {
     BoxArrowRight,
     HandThumbsUp,
     HouseDoor,
+    Bell,
 } from "react-bootstrap-icons";
 import loginImage from "../assets/images/fpt-login.jpg";
 import {
@@ -24,6 +25,7 @@ import {
     setAccessToken,
     setUser,
 } from "../redux/authSlice";
+import { getUserNotifications } from "../redux/notificationSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useCookies } from "react-cookie";
 import axios from "axios";
@@ -35,7 +37,9 @@ const Sidebar = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
+    const { notifications, loading } = useSelector((state) => state.notification);
     const { user } = useSelector((state) => state.auth);
+    const userId = user?._id; 
 
     const handleLogout = () => {
         dispatch(logoutUser())
@@ -50,6 +54,14 @@ const Sidebar = () => {
     const handleProfileRedirect = () => {
         navigate("/profile");
     };
+
+    useEffect(() => {
+        if (userId) {
+            dispatch(getUserNotifications(userId));
+        }
+    }, [dispatch, userId]);
+
+    const unreadCount = notifications?.filter((noti) => !noti.is_read).length || 0;
 
     useEffect(() => {
         if (!cookies.accessToken) return;
@@ -168,6 +180,12 @@ const Sidebar = () => {
                             >
                                 <FileText className="me-2" /> Ghi chỉ số
                             </Nav.Link>
+                            <Nav.Link
+                                href="/notification/create"
+                                className="text-white d-flex align-items-center py-2 nav-hover"
+                            >
+                                <FileText className="me-2" /> Tạo thông báo
+                            </Nav.Link>
                             <NavDropdown
                                 title={
                                     <span className="text-white d-flex align-items-center">
@@ -223,6 +241,20 @@ const Sidebar = () => {
                                 className="text-white d-flex align-items-center py-2 nav-hover"
                             >
                                 <FileText className="me-2" /> Điều khoản
+                            </Nav.Link>
+                            <Nav.Link
+                                href="/notification"
+                                className="text-white d-flex align-items-center py-2 nav-hover position-relative"
+                            >
+                                <Bell className="me-2" /> Thông báo
+                                {unreadCount > 0 && (
+                                    <span
+                                        className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                        style={{ fontSize: "0.75rem" }}
+                                    >
+                                        {unreadCount}
+                                    </span>
+                                )}
                             </Nav.Link>
                         </>
                     )}

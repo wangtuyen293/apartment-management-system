@@ -8,6 +8,7 @@ import serviceReducer from "./serviceSlice";
 import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from "redux-persist";
 import contractReducer from "./contractSlice.js";
 import paymentReducer from "./paymentSlice.js";
+import notificationReducer from "./notificationSlice.js";
 
 // Cấu hình redux-persist cho auth
 const persistConfig = {
@@ -26,6 +27,7 @@ const store = configureStore({
         payment: paymentReducer,
         bill: paymentReducer,
         service: serviceReducer,
+        notification: notificationReducer,
     },
 });
 
