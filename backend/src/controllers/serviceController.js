@@ -2,6 +2,7 @@ import ServiceCategory from '../models/ServiceCategory.js';
 import ServiceOrder from '../models/ServiceOrder.js';
 import ServiceRequest from '../models/ServiceRequest.js';
 import Apartment from '../models/Apartment.js';
+import Bill from '../models/Bill.js';
 
 // ========================== CRUD: ServiceCategory ==========================
 
@@ -98,7 +99,7 @@ const deleteServiceOrder = async (req, res) => {
 // Lấy danh sách tất cả yêu cầu dịch vụ
 const getAllServiceRequests = async (req, res) => {
     try {
-        const requests = await ServiceRequest.find().populate("service_category_id user_id");
+        const requests = await ServiceRequest.find().populate("service_category_id user_id apartment_id");
         res.status(200).json(requests);
     } catch (error) {
         res.status(500).json({ message: "Error fetching service requests", error: error.message });
@@ -109,6 +110,7 @@ const getAllServiceRequests = async (req, res) => {
 const createServiceRequest = async (req, res) => {
     try {
         const { service_category_id, user_id, apartment_id, status, note, requested_date } = req.body;
+        console.log(req.body);
         const newRequest = new ServiceRequest({ service_category_id, user_id, apartment_id, status, note, requested_date });
         await newRequest.save();
         res.status(201).json(newRequest);
@@ -120,6 +122,24 @@ const createServiceRequest = async (req, res) => {
 // Cập nhật trạng thái yêu cầu dịch vụ
 const updateServiceRequest = async (req, res) => {
     try {
+        const { status, service_category_id, user_id, apartment_id } = req.body;
+        const service = await ServiceCategory.findById(service_category_id);
+        if (!service) {
+            res.status(404).json({ message: "Service not found" });
+        }
+        const date = new Date();
+        if (status === "Completed") {
+            const bill = new Bill({
+                typeOfPaid: "Service",
+                fee: service.price_quotation,
+                billing_date: date,
+                status: "Unpaid",
+                apartment_id: apartment_id,
+                user_id: user_id
+            })
+            console.log(bill);
+            await bill.save();
+        }
         const updatedRequest = await ServiceRequest.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedRequest) return res.status(404).json({ message: "Service request not found" });
         res.status(200).json(updatedRequest);

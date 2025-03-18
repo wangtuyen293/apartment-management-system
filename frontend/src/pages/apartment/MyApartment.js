@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getApartment } from "../../redux/apartmentSlice";
-import { createServiceRequest, getAllServiceCategories } from "../../redux/serviceSlice";
+import { createServiceRequest, getAllServiceCategories, getAllServiceRequests } from "../../redux/serviceSlice";
 import { Container, Row, Col, Card, Button, Spinner, Table, Alert, Modal, Form } from "react-bootstrap";
 import Sidebar from "../../components/SideBar";
 import { FaBuilding } from "react-icons/fa";
@@ -12,7 +12,7 @@ const MyApartmentPage = () => {
     // Lấy dữ liệu từ Redux store
     const { user } = useSelector(state => state.auth);
     const { apartment, loading, error } = useSelector(state => state.apartment);
-    const { serviceCategories = [] } = useSelector(state => state.service);
+    const { serviceCategories = [], serviceRequests } = useSelector(state => state.service);
 
     // State modal
     const [showModal, setShowModal] = useState(false);
@@ -24,9 +24,12 @@ const MyApartmentPage = () => {
     useEffect(() => {
         dispatch(getApartment());
         dispatch(getAllServiceCategories()); // Lấy danh mục dịch vụ
+        dispatch(getAllServiceRequests());
     }, [dispatch]);
 
     const userApartments = apartment?.filter(apartment => apartment.tenantId?._id === user?._id) || [];
+    const userRequest = serviceRequests?.filter(req => req?.user_id?._id === user?._id);
+    console.log(userRequest)
 
     // Mở modal
     const handleShowModal = (apartment) => {
@@ -72,6 +75,11 @@ const MyApartmentPage = () => {
             });
     };
 
+    const formatDay = (day) => {
+        const date = new Date(day);
+        return date.toLocaleDateString('vi-VN');
+    }
+
     return (
         <Container fluid className="p-0">
             <Row className="g-0">
@@ -82,14 +90,16 @@ const MyApartmentPage = () => {
                 <Col xs={12} md={10} className="ms-auto p-0">
                     <div className="bg-primary text-white py-4 px-4 shadow">
                         <h1 className="h3 mb-0">
-                            <FaBuilding className="me-2" /> Danh sách Căn hộ của tôi
+                            <FaBuilding className="me-2" /> Danh sách dịch vụ
                         </h1>
-                        <p className="mb-0 opacity-75">Quản lý các căn hộ bạn sở hữu</p>
+                        <p className="mb-0 opacity-75">Quản lý các dịch vụ bạn yêu cầu</p>
                     </div>
 
                     <Container className="py-4">
                         <Card className="border-0 shadow-sm">
+
                             <Card.Body>
+
                                 {loading ? (
                                     <div className="text-center py-5">
                                         <Spinner animation="border" variant="primary" />
@@ -99,28 +109,28 @@ const MyApartmentPage = () => {
                                     <Alert variant="danger">
                                         <strong>Lỗi!</strong> {error}
                                     </Alert>
-                                ) : userApartments.length > 0 ? (
+                                ) : userRequest.length > 0 ? (
                                     <Table hover className="align-middle mb-0">
                                         <thead className="bg-light">
                                             <tr>
-                                                <th>Tên căn hộ</th>
+                                                <th>Người thuê</th>
                                                 <th>Số phòng</th>
-                                                <th>Diện tích</th>
-                                                <th>Giá thuê</th>
-                                                <th>Trạng thái</th>
+                                                <th>Loại dịch vụ</th>
+                                                <th>Ngày sửa</th>
+                                                <th>Tình trạng</th>
                                                 <th className="text-end">Thao tác</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {userApartments.map(apartment => (
+                                            {userRequest.map(apartment => (
                                                 <tr key={apartment._id}>
-                                                    <td>{apartment.tenantId?.name || "Chưa có chủ sỡ hữu"}</td>
-                                                    <td>{apartment.apartmentNumber}</td>
-                                                    <td>{apartment.area} m²</td>
-                                                    <td>{apartment.price.toLocaleString()} VND</td>
+                                                    <td>{apartment.user_id?.name || "Chưa có chủ sỡ hữu"}</td>
+                                                    <td>{apartment.apartment_id?.apartmentNumber}</td>
+                                                    <td>{apartment.service_category_id.name}</td>
+                                                    <td>{formatDay(apartment.requested_date)}</td>
                                                     <td>{apartment.status}</td>
                                                     <td className="text-end">
-                                                        <Button variant="primary" size="sm" onClick={() => handleShowModal(apartment)}>
+                                                        <Button variant="primary" size="sm" onClick={() => handleShowModal(apartment.apartment_id)}>
                                                             Yêu cầu dịch vụ
                                                         </Button>
                                                     </td>

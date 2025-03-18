@@ -36,7 +36,7 @@ const ApartmentDetailPage = () => {
     const saveSignature = () => {
         const signatureImage = sigCanvas.current.toDataURL('image/png');
         setSignature(signatureImage);
-        dispatch(signDepositContract({ apartmentId: id, userId: user.id, signature: signatureImage }))
+        dispatch(signDepositContract({ apartmentId: id, userId: user._id, signature: signatureImage, contractMonths: contractMonths }))
             .then((resultAction) => {
                 if (signDepositContract.fulfilled.match(resultAction)) {
                     setShowSignModal(false);
@@ -56,7 +56,7 @@ const ApartmentDetailPage = () => {
     };
 
     const handlePayDeposit = () => {
-        dispatch(payForDeposit({ userId: user.id, apartmentId: id }))
+        dispatch(payForDeposit({ userId: user._id, apartmentId: id }))
             .then((resultAction) => {
                 if (payForDeposit.fulfilled.match(resultAction)) {
                     const checkoutUrl = resultAction.payload.checkoutUrl;
@@ -106,8 +106,9 @@ const ApartmentDetailPage = () => {
     const handleGenerateContract = () => {
         dispatch(openDepositContract({
             apartmentId: id,
-            userId: user.id,
-            date: selectedDate
+            userId: user._id,
+            date: selectedDate,
+            contractMonths: contractMonths
         })).then((result) => {
             if (result.meta.requestStatus === 'fulfilled') {
                 setShowPickDayModal(false);
@@ -118,10 +119,12 @@ const ApartmentDetailPage = () => {
 
     const handleSubmitDate = () => {
         if (selectedDate) {
-            dispatch(requestForViewApartment({ apartmentId: id, tenantId: user.id, date: selectedDate }));
-            setShowModal(false);
-            alert('Yêu cầu xem căn hộ đã được gửi thành công!');
-            window.location.reload();
+            dispatch(requestForViewApartment({ apartmentId: id, tenantId: user._id, date: selectedDate }))
+                .then(() => {
+                    setShowModal(false);
+                    alert('Yêu cầu xem căn hộ đã được gửi thành công. Chúng tôi sẽ gửi lại thông tin cho bạn trong vòng vài giờ tới!');
+                    window.location.reload();
+                })
         } else {
             alert('Please select a date!');
         }
@@ -129,9 +132,9 @@ const ApartmentDetailPage = () => {
 
     const handleSubmitRentRequest = () => {
         if (selectedDate && contractMonths) {
-            dispatch(requestForRentApartment({ apartmentId: id, tenantId: user.id, date: selectedDate, contractMonths }));
+            dispatch(requestForRentApartment({ apartmentId: id, tenantId: user._id, date: selectedDate, contractMonths }));
             setShowRentModal(false);
-            alert('Yêu cầu thuê phòng đã được gửi thành công!');
+            alert('Yêu cầu thuê phòng đã được gửi thành công. Chúng tôi sẽ gửi lại thông tin cho bạn trong vòng vài giờ tới!');
             window.location.reload();
         } else {
             alert('Please provide both a start date and contract duration!');
@@ -468,6 +471,21 @@ const ApartmentDetailPage = () => {
                             </Form.Control.Feedback>
                             <Form.Text className="text-muted">
                                 Chọn ngày phù hợp để chúng tôi sắp xếp lịch kí hợp đồng.
+                            </Form.Text>
+                        </Form.Group>
+                        <Form.Group controlId="contractDuration" className="mb-3">
+                            <Form.Label>Thời gian hợp đồng:</Form.Label>
+                            <Form.Select
+                                value={contractMonths}
+                                onChange={(e) => setContractMonths(e.target.value)}
+                                className="border-primary"
+                            >
+                                <option value="6">6 tháng</option>
+                                <option value="12">1 năm</option>
+                                <option value="24">2 năm</option>
+                            </Form.Select>
+                            <Form.Text className="text-muted">
+                                Lựa chọn thời hạn hợp đồng phù hợp với nhu cầu của bạn.
                             </Form.Text>
                         </Form.Group>
                     </Form>

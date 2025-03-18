@@ -4,6 +4,7 @@ import "dotenv/config";
 import User from "../models/User.js";
 import Apartment from "../models/Apartment.js";
 import Bill from "../models/Bill.js";
+import CustomerRequest from "../models/CustomerRequest.js";
 
 const payos = new PayOS(process.env.PAYOS_CLIENT_ID, process.env.PAYOS_API_KEY, process.env.PAYOS_CHECKSUM_KEY);
 
@@ -46,9 +47,18 @@ export const depositPayment = async (req, res) => {
 
         const orderCode = await generateOrderCode();
 
+        const updateBill = await Bill.findOneAndUpdate(
+            {
+                user_id: userId,
+                apartment_id: apartmentId,
+                typeOfPaid: "Deposit"
+            },
+            { $set: { orderCode: orderCode } }
+        )
+
         const order = {
             amount: 10000,
-            description: `DEPOSIT${apartment.apartment_number}${user.username}`,
+            description: `DEPOSIT${apartment.apartmentNumber}${user.username}`,
             orderCode: orderCode,
             returnUrl: `${process.env.FRONTEND_URL}/success`,
             cancelUrl: `${process.env.FRONTEND_URL}/cancel`
@@ -65,7 +75,6 @@ export const depositPayment = async (req, res) => {
 export const checkPaymentStatus = async (req, res) => {
     try {
         const { orderCode, userId } = req.body;
-
         const paymentInfo = await payos.getPaymentLinkInformation(orderCode);
 
         const newPayment = new Payment({
@@ -83,7 +92,18 @@ export const checkPaymentStatus = async (req, res) => {
                     status: "Paid"
                 }
             }
-        )
+        );
+
+        const request = await CustomerRequest.findOne({
+            userId: userId,
+            status: "Đã cọc"
+        }).populate("apartment_id");
+
+        const updateApartment = await Apartment.findByIdAndUpdate(
+            request.apartment_id._id,
+            { $set: { status: "Đã cọc" } },
+            { new: true }
+        );
 
         return res.status(200).json({ message: "Save success" });
     } catch (error) {
@@ -95,7 +115,7 @@ export const checkPaymentStatus = async (req, res) => {
 export const getAllBill = async (req, res) => {
     try {
         const { id } = req.body;
-
+        console.log(id);
         const bills = await Bill.find({ user_id: id }).populate('apartment_id');
         if (!bills) {
             res.status(404).json({ message: "FInd bill failed" });

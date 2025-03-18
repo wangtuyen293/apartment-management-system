@@ -7,6 +7,49 @@ import ElectronFee from '../models/electronFee.js';
 import WaterFee from '../models/waterFee.js';
 import ManageFee from '../models/manageFee.js';
 import Bill from '../models/Bill.js';
+import Contract from '../models/Contract.js';
+
+const getCustomerDeposit = async (req, res) => {
+    try {
+        const users = await CustomerRequest.find({ status: "Đã cọc" })
+            .populate('userId apartment_id');
+
+        if (!users) {
+            return res.status(404).json({ message: "Users not found" });
+        }
+
+        const bills = await Promise.all(
+            users.map(user =>
+                Bill.findOne({
+                    apartment_id: user.apartment_id._id,
+                    typeOfPaid: "Deposit"
+                })
+            )
+        );
+
+        const contract = await Promise.all(
+            users.map(user =>
+                Contract.findOne({
+                    apartment: user.apartment_id._id
+                })
+            )
+        )
+
+        return res.status(200).json({
+            users,
+            bills,
+            contract
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            message: "Something went wrong",
+            error: error.message
+        });
+    }
+};
+
 
 const getCustomerViewApartment = async (req, res) => {
     try {
@@ -355,7 +398,8 @@ const RejectViewApartment = async (req, res) => {
 
 const ApproveRentApartment = async (req, res) => {
     try {
-        const { requestId } = req.body;
+        console.log(req.body)
+        const { requestId, date, duration } = req.body;
         const request = await CustomerRequest.findById(requestId);
         const user = await User.findById(request.userId);
         const apartment = await Apartment.findById(request.apartment_id);
@@ -372,8 +416,8 @@ const ApproveRentApartment = async (req, res) => {
             return res.status(404).json({ message: 'Apartment not found' });
         }
 
-        let endDate = new Date(request.date);
-        endDate.setMonth(endDate.getMonth() + request.contractMonths);
+        let endDate = new Date(date);
+        endDate.setMonth(endDate.getMonth() + duration);
 
 
         const updatedApartment = await Apartment.updateOne(
@@ -382,7 +426,7 @@ const ApproveRentApartment = async (req, res) => {
                 $set: {
                     status: "Đã cho thuê",
                     tenantId: request.userId,
-                    startRentDate: request.date,
+                    startRentDate: date,
                     endRentDate: endDate,
                 }
             }
@@ -822,5 +866,30 @@ const sendBill = async (req, res) => {
     }
 }
 
+const getBill = async (req, res) => {
+    try {
+        const { id } = req.body;
+        console.log(id)
+        const bill = await Bill.findOne({
+            typeOfPaid: "Deposit",
+            apartment_id: id,
+        });
 
-export { getCustomerViewApartment, getCustomerRequestRentApartment, ApproveRentApartment, RejectRentApartment, ApproveViewApartment, RejectViewApartment, getAllResidents, updateIndex, sendBill };
+        if (!bill) {
+            return res.status(404).json({ message: "Bill not found" });
+        }
+
+        return res.status(200).json(bill);
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Something went wrong", error: error.message });
+    }
+};
+
+
+export {
+    getCustomerViewApartment, getCustomerRequestRentApartment, ApproveRentApartment, RejectRentApartment,
+    ApproveViewApartment, RejectViewApartment, getAllResidents, updateIndex, sendBill, getCustomerDeposit,
+    getBill
+};

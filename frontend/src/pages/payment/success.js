@@ -13,7 +13,7 @@ const Success = () => {
     console.log(orderCode)
 
     const handleBackToHome = () => {
-        dispatch(saveTransaction({ orderCode: orderCode, userId: user.id }));
+        dispatch(saveTransaction({ orderCode: orderCode, userId: user._id }));
         navigate('/home');
     };
 

@@ -12,7 +12,6 @@ export const getUserNotifications = async (req, res) => {
                 { user_id: null }    // Nếu có thông báo null user_id
             ]
         }).sort({ createdAt: -1 });
-        console.log(notifications);
         res.status(200).json(notifications);
     } catch (error) {
         res.status(500).json({ message: "Lỗi khi lấy thông báo", error });

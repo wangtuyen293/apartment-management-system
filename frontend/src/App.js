@@ -23,6 +23,7 @@ import MyApartmentPage from "./pages/apartment/MyApartment";
 import ServiceRequestPage from "./pages/service/ServiceRequestPage";
 import NotificationPage from "./pages/notification/NotificationPage";
 import CreateNotification from "./pages/notification/CreateNotification";
+import CustomerDeposit from "./pages/customerManagement/customerDeposit";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 
 function App() {
@@ -62,6 +63,10 @@ function App() {
                 <Route
                     path="/customer/rent"
                     element={<CustomerRequestRent />}
+                />
+                <Route
+                    path="/customer/deposit"
+                    element={<CustomerDeposit />}
                 />
                 <Route
                     path="/apartment-manage"

@@ -25,11 +25,11 @@ export const openDepositContract = createAsyncThunk(
 
 export const signDepositContract = createAsyncThunk(
     "contract/signDepositContract",
-    async ({ apartmentId, userId, signature }, { rejectWithValue }) => {
+    async ({ apartmentId, userId, signature, contractMonths }, { rejectWithValue }) => {
         try {
             const response = await axios.post(
                 `${API_URL}/api/v1/contracts/deposit/sign/${apartmentId}`,
-                { userId, signature },
+                { userId, signature, contractMonths },
                 {
                     headers: {
                         'Content-Type': 'application/json'

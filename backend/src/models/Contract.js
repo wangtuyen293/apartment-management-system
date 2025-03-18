@@ -34,6 +34,10 @@ const contractSchema = new mongoose.Schema({
         required: true
     },
 
+    contractMonths: {
+        type: Number,
+    },
+
     signedAt: {
         type: Date,
         default: Date.now

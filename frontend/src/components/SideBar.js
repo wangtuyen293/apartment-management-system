@@ -35,7 +35,7 @@ const Sidebar = () => {
 
     const { notifications, loading } = useSelector((state) => state.notification);
     const { user } = useSelector((state) => state.auth);
-    const userId = user?._id; 
+    const userId = user?._id;
 
     const handleLogout = () => {
         dispatch(logoutUser())
@@ -195,7 +195,7 @@ const Sidebar = () => {
                                 <NavDropdown.Item href="/customer/view">
                                     Khách hẹn xem
                                 </NavDropdown.Item>
-                                <NavDropdown.Item href="#">
+                                <NavDropdown.Item href="/customer/deposit">
                                     Khách đã cọc
                                 </NavDropdown.Item>
                                 <NavDropdown.Item href="/customer/rent">
@@ -224,7 +224,7 @@ const Sidebar = () => {
                                 href="/myapartment"
                                 className="text-white d-flex align-items-center py-2 nav-hover"
                             >
-                                <Gear className="me-2" /> Căn hộ của tôi
+                                <Gear className="me-2" /> Dịch vụ
                             </Nav.Link>
                             <Nav.Link
                                 href="/view-payment"

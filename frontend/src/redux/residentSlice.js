@@ -3,6 +3,36 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5000";
 
+export const getCustomerDeposit = createAsyncThunk(
+    "resident/deposit",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(
+                `${API_URL}/api/v1/residents/deposit`
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const getBill = createAsyncThunk(
+    "resident/billstatus",
+    async ({ apartment_id }, { rejectWithValue }) => {
+        try {
+            console.log(apartment_id)
+            const response = await axios.get(
+                `${API_URL}/api/v1/residents/bill-status`,
+                { apartment_id }
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 export const getCustomerViewApartment = createAsyncThunk(
     "resident/view",
     async (_, { rejectWithValue }) => {
@@ -142,6 +172,7 @@ const residentSlice = createSlice({
     name: "resident",
     initialState: {
         resident: null,
+        bill: null,
         token: null,
         loading: false,
         error: null,
@@ -154,6 +185,18 @@ const residentSlice = createSlice({
         },
     },
     extraReducers: (builder) => {
+        builder
+            .addCase(getCustomerDeposit.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getCustomerDeposit.fulfilled, (state, action) => {
+                state.loading = false;
+                state.resident = action.payload;
+            })
+            .addCase(getCustomerDeposit.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            })
         builder
             .addCase(getCustomerViewApartment.pending, (state) => {
                 state.loading = true;
@@ -263,6 +306,18 @@ const residentSlice = createSlice({
                 state.loading = false;
             })
             .addCase(sendBill.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            });
+        builder
+            .addCase(getBill.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getBill.fulfilled, (state, action) => {
+                state.loading = false;
+                state.bill = action.payload;
+            })
+            .addCase(getBill.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
             });

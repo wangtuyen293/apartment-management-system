@@ -503,6 +503,7 @@ const FeeManagement = () => {
                                                 placeholder="Nhập số mới"
                                                 min="0"
                                                 step="1"
+                                                required="true"
                                             />
                                         </td>
                                     </tr>
@@ -519,6 +520,7 @@ const FeeManagement = () => {
                                                 placeholder="Nhập số mới"
                                                 min="0"
                                                 step="1"
+                                                required="true"
                                             />
                                         </td>
                                     </tr>
@@ -532,6 +534,7 @@ const FeeManagement = () => {
                                                 type="date"
                                                 value={month}
                                                 onChange={(e) => setMonth(e.target.value)}
+                                                required="true"
                                             />
                                         </td>
                                     </tr>
@@ -547,7 +550,7 @@ const FeeManagement = () => {
                     <Button
                         variant="success"
                         onClick={handleUpdateIndex}
-                        disabled={!newElectron && !newWater}
+                        disabled={!newElectron || !newWater || !month}
                     >
                         Xác nhận
                     </Button>

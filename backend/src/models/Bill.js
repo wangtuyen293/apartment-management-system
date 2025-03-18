@@ -5,7 +5,7 @@ const BillSchema = new mongoose.Schema(
     {
         typeOfPaid: {
             type: String,
-            enum: ["Living", "Service"],
+            enum: ["Living", "Service", "Deposit"],
             required: true
         },
         fee: {

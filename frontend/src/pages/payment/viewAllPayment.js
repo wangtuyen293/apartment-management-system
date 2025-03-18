@@ -23,21 +23,20 @@ const ViewAllPayment = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const billsPerPage = 10;
 
-    // Sửa useSelector để lấy đúng bill
     const { bill, loading, error } = useSelector(state => state.payment || { bill: [], loading: false, error: null });
     const user = useSelector(state => state.auth.user) || { name: "Người dùng" };
 
     useEffect(() => {
         setIsLoading(true);
-        dispatch(getAllPayment({ id: user.id }))
+        dispatch(getAllPayment({ id: user._id }))
             .unwrap()
             .then((result) => {
-                console.log("Fetched bills:", result); // Debug dữ liệu
+                console.log("Fetched bills:", result);
                 setBills(result || []);
                 setIsLoading(false);
             })
             .catch((err) => {
-                console.error("Error fetching bills:", err); // Debug lỗi
+                console.error("Error fetching bills:", err);
                 setIsLoading(false);
             });
     }, [dispatch, user.id]);
@@ -141,6 +140,11 @@ const ViewAllPayment = () => {
         const date = new Date(dateString);
         return date.getMonth() + 1;
     };
+
+    const formatDay = (day) => {
+        const date = new Date(day);
+        return date.toLocaleDateString('vi-VN');
+    }
 
     const renderPagination = () => {
         let items = [];
@@ -296,6 +300,7 @@ const ViewAllPayment = () => {
                                                     <th onClick={() => handleSort("apartment_number")} style={{ cursor: "pointer" }}>
                                                         Căn hộ {sortBy === "apartment_number" && (sortOrder === "asc" ? "↑" : "↓")}
                                                     </th>
+                                                    <th>Ngày gửi hóa đơn</th>
                                                     <th>Trạng thái</th>
                                                     <th>Hành động</th>
                                                 </tr>
@@ -307,6 +312,7 @@ const ViewAllPayment = () => {
                                                         <td className="fw-bold">{formatCurrency(bill.fee)}</td>
                                                         <td><Calendar className="me-1" />{formatDate(bill.billing_date)}</td>
                                                         <td>{bill.apartment_id.apartmentNumber}</td>
+                                                        <td>{formatDay(bill.billing_date)}</td>
                                                         <td>{renderStatus(bill.status)}</td>
                                                         <td>
                                                             <Button

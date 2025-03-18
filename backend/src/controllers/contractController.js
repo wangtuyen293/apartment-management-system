@@ -4,6 +4,8 @@ import { PDFDocument } from 'pdf-lib';
 import User from '../models/User.js';
 import Apartment from '../models/Apartment.js';
 import Contract from '../models/Contract.js';
+import Bill from '../models/Bill.js';
+import CustomerRequest from '../models/CustomerRequest.js';
 
 export const depositContract = async (req, res) => {
     try {
@@ -85,7 +87,7 @@ export const depositContract = async (req, res) => {
             y: 428,
             size: 11,
         });
-        page.drawText(`${apartment.apartment_number || ''}`, {
+        page.drawText(`${apartment.apartmentNumber || ''}`, {
             x: 380,
             y: 215,
             size: 11,
@@ -121,7 +123,7 @@ export const depositContract = async (req, res) => {
             size: 8,
         });
 
-        const fileName = `hopdongcoc_${user.username}_${apartment.apartment_number}_pending.pdf`;
+        const fileName = `hopdongcoc_${user.username}_${apartment.apartmentNumber}_pending.pdf`;
         const outputPath = path.join(process.cwd(), 'src', 'controllers', 'resources', fileName);
         const pdfBytes = await pdfDoc.save();
 
@@ -133,7 +135,7 @@ export const depositContract = async (req, res) => {
         res.status(200).json({
             message: 'Contract generated successfully',
             contractPath: contractPath,
-            fileName: fileName
+            fileName: fileName,
         });
 
     } catch (error) {
@@ -170,7 +172,7 @@ export const getContractFile = async (req, res) => {
 
 export const signDepositContract = async (req, res) => {
     try {
-        const { userId, signature } = req.body;
+        const { userId, signature, contractMonths } = req.body;
         const { apartmentId } = req.params;
 
         if (!userId || !apartmentId) {
@@ -189,7 +191,7 @@ export const signDepositContract = async (req, res) => {
             return res.status(404).json({ message: "Apartment not found" });
         }
 
-        const inputPath = path.join(process.cwd(), 'src', 'controllers', 'resources', `hopdongcoc_${user.username}_${apartment.apartment_number}_pending.pdf`);
+        const inputPath = path.join(process.cwd(), 'src', 'controllers', 'resources', `hopdongcoc_${user.username}_${apartment.apartmentNumber}_pending.pdf`);
 
         if (!fs.existsSync(inputPath)) {
             return res.status(400).json({ message: "Template contract not found" });
@@ -209,7 +211,7 @@ export const signDepositContract = async (req, res) => {
             height: 50,
         });
 
-        const fileName = `hopdongcoc_${user.username}_${apartment.apartment_number}_signed.pdf`;
+        const fileName = `hopdongcoc_${user.username}_${apartment.apartmentNumber}_signed.pdf`;
         const outputPath = path.join(process.cwd(), 'src', 'controllers', 'resources', fileName);
         const pdfBytes = await pdfDoc.save();
 
@@ -221,24 +223,34 @@ export const signDepositContract = async (req, res) => {
             user: userId,
             apartment: apartmentId,
             contractPath: contractPath,
-            fileName: fileName
+            fileName: fileName,
+            status: "Deposit",
+            contractMonths: contractMonths,
         });
         await signedContract.save();
 
-        const updatedApartment = await Apartment.updateOne(
-            { _id: apartmentId },
-            {
-                $set: {
-                    status: "Đã cọc",
-                },
-            }
-        );
-
-        if (updatedApartment.modifiedCount === 0) {
-            return res.status(400).json({ message: "Failed to update apartment" });
-        }
-
         console.log('Generated contractPath:', contractPath);
+
+        const today = new Date();
+
+        const viewRequest = new CustomerRequest({
+            apartment_id: apartmentId,
+            status: "Đã cọc",
+            userId: userId,
+            date: today,
+        });
+
+        await viewRequest.save();
+
+        const bill = new Bill({
+            typeOfPaid: "Deposit",
+            fee: 10000,
+            billing_date: today,
+            status: "Unpaid",
+            apartment_id: apartmentId,
+            user_id: userId
+        })
+        await bill.save();
 
         res.status(200).json({
             message: 'Contract generated and saved successfully',

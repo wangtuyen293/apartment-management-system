@@ -44,13 +44,13 @@ const HomePage = () => {
             if (priceFilter) {
                 switch (priceFilter) {
                     case 'low':
-                        results = results.filter(apt => apt.price < 5000000);
+                        results = results.filter(apt => apt.price < 3000);
                         break;
                     case 'medium':
-                        results = results.filter(apt => apt.price >= 5000000 && apt.price <= 10000000);
+                        results = results.filter(apt => apt.price >= 3000 && apt.price <= 4000);
                         break;
                     case 'high':
-                        results = results.filter(apt => apt.price > 10000000);
+                        results = results.filter(apt => apt.price > 4000);
                         break;
                     default:
                         break;
@@ -154,13 +154,13 @@ const HomePage = () => {
                                             size="sm"
                                         >
                                             <Dropdown.Item onClick={() => setPriceFilter('low')}>
-                                                Dưới 5,000,000 VND
+                                                Dưới 3000 VND
                                             </Dropdown.Item>
                                             <Dropdown.Item onClick={() => setPriceFilter('medium')}>
-                                                5,000,000 - 10,000,000 VND
+                                                3000 - 4000 VND
                                             </Dropdown.Item>
                                             <Dropdown.Item onClick={() => setPriceFilter('high')}>
-                                                Trên 10,000,000 VND
+                                                Trên 4000 VND
                                             </Dropdown.Item>
                                             <Dropdown.Divider />
                                             <Dropdown.Item onClick={() => setPriceFilter(null)}>
@@ -273,7 +273,7 @@ const HomePage = () => {
                                         )}
                                         {priceFilter && (
                                             <Badge bg="info" className="me-2 p-2">
-                                                Giá cả: {priceFilter === 'low' ? 'Under 5M' : priceFilter === 'medium' ? '5M-10M' : 'Above 10M'}
+                                                Giá cả: {priceFilter === 'low' ? 'Under 3k' : priceFilter === 'medium' ? '3k-4k' : 'Above 4k'}
                                                 <Button
                                                     size="sm"
                                                     variant="info"
