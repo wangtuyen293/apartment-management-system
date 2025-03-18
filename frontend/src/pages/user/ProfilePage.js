@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
-import { Button, Row, Col, Form, Container } from "react-bootstrap";
+import { Button, Row, Col, Form, Container, Alert } from "react-bootstrap";
 import { setUser } from "../../redux/authSlice";
 import { fetchUser, updateUserProfile } from "../../redux/userSlice";
 import "../../assets/css/ProfilePage.css";
@@ -10,6 +10,7 @@ const ProfilePage = () => {
     const { user } = useSelector((state) => state.auth);
 
     const [editable, setEditable] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
     const [errors, setErrors] = useState({});
     const [generalError, setGeneralError] = useState("");
 
@@ -58,7 +59,9 @@ const ProfilePage = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSave = async () => {
+    const handleSave = async (e) => {
+        e.preventDefault();
+
         if (!validate()) return;
 
         try {
@@ -67,8 +70,9 @@ const ProfilePage = () => {
             ).unwrap();
             dispatch(setUser(response.user));
             dispatch(fetchUser());
-            setEditable(false);
+            setSuccessMessage("Cập nhật thông tin thành công.");
             setGeneralError("");
+            setEditable(false);
         } catch (error) {
             setGeneralError(
                 error.message ||
@@ -88,6 +92,7 @@ const ProfilePage = () => {
         });
         setErrors({});
         setGeneralError("");
+        setSuccessMessage("");
         setEditable(false);
     };
 
@@ -97,7 +102,10 @@ const ProfilePage = () => {
                 <h3 className="mb-0">Thông tin cá nhân</h3>
             </div>
 
-            {generalError && <p className="text-danger">{generalError}</p>}
+            {generalError && <Alert variant="danger">{generalError}</Alert>}
+            {successMessage && (
+                <Alert variant="success">{successMessage}</Alert>
+            )}
 
             <Row>
                 <Col md={6} className="mb-3">

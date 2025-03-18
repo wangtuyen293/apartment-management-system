@@ -56,3 +56,21 @@ export const updateUserProfile = async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+export const changePassword = async (req, res) => {
+    try {
+        const { oldPassword, newPassword } = req.body;
+        const user = await User.findById(req.user.id);
+
+        if (!user || !(await bcrypt.compare(oldPassword, user.password))) {
+            return res.status(400).json({ message: "Mật khẩu cũ không đúng" });
+        }
+
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        res.json({ message: "Mật khẩu đã được cập nhật thành công!" });
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};

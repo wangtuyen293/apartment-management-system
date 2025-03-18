@@ -23,6 +23,7 @@ import MyApartmentPage from "./pages/apartment/MyApartment";
 import ServiceRequestPage from "./pages/service/ServiceRequestPage";
 import NotificationPage from "./pages/notification/NotificationPage";
 import CreateNotification from "./pages/notification/CreateNotification";
+import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 
 function App() {
     return (
@@ -37,6 +38,10 @@ function App() {
                     <Route path="/verify-email" element={<VerifyEmail />} />
                     <Route path="/profile/*" element={<ProfileLayout />}>
                         <Route index element={<ProfilePage />} />
+                        <Route
+                            path="change-password"
+                            element={<ChangePasswordPage />}
+                        />
                         <Route path="contract" element={<ContractPage />} />
                         <Route
                             path="transactions"
