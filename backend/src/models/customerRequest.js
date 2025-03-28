@@ -14,6 +14,10 @@ const customerRequest = new mongoose.Schema(
             type: String,
             enum: ["Khách hẹn xem", "Đã cọc", "Đang xét duyệt"],
         },
+        action: {
+            type: String,
+            enum: ["Đồng ý", "Từ chối"],
+        },
         date: {
             type: Date,
         },

@@ -12,6 +12,7 @@ import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
 import { logoutUser } from "../../redux/authSlice";
 import { useDispatch, useSelector } from 'react-redux';
 import Sidebar from "../../components/SideBar";
+import DatePicker from 'react-datepicker';
 
 const HomePage = () => {
     const dispatch = useDispatch();
@@ -25,10 +26,12 @@ const HomePage = () => {
     const [areaFilter, setAreaFilter] = useState(null);
     const [statusFilter, setStatusFilter] = useState(null);
     const [sortOption, setSortOption] = useState(null);
-
+    const [startDateFilter, setStartDateFilter] = useState(null);
+    const [endDateFilter, setEndDateFilter] = useState(null);
     useEffect(() => {
         dispatch(getApartment());
     }, [dispatch]);
+    console.log(apartment[1]);
 
     useEffect(() => {
         if (apartment) {
@@ -55,6 +58,20 @@ const HomePage = () => {
                     default:
                         break;
                 }
+            }
+
+            if (startDateFilter && endDateFilter) {
+                results = results.filter(apt => {
+                    if (!apt.startRentDate || !apt.endRentDate) {
+                        return true;
+                    }
+
+                    const startRent = new Date(apt.startRentDate);
+                    const endRent = new Date(apt.endRentDate);
+                    const startFilter = new Date(startDateFilter);
+                    const endFilter = new Date(endDateFilter);
+                    return endFilter < startRent || startFilter > endRent;
+                });
             }
 
             if (areaFilter) {
@@ -98,7 +115,7 @@ const HomePage = () => {
 
             setFilteredApartments(results);
         }
-    }, [apartment, searchTerm, priceFilter, areaFilter, statusFilter, sortOption]);
+    }, [apartment, searchTerm, priceFilter, areaFilter, statusFilter, sortOption, startDateFilter, endDateFilter]);
 
     const handleViewDetails = (apartmentId) => {
         dispatch(getApartmentDetail(apartmentId));
@@ -111,10 +128,18 @@ const HomePage = () => {
         setAreaFilter(null);
         setStatusFilter(null);
         setSortOption(null);
+        setStartDateFilter(null);
+        setEndDateFilter(null);
+        setFilteredApartments(apartment);
     };
 
     const formatPrice = (price) => {
         return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    };
+
+    const formatDay = (day) => {
+        const date = new Date(day);
+        return date.toLocaleDateString('vi-VN');
     };
 
     return (
@@ -147,6 +172,25 @@ const HomePage = () => {
                             </Col>
                             <Col md={7}>
                                 <Row className="g-2">
+                                    <Col>
+                                        <Form.Control
+                                            type="date"
+                                            value={startDateFilter ? startDateFilter.toISOString().split('T')[0] : ''}
+                                            onChange={(e) => setStartDateFilter(e.target.value ? new Date(e.target.value) : null)}
+                                            placeholder="Từ ngày"
+                                            size="sm"
+                                        />
+                                    </Col>
+                                    <Col>
+                                        <Form.Control
+                                            type="date"
+                                            value={endDateFilter ? endDateFilter.toISOString().split('T')[0] : ''}
+                                            onChange={(e) => setEndDateFilter(e.target.value ? new Date(e.target.value) : null)}
+                                            min={startDateFilter ? startDateFilter.toISOString().split('T')[0] : undefined}
+                                            placeholder="Đến ngày"
+                                            size="sm"
+                                        />
+                                    </Col>
                                     <Col>
                                         <DropdownButton
                                             variant="outline-secondary"
@@ -357,12 +401,19 @@ const HomePage = () => {
                                             <div className="position-relative">
                                                 <Card.Img
                                                     variant="top"
-                                                    src={apartmentImage1}
+                                                    src={apt.images && apt.images.length > 0
+                                                        ? `http://localhost:5000${apt.images[0].url}`
+                                                        : apartmentImage1}
                                                     className="img-fluid"
                                                     style={{ height: "200px", objectFit: "cover" }}
                                                 />
                                                 <Badge
-                                                    bg={apt.status === 'Trống' ? 'success' : apt.status === 'Đã cho thuê' ? 'danger' : apt.status === 'Đang xét duyệt' ? 'primary' : apt.status === 'Đã cọc' ? 'secondary' : 'warning'}
+                                                    bg={
+                                                        apt.status === 'Trống' ? 'success' :
+                                                            apt.status === 'Đã cho thuê' ? 'danger' :
+                                                                apt.status === 'Đang xét duyệt' ? 'primary' :
+                                                                    apt.status === 'Đã cọc' ? 'secondary' : 'warning'
+                                                    }
                                                     className="position-absolute top-0 end-0 m-2 py-2 px-3"
                                                 >
                                                     {apt.status}
@@ -377,15 +428,34 @@ const HomePage = () => {
                                                     <Row className="mt-3">
                                                         <Col xs={6}>
                                                             <div className="text-muted mb-2">
-                                                                <i className="bi bi-building me-2"></i> Tầng {apt.apartmentNumber / 100}
+                                                                <i className="bi bi-building me-2"></i> Tầng {Math.floor(apt.apartmentNumber / 100)}
                                                             </div>
                                                         </Col>
                                                         <Col xs={6}>
                                                             <div className="text-muted mb-2">
-                                                                <i className="bi bi-square me-2"></i> Diện tích:  {apt.area} m²
+                                                                <i className="bi bi-square me-2"></i> Diện tích: {apt.area} m²
                                                             </div>
                                                         </Col>
                                                     </Row>
+                                                    <Badge bg="danger" pill>{apt.status === 'Đã cho thuê'
+                                                        ? `Thời hạn thuê: ${formatDay(apt.startRentDate)} - ${formatDay(apt.endRentDate)}`
+                                                        : 'Phòng trống toàn thời gian'}
+                                                    </Badge>
+                                                    {apt.images && apt.images.length > 0 && (
+                                                        <div className="mt-3">
+                                                            <small className="text-muted">Hình ảnh:</small>
+                                                            <div className="d-flex flex-wrap gap-2">
+                                                                {apt.images.map((image, index) => (
+                                                                    <img
+                                                                        key={index}
+                                                                        src={`http://localhost:5000${image.url}`}
+                                                                        alt={`Ảnh ${index + 1}`}
+                                                                        style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </Card.Text>
                                                 <div className="d-flex justify-content-between align-items-center mt-3">
                                                     <h5 className="text-primary mb-0">{formatPrice(apt.price)} VND</h5>
@@ -403,15 +473,6 @@ const HomePage = () => {
                             </Row>
                         )}
                     </Container>
-
-                    {/* Footer info */}
-                    <div className="bg-light py-4 mt-4">
-                        <Container>
-                            <p className="text-center text-muted mb-0">
-                                ApaMan
-                            </p>
-                        </Container>
-                    </div>
                 </Col>
             </Row>
         </Container>

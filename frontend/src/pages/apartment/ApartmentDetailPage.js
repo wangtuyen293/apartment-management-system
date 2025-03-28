@@ -6,12 +6,9 @@ import {
     Badge, ListGroup, Tabs, Tab, OverlayTrigger, Tooltip
 } from 'react-bootstrap';
 import { FaMapMarkerAlt, FaRulerCombined, FaMoneyBillWave, FaCalendarAlt, FaInfoCircle, FaHome, FaArrowLeft, FaEye, FaHandshake, FaMoneyCheck } from 'react-icons/fa';
-import apartmentImage1 from '../../assets/images/fpt-login.jpg';
-import { logoutUser } from "../../redux/authSlice";
 import { openDepositContract, signDepositContract } from '../../redux/contractSlice';
 import { getApartmentDetail, requestForViewApartment, requestForRentApartment } from '../../redux/apartmentSlice';
 import Sidebar from '../../components/SideBar';
-import SignatureCanvas from 'react-signature-canvas';
 import { payForDeposit } from '../../redux/paymentSlice';
 
 const ApartmentDetailPage = () => {
@@ -25,31 +22,6 @@ const ApartmentDetailPage = () => {
     const [showContractModal, setShowContractModal] = useState(false);
     const [showSignModal, setShowSignModal] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-
-    //sign 
-    const sigCanvas = useRef(null);
-    const [signature, setSignature] = useState(null);
-    const clearSignature = () => {
-        sigCanvas.current.clear();
-    };
-
-    const saveSignature = () => {
-        const signatureImage = sigCanvas.current.toDataURL('image/png');
-        setSignature(signatureImage);
-        dispatch(signDepositContract({ apartmentId: id, userId: user._id, signature: signatureImage, contractMonths: contractMonths }))
-            .then((resultAction) => {
-                if (signDepositContract.fulfilled.match(resultAction)) {
-                    setShowSignModal(false);
-                    setIsSuccessModalOpen(true);
-                } else {
-                    console.error('Failed to sign contract:', resultAction.payload);
-                }
-            })
-            .catch((error) => {
-                console.error('Error occurred:', error);
-            });
-
-    }
 
     const handleCloseModal = () => {
         setIsSuccessModalOpen(false);
@@ -142,17 +114,19 @@ const ApartmentDetailPage = () => {
     };
 
     const handleConfirmContract = () => {
-        setShowContractModal(false);
-        setShowSignModal(true);
+        dispatch(signDepositContract({ apartmentId: id, userId: user._id, contractMonths: contractMonths }))
+            .then((resultAction) => {
+                if (signDepositContract.fulfilled.match(resultAction)) {
+                    setShowContractModal(false);
+                    setIsSuccessModalOpen(true);
+                } else {
+                    console.error('Failed to sign contract:', resultAction.payload);
+                }
+            })
+            .catch((error) => {
+                console.error('Error occurred:', error);
+            });
     }
-
-    const handleLogout = () => {
-        dispatch(logoutUser());
-    };
-
-    const handleProfileRedirect = () => {
-        navigate("/profile");
-    };
 
     const isViewDisabled =
         apartmentDetail && (apartmentDetail.status === "Đang xét duyệt" || apartmentDetail.status === "Đã cọc" || apartmentDetail.status === "Đã cho thuê");
@@ -175,7 +149,7 @@ const ApartmentDetailPage = () => {
             <Container fluid className="py-4">
                 <Row>
                     <Col md={2} className="d-none d-md-block">
-                        <Sidebar user={user} handleProfileRedirect={handleProfileRedirect} handleLogout={handleLogout} />
+                        <Sidebar />
                     </Col>
 
                     <Col xs={12} md={10} className="px-md-4">
@@ -217,34 +191,21 @@ const ApartmentDetailPage = () => {
                                 <Row>
                                     <Col lg={7} className="mb-4">
                                         <Card className="shadow-sm border-0 overflow-hidden">
-                                            <Carousel interval={3000} className="apartment-carousel">
-                                                <Carousel.Item>
-                                                    <div className="position-relative">
-                                                        <img
-                                                            className="d-block w-100"
-                                                            src={apartmentImage1}
-                                                            alt={`Apartment ${apartmentDetail.apartmentNumber}`}
-                                                            style={{ objectFit: 'cover', height: '500px' }}
-                                                        />
-                                                        <div className="position-absolute bottom-0 start-0 w-100 bg-gradient-dark p-3 text-white">
-                                                            <h5 className="mb-0">Phòng khách</h5>
-                                                        </div>
-                                                    </div>
-                                                </Carousel.Item>
-                                                <Carousel.Item>
-                                                    <div className="position-relative">
-                                                        <img
-                                                            className="d-block w-100"
-                                                            src={apartmentImage1}
-                                                            alt={`Apartment ${apartmentDetail.apartmentNumber}`}
-                                                            style={{ objectFit: 'cover', height: '500px' }}
-                                                        />
-                                                        <div className="position-absolute bottom-0 start-0 w-100 bg-gradient-dark p-3 text-white">
-                                                            <h5 className="mb-0">Phòng ngủ</h5>
-                                                        </div>
-                                                    </div>
-                                                </Carousel.Item>
-                                            </Carousel>
+                                            {apartmentDetail.images && apartmentDetail.images.length > 0 && (
+                                                <Carousel interval={3000} className="apartment-carousel">
+                                                    {apartmentDetail.images.map((image, index) => (
+                                                        <Carousel.Item key={index}>
+                                                            <div className="position-relative">
+                                                                <img
+                                                                    src={`http://localhost:5000${image.url}`}
+                                                                    alt={`Ảnh ${index + 1}`}
+                                                                    className="d-block w-100"
+                                                                />
+                                                            </div>
+                                                        </Carousel.Item>
+                                                    ))}
+                                                </Carousel>
+                                            )}
                                         </Card>
                                     </Col>
 
@@ -422,7 +383,7 @@ const ApartmentDetailPage = () => {
                                 type="date"
                                 value={selectedDate}
                                 onChange={(e) => setSelectedDate(e.target.value)}
-                                isInvalid={selectedDate && new Date(selectedDate) < new Date().setHours(0, 0, 0, 0)}
+                                isInvalid={selectedDate && new Date(selectedDate) <= new Date().setHours(0, 0, 0, 0)}
                                 className="border-primary"
                             />
                             <Form.Control.Feedback type="invalid">
@@ -441,13 +402,13 @@ const ApartmentDetailPage = () => {
                     <Button
                         variant="primary"
                         onClick={handleSubmitDate}
-                        disabled={!selectedDate || new Date(selectedDate) < new Date()}
+                        disabled={!selectedDate || new Date(selectedDate) < new Date().setHours(0, 0, 0, 0)}
                     >
                         Gửi yêu cầu
                     </Button>
                 </Modal.Footer>
             </Modal>
-
+            {/* Modal for request deposit */}
             <Modal show={showPickDayModal} onHide={() => setShowPickDayModal(false)} centered>
                 <Modal.Header closeButton className="bg-light">
                     <Modal.Title className="d-flex align-items-center">
@@ -514,6 +475,18 @@ const ApartmentDetailPage = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
+                        <Form.Group controlId="viewDate" className="mb-3">
+                            <Form.Label className="fw-bold">Thông tin người thuê:</Form.Label>
+                            <Card className="shadow-sm border-primary mt-2">
+                                <Card.Body>
+                                    <Form.Text className="text-danger">
+                                        <strong>Tên người thuê:</strong> {user.name} <br />
+                                        <strong>Email:</strong> {user.email} <br />
+                                        <strong>Số điện thoại:</strong> {user.phoneNumber}
+                                    </Form.Text>
+                                </Card.Body>
+                            </Card>
+                        </Form.Group>
                         <Form.Group controlId="rentDate" className="mb-3">
                             <Form.Label>Chọn ngày bắt đầu:</Form.Label>
                             <Form.Control
@@ -622,39 +595,12 @@ const ApartmentDetailPage = () => {
                             onClick={handleConfirmContract}
                             disabled={!isChecked}
                         >
-                            Xác nhận ký
+                            Xác nhận hợp đồng
                         </Button>
                     )}
                 </Modal.Footer>
             </Modal>
 
-            <Modal
-                show={showSignModal}
-                onHide={() => setShowSignModal(false)}
-                centered
-            >
-                <Modal.Header closeButton>
-                    <Modal.Title>Ký điện tử</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <SignatureCanvas
-                        ref={sigCanvas}
-                        penColor="black"
-                        canvasProps={{ width: 500, height: 200, className: 'sigCanvas' }}
-                    />
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={clearSignature}>
-                        Xóa
-                    </Button>
-                    <Button variant="primary" onClick={saveSignature}>
-                        Lưu
-                    </Button>
-                    <Button variant="danger" onClick={() => setShowSignModal(false)}>
-                        Đóng
-                    </Button>
-                </Modal.Footer>
-            </Modal>
 
             <Modal show={isSuccessModalOpen} onHide={handleCloseModal}>
                 <Modal.Header closeButton>

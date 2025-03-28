@@ -195,6 +195,7 @@ const CustomerRequestView = () => {
                                                     <th className="py-3 border-0">Căn hộ</th>
                                                     <th className="py-3 border-0">Trạng thái</th>
                                                     <th className="py-3 border-0">Ngày xem</th>
+                                                    <th className="py-3 border-0">Tình trạng</th>
                                                     <th className="py-3 border-0 text-end pe-4">Thao tác</th>
                                                 </tr>
                                             </thead>
@@ -241,12 +242,20 @@ const CustomerRequestView = () => {
                                                                     </div>
                                                                 </div>
                                                             </td>
+                                                            <td className="py-3">
+                                                                <div className="d-flex align-items-center">
+                                                                    <div>
+                                                                        {request.action ? request.action : "Chưa xem"}
+                                                                    </div>
+                                                                </div>
+                                                            </td>
                                                             <td className="py-3 text-end pe-4">
                                                                 <Button
                                                                     variant="success"
                                                                     size="sm"
                                                                     className="me-2"
                                                                     onClick={() => handleApprove(request._id)}
+                                                                    disabled={request.action === "Đồng ý" || request.action === "Từ chối"}
                                                                 >
                                                                     <HandThumbsUp className="me-1" /> Đồng ý
                                                                 </Button>
@@ -254,6 +263,7 @@ const CustomerRequestView = () => {
                                                                     variant="outline-danger"
                                                                     size="sm"
                                                                     onClick={() => handleReject(request._id)}
+                                                                    disabled={request.action === "Đồng ý" || request.action === "Từ chối"}
                                                                 >
                                                                     <HandThumbsDown className="me-1" /> Từ chối
                                                                 </Button>

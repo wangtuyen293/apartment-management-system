@@ -170,5 +170,121 @@ const addApartment = async (req, res) => {
     });
 };
 
+const updateApartment = async (req, res) => {
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ message: err.message });
+        }
 
-export { getApartment, getApartmentDetail, requestForViewApartment, requestForRentApartment, addApartment };
+        try {
+            const apartmentId = req.params.id;
+            console.log('Apartment ID:', apartmentId);
+            const { apartmentNumber, description, floor, area, price } = req.body;
+            const images = req.files ? req.files.map(file => ({
+                url: `/uploads/${file.filename}`,
+            })) : [];
+            const existingApartment = await Apartment.findById(apartmentId);
+            if (!existingApartment) {
+                return res.status(404).json({ message: "Căn hộ không tồn tại" });
+            }
+
+            const apartmentData = await Apartment.findByIdAndUpdate(
+                apartmentId,
+                {
+                    apartmentNumber,
+                    description,
+                    floor,
+                    area,
+                    price,
+                    images,
+                },
+                { new: true }
+            );
+
+            if (!apartmentData) {
+                return res.status(500).json({ message: "Không thể cập nhật căn hộ" });
+            }
+
+            res.status(200).json(apartmentData);
+        } catch (error) {
+            console.error('Error updating apartment:', error);
+            if (error.code === 11000) {
+                return res.status(400).json({
+                    message: `Căn hộ với số "${req.body.apartmentNumber}" đã tồn tại`,
+                });
+            }
+            res.status(500).json({
+                message: 'Error updating apartment',
+                error: error.message,
+            });
+        }
+    });
+};
+
+const deleteApartment = async (req, res) => {
+    try {
+        const apartmentId = req.params.id;
+        const apartment = await Apartment.findByIdAndDelete(apartmentId);
+        if (!apartment) {
+            return res.status(404).json({ message: "Căn hộ không tồn tại" });
+        }
+        res.status(200).json({ message: "Căn hộ đã được xóa thành công" });
+    } catch (error) {
+        console.error('Error deleting apartment:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+const extendContract = async (req, res) => {
+    try {
+        const apartmentId = req.params.id;
+        console.log('Apartment ID:', apartmentId);
+        const { startDate, endDate } = req.body;
+        const apartment = await Apartment.findByIdAndUpdate(
+            apartmentId,
+            {
+                $set: {
+                    startRentDate: startDate,
+                    endRentDate: endDate,
+                },
+            },
+            { new: true }
+        )
+        if (!apartment) {
+            return res.status(404).json({ message: "Apartment not found" });
+        }
+        res.status(200).json({ message: "Contract extended successfully", apartment });
+    } catch (error) {
+        console.error('Error extending contract:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+const removeContract = async (req, res) => {
+    try {
+        const apartmentId = req.params.id;
+        const apartment = await Apartment.findByIdAndUpdate(
+            apartmentId,
+            {
+                $set: {
+                    startRentDate: null,
+                    endRentDate: null,
+                    status: 'Trống',
+                    tenantId: null,
+                    services: [],
+                },
+            },
+            { new: true }
+        );
+        if (!apartment) {
+            return res.status(404).json({ message: "Apartment not found" });
+        }
+        res.status(200).json({ message: "Contract removed successfully", apartment });
+    } catch (error) {
+        console.error('Error removing contract:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+
+export { getApartment, getApartmentDetail, requestForViewApartment, requestForRentApartment, addApartment, updateApartment, deleteApartment, extendContract, removeContract };

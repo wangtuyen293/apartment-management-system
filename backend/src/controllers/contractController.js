@@ -123,7 +123,7 @@ export const depositContract = async (req, res) => {
             size: 8,
         });
 
-        const fileName = `hopdongcoc_${user.username}_${apartment.apartmentNumber}_pending.pdf`;
+        const fileName = `hopdongcoc_${user.username}_${apartment.apartmentNumber}.pdf`;
         const outputPath = path.join(process.cwd(), 'src', 'controllers', 'resources', fileName);
         const pdfBytes = await pdfDoc.save();
 
@@ -170,9 +170,9 @@ export const getContractFile = async (req, res) => {
     }
 };
 
-export const signDepositContract = async (req, res) => {
+export const acceptDepositContract = async (req, res) => {
     try {
-        const { userId, signature, contractMonths } = req.body;
+        const { userId, contractMonths } = req.body;
         const { apartmentId } = req.params;
 
         if (!userId || !apartmentId) {
@@ -191,33 +191,8 @@ export const signDepositContract = async (req, res) => {
             return res.status(404).json({ message: "Apartment not found" });
         }
 
-        const inputPath = path.join(process.cwd(), 'src', 'controllers', 'resources', `hopdongcoc_${user.username}_${apartment.apartmentNumber}_pending.pdf`);
-
-        if (!fs.existsSync(inputPath)) {
-            return res.status(400).json({ message: "Template contract not found" });
-        }
-
-        const inputPdfBytes = fs.readFileSync(inputPath);
-        const pdfDoc = await PDFDocument.load(inputPdfBytes);
-        const page = pdfDoc.getPages()[1];
-
-        const signatureImageBytes = Buffer.from(signature.split(',')[1], 'base64');
-        const signatureImage = await pdfDoc.embedPng(signatureImageBytes);
-
-        page.drawImage(signatureImage, {
-            x: 60,
-            y: 240,
-            width: 100,
-            height: 50,
-        });
-
-        const fileName = `hopdongcoc_${user.username}_${apartment.apartmentNumber}_signed.pdf`;
-        const outputPath = path.join(process.cwd(), 'src', 'controllers', 'resources', fileName);
-        const pdfBytes = await pdfDoc.save();
-
-        await fs.promises.writeFile(outputPath, pdfBytes);
-
-        const contractPath = `/resources/${fileName}`;
+        const fileName = `hopdongcoc_${user.username}_${apartment.apartmentNumber}.pdf`;
+        const contractPath = `/resources/hopdongcoc_${user.username}_${apartment.apartmentNumber}.pdf`;
 
         const signedContract = new Contract({
             user: userId,

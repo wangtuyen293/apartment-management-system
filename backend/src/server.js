@@ -35,7 +35,8 @@ const resourcesPath = path.join(__dirname, 'controllers/resources');
 console.log('Resources path:', resourcesPath);
 app.use('/resources', express.static(resourcesPath));
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+console.log('Uploads path:', path.join(__dirname, 'uploads'));
 
 app.use(
     session({

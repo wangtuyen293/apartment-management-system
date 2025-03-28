@@ -27,11 +27,77 @@ export const getApartmentDetail = createAsyncThunk(
     }
 );
 
+export const addApartment = createAsyncThunk(
+    "apartment/addApartment",
+    async (formData, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(`${API_URL}/api/v1/apartments/add`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || "Error adding apartment");
+        }
+    }
+);
+
+export const changeApartmentDetail = createAsyncThunk(
+    "apartment/changeApartmentDetail",
+    async ({ id, data }, { rejectWithValue }) => {
+        try {
+            const response = await axios.put(`${API_URL}/api/v1/apartments/update/${id}`, data, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || "An error occurred");
+        }
+    }
+);
+
+export const deleteApartment = createAsyncThunk(
+    "apartment/deleteApartment",
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axios.delete(`${API_URL}/api/v1/apartments/delete/${id}`);
+            return { id };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || "An error occurred");
+        }
+    }
+);
+
+export const removeContract = createAsyncThunk(
+    "apartment/removeContract",
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axios.put(`${API_URL}/api/v1/apartments/contract-remove/${id}`);
+            return { id };
+        } catch (error) {
+            return rejectWithValue(error.response?.data || "An error occurred");
+        }
+    }
+);
+
+export const extendContract = createAsyncThunk(
+    "apartment/extendContract",
+    async ({ id, startDate, endDate }, { rejectWithValue }) => {
+        try {
+            const response = await axios.put(
+                `${API_URL}/api/v1/apartments/contract/${id}`,
+                { startDate, endDate }
+            );
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data || "An error occurred");
+        }
+    }
+);
+
 export const requestForViewApartment = createAsyncThunk(
     "apartment/requestForViewApartment",
     async ({ apartmentId, tenantId, date }, { rejectWithValue }) => {
         try {
-
             const response = await axios.post(
                 `${API_URL}/api/v1/apartments/view/${apartmentId}/${tenantId}`,
                 { date }
@@ -47,7 +113,6 @@ export const requestForRentApartment = createAsyncThunk(
     "apartment/requestForRentApartment",
     async ({ apartmentId, tenantId, date, contractMonths }, { rejectWithValue }) => {
         try {
-
             const response = await axios.post(
                 `${API_URL}/api/v1/apartments/rent/${apartmentId}/${tenantId}`,
                 { date, contractMonths }
@@ -59,28 +124,10 @@ export const requestForRentApartment = createAsyncThunk(
     }
 );
 
-export const addApartment = createAsyncThunk(
-    'apartment/addApartment',
-    async (formData, { rejectWithValue }) => {
-        try {
-            console.log(formData)
-            const response = await axios.post(`${API_URL}/api/v1/apartments/add`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
-            return response.data;
-        } catch (error) {
-            return rejectWithValue(error.response?.data || 'Error adding apartment');
-        }
-    }
-);
-
-
 const apartmentSlice = createSlice({
     name: "apartment",
     initialState: {
-        apartment: null,
+        apartment: [],
         apartmentDetail: null,
         loading: false,
         error: null,
@@ -106,6 +153,7 @@ const apartmentSlice = createSlice({
             // Fetch Apartment Detail
             .addCase(getApartmentDetail.pending, (state) => {
                 state.loading = true;
+                state.error = null;
             })
             .addCase(getApartmentDetail.fulfilled, (state, action) => {
                 state.loading = false;
@@ -113,7 +161,83 @@ const apartmentSlice = createSlice({
             })
             .addCase(getApartmentDetail.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message;
+                state.error = action.payload || "Failed to fetch apartment detail";
+            })
+            // Add Apartment
+            .addCase(addApartment.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(addApartment.fulfilled, (state, action) => {
+                state.loading = false;
+                state.apartment.push(action.payload);
+            })
+            .addCase(addApartment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to add apartment";
+            })
+            // Update Apartment
+            .addCase(changeApartmentDetail.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(changeApartmentDetail.fulfilled, (state, action) => {
+                state.loading = false;
+                const index = state.apartment.findIndex((apt) => apt._id === action.payload._id);
+                if (index !== -1) {
+                    state.apartment[index] = action.payload;
+                }
+            })
+            .addCase(changeApartmentDetail.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to update apartment";
+            })
+            // Delete Apartment
+            .addCase(deleteApartment.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteApartment.fulfilled, (state, action) => {
+                state.loading = false;
+                state.apartment = state.apartment.filter((apt) => apt._id !== action.payload.id);
+            })
+            .addCase(deleteApartment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to delete apartment";
+            })
+            // Remove Contract
+            .addCase(removeContract.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(removeContract.fulfilled, (state, action) => {
+                state.loading = false;
+                const index = state.apartment.findIndex((apt) => apt._id === action.payload.id);
+                if (index !== -1) {
+                    state.apartment[index].startRentDate = null;
+                    state.apartment[index].endRentDate = null;
+                    state.apartment[index].status = "Trống";
+                }
+            })
+            .addCase(removeContract.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to remove contract";
+            })
+            // Extend Contract
+            .addCase(extendContract.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(extendContract.fulfilled, (state, action) => {
+                state.loading = false;
+                const index = state.apartment.findIndex((apt) => apt._id === action.payload._id);
+                if (index !== -1) {
+                    state.apartment[index] = action.payload;
+                }
+            })
+            .addCase(extendContract.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to extend contract";
             })
             // Request for View Apartment
             .addCase(requestForViewApartment.pending, (state) => {
@@ -142,21 +266,7 @@ const apartmentSlice = createSlice({
             .addCase(requestForRentApartment.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Failed to request for rent apartment";
-            })
-            // Add new apartment
-            .addCase(addApartment.pending, (state) => {
-                state.loading = true;
-                state.rentRequestStatus = null;
-                state.error = null;
-            })
-            .addCase(addApartment.fulfilled, (state, action) => {
-                state.loading = false;
-                state.apartment = action.payload;
-            })
-            .addCase(addApartment.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload || "Failed ";
-            })
+            });
     },
 });
 

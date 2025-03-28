@@ -165,16 +165,10 @@ const Sidebar = () => {
                                 </NavDropdown.Item>
                             </NavDropdown>
                             <Nav.Link
-                                href="service_payment"
-                                className="text-white d-flex align-items-center py-2 nav-hover"
-                            >
-                                <CreditCard className="me-2" /> Phí dịch vụ
-                            </Nav.Link>
-                            <Nav.Link
                                 href="/fee-manage"
                                 className="text-white d-flex align-items-center py-2 nav-hover"
                             >
-                                <FileText className="me-2" /> Ghi chỉ số
+                                <CreditCard className="me-2" /> Ghi chỉ số
                             </Nav.Link>
                             <Nav.Link
                                 href="/notification/create"
