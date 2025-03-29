@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Register from "./pages/user/Register";
 import Login from "./pages/user/Login";
-import Home from "./pages/layout/Home";
-import LandingPage from "./pages/layout/LandingPage";
+import Home from "./pages/Home";
+import LandingPage from "./pages/LandingPage";
 import ApartmentDetailPage from "./pages/apartment/ApartmentDetailPage";
 import FindApartments from "./pages/apartment/FindApartment";
 import VerifyEmail from "./pages/user/VerifyEmail";
@@ -32,12 +32,12 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
                 <Route path="/home" element={<Home />} />
 
                 <Route path="/" element={<Layout />}>
                     <Route path="/" element={<LandingPage />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />

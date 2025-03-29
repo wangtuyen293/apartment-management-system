@@ -80,7 +80,7 @@ const RegistrationForm = () => {
     return (
         <Container
             fluid
-            className="d-flex justify-content-center align-items-center vh-100"
+            className="d-flex justify-content-center align-items-center vh-100 mt-5 py-5"
             style={{ backgroundColor: "#F7444E" }}
         >
             <Row

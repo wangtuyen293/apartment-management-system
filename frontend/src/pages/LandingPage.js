@@ -2,9 +2,9 @@ import React, { useEffect } from "react";
 import { Button, Container, Row, Col, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import apartmentImage1 from "../../assets/images/fpt-login.jpg";
-import { getApartment, getApartmentDetail } from "../../redux/apartmentSlice";
-import Banner from "../../components/Banner";
+import apartmentImage1 from "../assets/images/fpt-login.jpg";
+import { getApartment, getApartmentDetail } from "../redux/apartmentSlice";
+import Banner from "../components/Banner";
 
 const LandingPage = () => {
     const dispatch = useDispatch();
