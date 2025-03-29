@@ -12,7 +12,6 @@ import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
 import { logoutUser } from "../../redux/authSlice";
 import { useDispatch, useSelector } from 'react-redux';
 import Sidebar from "../../components/SideBar";
-import DatePicker from 'react-datepicker';
 
 const HomePage = () => {
     const dispatch = useDispatch();

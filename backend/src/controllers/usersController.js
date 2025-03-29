@@ -26,18 +26,7 @@ export const getUserProfile = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
     try {
-        const token = req.cookies.accessToken;
-
-        if (!token) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        const user = await User.findById(decoded.id).select("-password");
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
+        const user = req.user;
 
         user.name = req.body.name || user.name;
         user.username = req.body.username || user.username;
@@ -71,6 +60,29 @@ export const changePassword = async (req, res) => {
 
         res.json({ message: "Mật khẩu đã được cập nhật thành công!" });
     } catch (error) {
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const updateUserRole = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const { newRole } = req.body;
+
+        const validRoles = ["User", "Manager"];
+
+        if (!validRoles.includes(newRole)) {
+            return res.status(400).json({ message: "Vai trò không hợp lệ." });
+        }
+
+        const user = await User.findById(userId);
+
+        user.role = newRole;
+        await user.save();
+
+        res.status(200).json({ message: "Cập nhật vai trò thành công.", user });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };

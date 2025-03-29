@@ -2,10 +2,12 @@ import express from "express";
 import passport from "passport";
 import "dotenv/config";
 import {
+    forgotPassword,
     login,
     logout,
     refresh,
     register,
+    resetPassword,
     verifyEmail,
 } from "../controllers/authController.js";
 
@@ -15,8 +17,8 @@ router.post("/login", login);
 router.post("/register", register);
 router.post("/logout", logout);
 router.post("/refresh", refresh);
-// router.post("/forgot-password", refresh);
-// router.post("/reset-password", refresh);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:token", resetPassword);
 router.post("/verify-email", verifyEmail);
 router.get(
     "/google",

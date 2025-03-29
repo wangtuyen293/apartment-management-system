@@ -25,6 +25,8 @@ import NotificationPage from "./pages/notification/NotificationPage";
 import CreateNotification from "./pages/notification/CreateNotification";
 import CustomerDeposit from "./pages/customerManagement/customerDeposit";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
+import ForgotPassword from "./pages/user/ForgotPassword";
+import ResetPassword from "./pages/user/ResetPassword";
 
 function App() {
     return (
@@ -36,6 +38,8 @@ function App() {
 
                 <Route path="/" element={<Layout />}>
                     <Route path="/" element={<LandingPage />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/reset-password/:token" element={<ResetPassword />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />
                     <Route path="/profile/*" element={<ProfileLayout />}>
                         <Route index element={<ProfilePage />} />

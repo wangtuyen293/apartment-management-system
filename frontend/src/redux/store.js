@@ -10,6 +10,7 @@ import contractReducer from "./contractSlice.js";
 import paymentReducer from "./paymentSlice.js";
 import notificationReducer from "./notificationSlice.js";
 import userReducer from "./userSlice.js";
+import passwordReducer from "./passwordSlice.js";
 
 // Cấu hình redux-persist cho auth
 const persistConfig = {
@@ -23,6 +24,7 @@ const store = configureStore({
     reducer: {
         auth: persistedAuthReducer,
         user: userReducer,
+        password: passwordReducer,
         apartment: apartmentReducer,
         resident: residentReducer,
         contract: contractReducer,

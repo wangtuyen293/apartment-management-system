@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
+import crypto from "crypto";
 import bcrypt from "bcrypt";
+import nodemailer from "nodemailer";
 import "dotenv/config";
 import User from "../models/User.js";
 import { generateAccessToken, generateToken } from "../utils/generateToken.js";
@@ -145,7 +146,7 @@ export const register = async (req, res) => {
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: newUser.email,
-            subject: "Email Verification",
+            subject: "Email Verification - FPT Plaza",
             text: `Please verify your email by clicking the following link: ${verificationLink} and use the OTP to verify: ${emailVerificationOTP}`,
             html: `
                 <p>Please verify your email by clicking the following link:</p>
@@ -272,5 +273,88 @@ export const logout = async (req, res) => {
     } catch (error) {
         console.error("Logout error:", error);
         return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const resetToken = crypto.randomBytes(32).toString("hex");
+
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 5 * 60 * 1000;
+
+        await user.save();
+
+        const transporter = nodemailer.createTransport({
+            service: "Gmail",
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS,
+            },
+        });
+
+        const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "Reset your password - FPT Plaza",
+            html: `
+                <p>Click the link below to reset your password:</p>
+                <a href="${resetLink}">${resetLink}</a>
+                <p>The link will expire in 5 minutes.</p>
+                <p>If you didn't request a password reset, please ignore this email.</p>
+                <p>Thank you,</p>
+                <p>The FPT Plaza Team</p>
+            `,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: "Password reset link sent to email" });
+    } catch (error) {
+        console.error("Forgot Password Error:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { newPassword } = req.body;
+
+        if (!newPassword) return res.status(400).json({ message: "New password is required" });
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid or expired token" });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+
+        user.resetPasswordToken = null;
+        user.resetPasswordExpires = null;
+        await user.save();
+
+        res.status(200).json({ message: "Password reset successfully" });
+    } catch (error) {
+        console.error("Reset Password Error:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 };

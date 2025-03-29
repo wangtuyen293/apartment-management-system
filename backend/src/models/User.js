@@ -54,7 +54,13 @@ const userSchema = new mongoose.Schema(
         },
         emailVerificationOTPExpires: {
             type: Date,
-        }
+        },
+        resetPasswordToken: {
+            type: String,
+        },
+        resetPasswordExpires: {
+            type: Date,
+        },
     },
     { timestamps: true }
 );

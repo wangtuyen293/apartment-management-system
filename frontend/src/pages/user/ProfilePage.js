@@ -137,9 +137,8 @@ const ProfilePage = () => {
                             type="text"
                             name="username"
                             value={profileData.username}
-                            onChange={handleChange}
-                            readOnly={!editable}
-                            className={editable ? "" : "bg-light"}
+                            readOnly
+                            className="bg-light"
                         />
                         {errors.username && (
                             <Form.Text className="text-danger">
