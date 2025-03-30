@@ -8,7 +8,7 @@ import {
     Dropdown,
     Image,
 } from "react-bootstrap";
-import avatar from "../assets/images/avatar/avatar.jpg";
+import avatarImage from "../assets/images/avatar/avatar.jpg";
 import { logoutUser } from "../redux/authSlice";
 import "../assets/css/AppNavbar.css";
 
@@ -18,6 +18,11 @@ const AppNavbar = () => {
     const dispatch = useDispatch();
 
     const { user } = useSelector((state) => state.auth);
+
+    const backendUrl = "http://localhost:5000";
+    const avatarUrl = user?.images?.[0]?.url
+        ? `${backendUrl}${user.images[0].url}`
+        : avatarImage;
 
     const isAuthenticated = user !== null;
     const userRole = user?.role || "Guest";
@@ -107,7 +112,7 @@ const AppNavbar = () => {
                                 className="d-flex align-items-center"
                             >
                                 <Image
-                                    src={user?.avatar || avatar}
+                                    src={avatarUrl}
                                     roundedCircle
                                     width="32"
                                     height="32"

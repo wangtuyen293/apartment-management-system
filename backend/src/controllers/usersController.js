@@ -28,12 +28,12 @@ export const updateUserProfile = async (req, res) => {
     try {
         const user = req.user;
 
-        user.name = req.body.name || user.name;
-        user.username = req.body.username || user.username;
-        user.email = req.body.email || user.email;
-        user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
-        user.address = req.body.address || user.address;
-        user.gender = req.body.gender || user.gender;
+        user.name = req.body.name ?? user.name;
+        user.username = req.body.username ?? user.username;
+        user.email = req.body.email ?? user.email;
+        user.phoneNumber = req.body.phoneNumber ?? user.phoneNumber;
+        user.address = req.body.address ?? user.address;
+        user.gender = req.body.gender ?? user.gender;
 
         const updatedUser = await user.save();
 
@@ -84,5 +84,30 @@ export const updateUserRole = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+export const uploadAvatar = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded." });
+        }
+
+        const userId = req.user.id;
+        const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $set: { "images": [{ url: avatarUrl }] } },
+            { new: true }
+        );
+
+        res.status(200).json({
+            message: "Avatar uploaded successfully",
+            avatarUrl: user.images[0].url,
+        });
+    } catch (error) {
+        console.error("Error uploading avatar:", error);
+        res.status(500).json({ message: "Error uploading avatar", error: error.message });
     }
 };

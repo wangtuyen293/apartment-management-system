@@ -38,6 +38,8 @@ app.use('/resources', express.static(resourcesPath));
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 console.log('Uploads path:', path.join(__dirname, 'uploads'));
 
+app.use("/uploads/avatars", express.static(path.join(__dirname, "..", "uploads/avatars")));
+
 app.use(
     session({
         secret: process.env.JWT_SECRET,
@@ -54,7 +56,7 @@ app.use("/api/v1/residents", residentRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/contracts", contractRoutes);
-app.use("/api/v1/payments/", paymentRoutes);
+app.use("/api/v1/payments", paymentRoutes);
 app.use("/api/v1/services", serviceRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 

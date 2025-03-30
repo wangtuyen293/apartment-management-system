@@ -2,8 +2,14 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { Button, Row, Col, Form, Container, Alert } from "react-bootstrap";
 import { setUser } from "../../redux/authSlice";
-import { fetchUser, updateUserProfile } from "../../redux/userSlice";
+import {
+    fetchUser,
+    updateUserProfile,
+    uploadAvatar,
+} from "../../redux/userSlice";
 import "../../assets/css/ProfilePage.css";
+import avatarImage from "../../assets/images/avatar/avatar.jpg";
+import { Camera } from "react-bootstrap-icons";
 
 const ProfilePage = () => {
     const dispatch = useDispatch();
@@ -23,6 +29,9 @@ const ProfilePage = () => {
         gender: "",
     });
 
+    const [avatar, setAvatar] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState(avatarImage);
+
     useEffect(() => {
         if (!user) {
             dispatch(fetchUser());
@@ -35,12 +44,27 @@ const ProfilePage = () => {
                 address: user.address || "",
                 gender: user.gender || "",
             });
+            const backendUrl = "http://localhost:5000";
+            const userAvatar = user.images?.[0]?.url
+                ? `${backendUrl}${user.images[0].url}`
+                : avatarImage;
+
+            setAvatarPreview(userAvatar);
         }
     }, [dispatch, user]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setProfileData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleAvatarChange = async (e) => {
+        const file = e.target.files[0];
+
+        if (file) {
+            setAvatar(file);
+            setAvatarPreview(URL.createObjectURL(file));
+        }
     };
 
     const validate = () => {
@@ -65,6 +89,12 @@ const ProfilePage = () => {
         if (!validate()) return;
 
         try {
+            if (avatar) {
+                const formData = new FormData();
+                formData.append("avatar", avatar);
+                dispatch(uploadAvatar(formData));
+            }
+
             const response = await dispatch(
                 updateUserProfile(profileData)
             ).unwrap();
@@ -90,6 +120,13 @@ const ProfilePage = () => {
             address: user?.address || "",
             gender: user?.gender || "",
         });
+        const backendUrl = "http://localhost:5000";
+        const userAvatar = user.images?.[0]?.url
+            ? `${backendUrl}${user.images[0].url}`
+            : avatarImage;
+
+        setAvatarPreview(userAvatar);
+        setAvatar(null);
         setErrors({});
         setGeneralError("");
         setSuccessMessage("");
@@ -97,9 +134,9 @@ const ProfilePage = () => {
     };
 
     return (
-        <Container className="mt-5">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-                <h3 className="mb-0">Thông tin cá nhân</h3>
+        <Container className="my-5">
+            <div className="text-center mb-2">
+                <h3 className="mb-5">Thông tin cá nhân</h3>
             </div>
 
             {generalError && <Alert variant="danger">{generalError}</Alert>}
@@ -107,9 +144,36 @@ const ProfilePage = () => {
                 <Alert variant="success">{successMessage}</Alert>
             )}
 
-            <Row>
-                <Col md={6} className="mb-3">
-                    <Form.Group>
+            <Row className="d-flex align-items-center justify-content-center">
+                <Col md={3} className="text-center">
+                    <div className="avatar-wrapper">
+                        <label
+                            htmlFor="avatar-upload"
+                            className="avatar-container"
+                        >
+                            <img
+                                src={avatarPreview}
+                                alt="Avatar"
+                                className="avatar-preview"
+                            />
+                            <div
+                                className="upload-overlay"
+                                style={{ cursor: "pointer" }}
+                            >
+                                <Camera />
+                            </div>
+                        </label>
+                        <input
+                            type="file"
+                            id="avatar-upload"
+                            accept="image/png, image/jpeg"
+                            onChange={handleAvatarChange}
+                            hidden
+                        />
+                    </div>
+                </Col>
+                <Col md={9}>
+                    <Form.Group className="mb-3">
                         <Form.Label className="text-muted">
                             Họ và tên
                         </Form.Label>
@@ -127,9 +191,8 @@ const ProfilePage = () => {
                             </Form.Text>
                         )}
                     </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                    <Form.Group>
+
+                    <Form.Group className="mb-3">
                         <Form.Label className="text-muted">
                             Tên người dùng
                         </Form.Label>
@@ -146,9 +209,8 @@ const ProfilePage = () => {
                             </Form.Text>
                         )}
                     </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                    <Form.Group>
+
+                    <Form.Group className="mb-3">
                         <Form.Label className="text-muted">Email</Form.Label>
                         <Form.Control
                             type="email"
@@ -158,9 +220,8 @@ const ProfilePage = () => {
                             className="bg-light"
                         />
                     </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                    <Form.Group>
+
+                    <Form.Group className="mb-3">
                         <Form.Label className="text-muted">
                             Số điện thoại
                         </Form.Label>
@@ -178,9 +239,8 @@ const ProfilePage = () => {
                             </Form.Text>
                         )}
                     </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                    <Form.Group>
+
+                    <Form.Group className="mb-3">
                         <Form.Label className="text-muted">Địa chỉ</Form.Label>
                         <Form.Control
                             type="text"
@@ -191,9 +251,8 @@ const ProfilePage = () => {
                             className={editable ? "" : "bg-light"}
                         />
                     </Form.Group>
-                </Col>
-                <Col md={6} className="mb-3">
-                    <Form.Group>
+
+                    <Form.Group className="mb-3">
                         <Form.Label className="text-muted">
                             Giới tính
                         </Form.Label>
@@ -210,35 +269,35 @@ const ProfilePage = () => {
                             <option value="Other">Khác</option>
                         </Form.Select>
                     </Form.Group>
+
+                    <div className="d-flex mt-3">
+                        {!editable ? (
+                            <Button
+                                variant="outline-primary"
+                                onClick={() => setEditable(true)}
+                            >
+                                Cập Nhật
+                            </Button>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="success"
+                                    className="me-2"
+                                    onClick={handleSave}
+                                >
+                                    Lưu
+                                </Button>
+                                <Button
+                                    variant="outline-secondary"
+                                    onClick={handleCancel}
+                                >
+                                    Hủy
+                                </Button>
+                            </>
+                        )}
+                    </div>
                 </Col>
             </Row>
-
-            <div className="d-flex mt-3">
-                {!editable ? (
-                    <Button
-                        variant="outline-secondary"
-                        onClick={() => setEditable(true)}
-                    >
-                        Cập Nhật
-                    </Button>
-                ) : (
-                    <>
-                        <Button
-                            variant="success"
-                            className="me-2"
-                            onClick={handleSave}
-                        >
-                            Lưu
-                        </Button>
-                        <Button
-                            variant="outline-secondary"
-                            onClick={handleCancel}
-                        >
-                            Hủy
-                        </Button>
-                    </>
-                )}
-            </div>
         </Container>
     );
 };
