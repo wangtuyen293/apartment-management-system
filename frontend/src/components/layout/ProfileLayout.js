@@ -4,16 +4,18 @@ import ProfileSideBar from "../sidebar/ProfileSideBar";
 
 const ProfileLayout = () => {
     return (
-        <Container fluid className="mt-5 pt-4">
-            <Row>
-                <Col md={3} className="p-0">
-                    <ProfileSideBar />
-                </Col>
-                <Col md={9} className="p-0">
-                    <Outlet />
-                </Col>
-            </Row>
-        </Container>
+        <>
+            <Container fluid className="mt-5 pt-4 profile-container">
+                <Row>
+                    <Col md={3} className="p-0 profile-sidebar">
+                        <ProfileSideBar />
+                    </Col>
+                    <Col md={9} className="p-0 profile-content">
+                        <Outlet />
+                    </Col>
+                </Row>
+            </Container>
+        </>
     );
 };
 

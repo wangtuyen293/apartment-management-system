@@ -144,7 +144,7 @@ const ProfilePage = () => {
                 <Alert variant="success">{successMessage}</Alert>
             )}
 
-            <Row className="d-flex align-items-center justify-content-center">
+            <Row>
                 <Col md={3} className="text-center">
                     <div className="avatar-wrapper">
                         <label

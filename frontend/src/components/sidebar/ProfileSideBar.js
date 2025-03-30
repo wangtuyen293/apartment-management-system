@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { logoutUser } from "../../redux/authSlice";
+import { Image, Button } from "react-bootstrap";
 import {
     FaUser,
     FaLock,
@@ -11,6 +11,7 @@ import {
     FaSignOutAlt,
     FaList,
 } from "react-icons/fa";
+import { logoutUser } from "../../redux/authSlice";
 import avatarImage from "../../assets/images/avatar/avatar.jpg";
 import "../../assets/css/ProfileSidebar.css";
 
@@ -18,8 +19,12 @@ const ProfileSideBar = () => {
     const dispatch = useDispatch();
     const { user } = useSelector((state) => state.auth);
 
+    const location = useLocation();
+
     const backendUrl = "http://localhost:5000";
-    const avatarUrl = user?.images?.[0]?.url ? `${backendUrl}${user.images[0].url}` : avatarImage;
+    const avatarUrl = user?.images?.[0]?.url
+        ? `${backendUrl}${user.images[0].url}`
+        : avatarImage;
 
     const userRole = user?.role || "Guest";
 
@@ -28,63 +33,101 @@ const ProfileSideBar = () => {
     };
 
     return (
-        <div className="sidebar">
-            <div className="sidebar-header">
-                <img
-                    src={avatarUrl}
-                    alt="Avatar"
-                    className="avatar"
-                />
-                <h4>{user?.name}</h4>
-                <p className="role">
-                    {user?.role === "resident" ? "Cư Dân" : "Quản Lý"}
-                </p>
-            </div>
+        <>
+            <div className="admin-sidebar">
+                <div className="sidebar-header text-center">
+                    <Image
+                        src={avatarUrl}
+                        alt="Avatar"
+                        className="avatar"
+                        roundedCircle
+                    />
+                    <h4 className="username">{user?.name}</h4>
+                    <p className="role">Quản Lý</p>
+                </div>
 
-            <ul className="sidebar-links">
-                <li>
-                    <Link to="/profile">
-                        <FaUser /> Hồ Sơ Cá Nhân
+                <nav className="sidebar-menu">
+                    <Link
+                        to="/profile"
+                        className={`menu-item ${
+                            location.pathname === "/profile" ? "active" : ""
+                        }`}
+                    >
+                        <FaUser className="icon" /> Hồ Sơ Cá Nhân
                     </Link>
-                </li>
-                <li>
-                    <Link to="/profile/change-password">
-                        <FaLock /> Đổi Mật Khẩu
+                    <Link
+                        to="/profile/change-password"
+                        className={`menu-item ${
+                            location.pathname === "/profile/change-password"
+                                ? "active"
+                                : ""
+                        }`}
+                    >
+                        <FaLock className="icon" /> Đổi Mật Khẩu
                     </Link>
-                </li>
-                <li>
-                    <Link to="/profile/my-apartments">
-                        <FaHome /> Căn Hộ Của Tôi
+                    <Link
+                        to="/profile/my-apartments"
+                        className={`menu-item ${
+                            location.pathname === "/profile/my-apartments"
+                                ? "active"
+                                : ""
+                        }`}
+                    >
+                        <FaHome className="icon" /> Căn Hộ Của Tôi
                     </Link>
-                </li>
-                <li>
-                    <Link to="/profile/contract">
-                        <FaList /> Hợp đồng Của Tôi
+                    <Link
+                        to="/profile/contract"
+                        className={`menu-item ${
+                            location.pathname === "/profile/contract"
+                                ? "active"
+                                : ""
+                        }`}
+                    >
+                        <FaList className="icon" /> Hợp đồng Của Tôi
                     </Link>
-                </li>
-                <li>
-                    <Link to="/profile/transactions">
-                        <FaHistory /> Lịch Sử Giao Dịch
+                    <Link
+                        to="/profile/transactions"
+                        className={`menu-item ${
+                            location.pathname === "/profile/transactions"
+                                ? "active"
+                                : ""
+                        }`}
+                    >
+                        <FaHistory className="icon" /> Lịch Sử Giao Dịch
                     </Link>
-                </li>
-                <li>
-                    <Link to="/profile/service-requests">
-                        <FaTools /> Yêu Cầu Dịch Vụ
+                    <Link
+                        to="/profile/service-requests"
+                        className={`menu-item ${
+                            location.pathname === "/profile/service-requests"
+                                ? "active"
+                                : ""
+                        }`}
+                    >
+                        <FaTools className="icon" /> Yêu Cầu Dịch Vụ
                     </Link>
-                </li>
-                <li>
-                    <Link to="/profile/settings">
-                        <FaCog /> Cài Đặt
+                    <Link
+                        to="/profile/settings"
+                        className={`menu-item ${
+                            location.pathname === "/profile/settings"
+                                ? "active"
+                                : ""
+                        }`}
+                    >
+                        <FaCog className="icon" /> Cài Đặt
                     </Link>
-                </li>
-            </ul>
+                </nav>
 
-            <div className="logout-section">
-                <button onClick={handleLogout} className="logout-btn">
-                    <FaSignOutAlt /> Đăng Xuất
-                </button>
+                <div className="logout-section mt-5">
+                    <Button
+                        variant="danger"
+                        className="logout-btn"
+                        onClick={handleLogout}
+                    >
+                        <FaSignOutAlt className="icon" /> Đăng Xuất
+                    </Button>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

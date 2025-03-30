@@ -27,6 +27,7 @@ import CustomerDeposit from "./pages/customerManagement/customerDeposit";
 import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 import ForgotPassword from "./pages/user/ForgotPassword";
 import ResetPassword from "./pages/user/ResetPassword";
+import ManagerLayout from "./components/layout/ManagerLayout";
 
 function App() {
     return (
@@ -41,6 +42,9 @@ function App() {
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />
+                    <Route path="/admin/*" element={<ManagerLayout />}>
+                        <Route index element={<ProfilePage />} />
+                    </Route>
                     <Route path="/profile/*" element={<ProfileLayout />}>
                         <Route index element={<ProfilePage />} />
                         <Route
