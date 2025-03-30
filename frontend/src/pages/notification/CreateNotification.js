@@ -1,51 +1,63 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { getApartment } from "../../redux/apartmentSlice";
 import { createNotification } from "../../redux/notificationSlice";
 import { Container, Row, Col, Card, Form, Button, Spinner } from "react-bootstrap";
 import Sidebar from "../../components/SideBar";
 
 const CreateNotification = () => {
     const dispatch = useDispatch();
+    const { apartment } = useSelector((state) => state.apartment);
     const { loading } = useSelector((state) => state.notification);
+
     const [formData, setFormData] = useState({
-        user_id: "", // Rỗng nếu gửi cho tất cả user
+        user_id: "", // Gửi cho tất cả nếu rỗng
         type: "general",
         title: "",
         message: "",
         metadata: {},
     });
 
+    useEffect(() => {
+        dispatch(getApartment());
+    }, [dispatch]);
+
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        setFormData({ ...formData, [e.target.name]: e.target.value.toString() });
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        console.log("data:", formData)
         dispatch(createNotification(formData));
     };
+
+    console.log("Apartment:", apartment);
 
     return (
         <Container fluid className="p-0">
             <Row className="g-0">
-                {/* Sidebar */}
                 <Col md={2} className="d-none d-md-block">
                     <Sidebar />
                 </Col>
 
-                {/* Nội dung */}
                 <Col xs={12} md={10} className="ms-auto p-4">
                     <h2 className="mb-4">Tạo Thông Báo</h2>
 
                     <Card className="p-4">
                         <Form onSubmit={handleSubmit}>
-                            {/* Chọn gửi cho tất cả hoặc 1 user */}
+                            {/* Chọn căn hộ để gửi */}
                             <Form.Group className="mb-3">
-                                <Form.Label>Gửi đến</Form.Label>
+                                <Form.Label>Gửi đến căn hộ</Form.Label>
                                 <Form.Select name="user_id" value={formData.user_id} onChange={handleChange}>
                                     <option value="">Tất cả người dùng</option>
-                                    <option value="67d6e846873eb98eed404cd6">User 123</option>
-                                    <option value="67d6e846873eb98eed404cd6">User 456</option>
-                                    {/* Cần fetch danh sách user nếu muốn chọn cụ thể */}
+                                    {apartment
+                                        .filter((apt) => apt.tenantId && apt.tenantId._id)
+                                        .map((apartment) => (
+                                            <option key={apartment._id} value={apartment.tenantId._id}>
+                                                Phòng {apartment.apartmentNumber}
+                                            </option>
+                                        ))}
                                 </Form.Select>
                             </Form.Group>
 

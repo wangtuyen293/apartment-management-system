@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getApartment } from "../../redux/apartmentSlice";
-import { createServiceRequest, getAllServiceCategories, getAllServiceRequests } from "../../redux/serviceSlice";
+import { createServiceRequest, getAllServiceCategories, getAllServiceRequests, deleteServiceRequest } from "../../redux/serviceSlice";
 import { Container, Row, Col, Card, Button, Spinner, Table, Alert, Modal, Form } from "react-bootstrap";
 import Sidebar from "../../components/SideBar";
 import { FaBuilding } from "react-icons/fa";
@@ -28,6 +28,7 @@ const MyApartmentPage = () => {
     }, [dispatch]);
 
     const userApartments = apartment?.filter(apartment => apartment.tenantId?._id === user?._id) || [];
+    console.log("Apartment: ", userApartments);
     const userRequest = serviceRequests?.filter(req => req?.user_id?._id === user?._id);
     console.log(userRequest)
 
@@ -44,6 +45,20 @@ const MyApartmentPage = () => {
         setSelectedCategory("");
         setNote("");
         setRequestedDate("");
+    };
+
+    //Xóa yêu cầu dịch vụ
+    const handleDeleteRequest = (requestId) => {
+        if (window.confirm("Bạn có chắc muốn xóa yêu cầu này?")) {
+            dispatch(deleteServiceRequest(requestId))
+                .then(() => {
+                    alert("Yêu cầu dịch vụ đã được xóa!");
+                })
+                .catch(err => {
+                    alert("Lỗi khi xóa yêu cầu!");
+                    console.error(err);
+                });
+        }
     };
 
     // Gửi yêu cầu dịch vụ
@@ -94,7 +109,11 @@ const MyApartmentPage = () => {
                         </h1>
                         <p className="mb-0 opacity-75">Quản lý các dịch vụ bạn yêu cầu</p>
                     </div>
-
+                    <div className="d-flex justify-content-start mt-3 ms-4">
+                        <Button variant="primary" size="sm" onClick={() => handleShowModal(apartment.apartment_id)}>
+                            Yêu cầu dịch vụ
+                        </Button>
+                    </div>
                     <Container className="py-4">
                         <Card className="border-0 shadow-sm">
 
@@ -110,13 +129,14 @@ const MyApartmentPage = () => {
                                         <strong>Lỗi!</strong> {error}
                                     </Alert>
                                 ) : userRequest.length > 0 ? (
+
                                     <Table hover className="align-middle mb-0">
                                         <thead className="bg-light">
                                             <tr>
                                                 <th>Người thuê</th>
                                                 <th>Số phòng</th>
                                                 <th>Loại dịch vụ</th>
-                                                <th>Ngày sửa</th>
+                                                <th>Ngày thực hiện</th>
                                                 <th>Tình trạng</th>
                                                 <th className="text-end">Thao tác</th>
                                             </tr>
@@ -130,8 +150,12 @@ const MyApartmentPage = () => {
                                                     <td>{formatDay(apartment.requested_date)}</td>
                                                     <td>{apartment.status}</td>
                                                     <td className="text-end">
-                                                        <Button variant="primary" size="sm" onClick={() => handleShowModal(apartment.apartment_id)}>
-                                                            Yêu cầu dịch vụ
+                                                        <Button
+                                                            variant="danger"
+                                                            size="sm"
+                                                            onClick={() => handleDeleteRequest(apartment._id)}
+                                                        >
+                                                            Xóa yêu cầu
                                                         </Button>
                                                     </td>
                                                 </tr>
@@ -154,6 +178,26 @@ const MyApartmentPage = () => {
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
+                        {/* Chọn căn hộ */}
+                        <Form.Group className="mb-3">
+                            <Form.Label>Chọn căn hộ</Form.Label>
+                            <Form.Select
+                                value={selectedApartment?._id || ""}
+                                onChange={(e) => {
+                                    const selected = userApartments.find(apartment => apartment._id === e.target.value);
+                                    setSelectedApartment(selected);
+                                }}
+                            >
+                                <option value="">-- Chọn căn hộ --</option>
+                                {userApartments.map(apartment => (
+                                    <option key={apartment._id} value={apartment._id}>
+                                        {apartment.apartmentNumber}
+                                    </option>
+                                ))}
+                            </Form.Select>
+                        </Form.Group>
+
+                        {/* Chọn dịch vụ */}
                         <Form.Group className="mb-3">
                             <Form.Label>Chọn dịch vụ</Form.Label>
                             <Form.Select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
@@ -163,10 +207,14 @@ const MyApartmentPage = () => {
                                 ))}
                             </Form.Select>
                         </Form.Group>
+
+                        {/* Ghi chú */}
                         <Form.Group className="mb-3">
                             <Form.Label>Ghi chú</Form.Label>
                             <Form.Control as="textarea" value={note} onChange={(e) => setNote(e.target.value)} />
                         </Form.Group>
+
+                        {/* Ngày yêu cầu */}
                         <Form.Group>
                             <Form.Label>Ngày yêu cầu</Form.Label>
                             <Form.Control type="date" value={requestedDate} onChange={(e) => setRequestedDate(e.target.value)} />

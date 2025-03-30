@@ -21,6 +21,7 @@ const NotificationPage = () => {
 
     const handleMarkAsRead = (id) => {
         dispatch(markNotificationAsRead(id));
+        window.location.reload();
     };
 
     return (
@@ -55,7 +56,7 @@ const NotificationPage = () => {
                                             <h5 className="card-title">{noti.title}</h5>
                                             <p className="card-text text-muted">{noti.message}</p>
                                             <p className="text-muted small">{new Date(noti.createdAt).toLocaleString()}</p>
-                                            {!noti.read && (
+                                            {!noti.is_read && (
                                                 <Button
                                                     variant="success"
                                                     size="sm"
