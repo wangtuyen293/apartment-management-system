@@ -44,6 +44,12 @@ const userSchema = new mongoose.Schema(
         phoneNumber: {
             type: String,
         },
+        images: [
+            {
+                url: { type: String, required: true },
+                description: { type: String },
+            },
+        ],
         role: {
             type: String,
             enum: ["User", "Manager"],
