@@ -224,6 +224,12 @@ const updateApartment = async (req, res) => {
 const deleteApartment = async (req, res) => {
     try {
         const apartmentId = req.params.id;
+        const request = await CustomerRequest.find({ apartment_id: apartmentId });
+        console.log('Request:', request);
+        request.forEach(async (item) => {
+            await CustomerRequest.findByIdAndDelete(item._id);
+        }
+        );
         const apartment = await Apartment.findByIdAndDelete(apartmentId);
         if (!apartment) {
             return res.status(404).json({ message: "Căn hộ không tồn tại" });
