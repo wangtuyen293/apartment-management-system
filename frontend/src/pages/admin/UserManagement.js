@@ -7,14 +7,23 @@ import {
     FormControl,
     Button,
     Alert,
+    Pagination,
+    Dropdown,
+    Badge,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUsers, banUser, deleteUser } from "../../redux/userSlice";
 
 const UserManagement = () => {
     const dispatch = useDispatch();
-    const { users, loading, error, successMessage } = useSelector((state) => state.user);
+    const { users, loading, error, successMessage } = useSelector(
+        (state) => state.user
+    );
     const [searchTerm, setSearchTerm] = useState("");
+    const [roleFilter, setRoleFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const usersPerPage = 5;
 
     useEffect(() => {
         dispatch(fetchUsers());
@@ -32,11 +41,30 @@ const UserManagement = () => {
 
     const validUsers = Array.isArray(users) ? users : [];
 
-    const filteredUsers = validUsers.filter(
-        (user) =>
-            (user?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
-            (user?.email?.toLowerCase() || "").includes(searchTerm.toLowerCase())
-    );
+    const filteredUsers = validUsers.filter((user) => {
+        const matchesSearch =
+            (user?.name?.toLowerCase() || "").includes(
+                searchTerm.toLowerCase()
+            ) ||
+            (user?.email?.toLowerCase() || "").includes(
+                searchTerm.toLowerCase()
+            );
+        const matchesRole = roleFilter
+            ? (user.role === "Manager" ? "Quản lý" : "Người dùng") ===
+              roleFilter
+            : true;
+        const matchesStatus = statusFilter
+            ? (user.isActive ? "Hoạt động" : "Bị khóa") === statusFilter
+            : true;
+
+        return matchesSearch && matchesRole && matchesStatus;
+    });
+
+    // Pagination Logic
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
+    const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
 
     return (
         <Container className="user-management-container my-5">
@@ -48,10 +76,49 @@ const UserManagement = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Button variant="outline-secondary">Tìm kiếm</Button>
+                <Dropdown className="ms-2">
+                    <Dropdown.Toggle variant="outline-primary">
+                        {roleFilter || "Lọc theo vai trò"}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                        <Dropdown.Item onClick={() => setRoleFilter("")}>
+                            Tất cả
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => setRoleFilter("Quản lý")}>
+                            Quản lý
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                            onClick={() => setRoleFilter("Người dùng")}
+                        >
+                            Người dùng
+                        </Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
+                <Dropdown className="ms-2">
+                    <Dropdown.Toggle variant="outline-secondary">
+                        {statusFilter || "Lọc theo trạng thái"}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                        <Dropdown.Item onClick={() => setStatusFilter("")}>
+                            Tất cả
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                            onClick={() => setStatusFilter("Hoạt động")}
+                        >
+                            Hoạt động
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                            onClick={() => setStatusFilter("Bị khóa")}
+                        >
+                            Bị khóa
+                        </Dropdown.Item>
+                    </Dropdown.Menu>
+                </Dropdown>
             </InputGroup>
 
-            {successMessage && <Alert variant="success">{successMessage}</Alert>}
+            {successMessage && (
+                <Alert variant="success">{successMessage}</Alert>
+            )}
 
             {loading ? (
                 <div className="text-center">
@@ -60,53 +127,98 @@ const UserManagement = () => {
                 </div>
             ) : error ? (
                 <Alert variant="danger">Lỗi khi tải dữ liệu: {error}</Alert>
-            ) : validUsers.length === 0 ? (
+            ) : filteredUsers.length === 0 ? (
                 <Alert variant="info">Không có người dùng nào.</Alert>
             ) : (
-                <Table striped bordered hover responsive>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Tên</th>
-                            <th>Email</th>
-                            <th>Vai Trò</th>
-                            <th>Trạng thái</th>
-                            <th>Hành Động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredUsers.map((user, index) => (
-                            <tr key={user._id || index}>
-                                <td>{index + 1}</td>
-                                <td>{user.name || "N/A"}</td>
-                                <td>{user.email || "N/A"}</td>
-                                <td>{user.role === "Manager" ? "Quản lý" : "Người dùng"}</td>
-                                <td>{user.isActive ? "Hoạt động" : "Bị khóa"}</td>
-                                <td>
-                                    <Button
-                                        variant={user.isActive ? "warning" : "success"}
-                                        size="sm"
-                                        className="me-2"
-                                        onClick={() => handleBanUser(user._id)}
-                                    >
-                                        {user.isActive ? "Khóa" : "Mở khóa"}
-                                    </Button>
-                                    <Button
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={() => handleDeleteUser(user._id)}
-                                    >
-                                        Xóa
-                                    </Button>
-                                </td>
+                <>
+                    <Table striped bordered hover responsive>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tên</th>
+                                <th>Email</th>
+                                <th>Vai Trò</th>
+                                <th>Trạng thái</th>
+                                <th>Hành Động</th>
                             </tr>
+                        </thead>
+                        <tbody>
+                            {currentUsers.map((user, index) => (
+                                <tr key={user._id || index}>
+                                    <td>{indexOfFirstUser + index + 1}</td>
+                                    <td>{user.name || "N/A"}</td>
+                                    <td>{user.email || "N/A"}</td>
+                                    <td>
+                                        <Badge
+                                            bg={
+                                                user.role === "Manager"
+                                                    ? "danger"
+                                                    : "primary"
+                                            }
+                                        >
+                                            {user.role === "Manager"
+                                                ? "Quản lý"
+                                                : "Người dùng"}
+                                        </Badge>
+                                    </td>
+                                    <td>
+                                        <Badge
+                                            bg={
+                                                user.isActive
+                                                    ? "success"
+                                                    : "secondary"
+                                            }
+                                        >
+                                            {user.isActive
+                                                ? "Hoạt động"
+                                                : "Bị khóa"}
+                                        </Badge>
+                                    </td>
+                                    <td>
+                                        <Button
+                                            variant={
+                                                user.isActive
+                                                    ? "warning"
+                                                    : "success"
+                                            }
+                                            size="sm"
+                                            className="me-2"
+                                            onClick={() =>
+                                                handleBanUser(user._id)
+                                            }
+                                        >
+                                            {user.isActive ? "Khóa" : "Mở khóa"}
+                                        </Button>
+                                        <Button
+                                            variant="danger"
+                                            size="sm"
+                                            onClick={() =>
+                                                handleDeleteUser(user._id)
+                                            }
+                                        >
+                                            Xóa
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </Table>
+
+                    <Pagination className="justify-content-center">
+                        {[...Array(totalPages).keys()].map((num) => (
+                            <Pagination.Item
+                                key={num + 1}
+                                active={num + 1 === currentPage}
+                                onClick={() => setCurrentPage(num + 1)}
+                            >
+                                {num + 1}
+                            </Pagination.Item>
                         ))}
-                    </tbody>
-                </Table>
+                    </Pagination>
+                </>
             )}
         </Container>
     );
 };
 
 export default UserManagement;
-
