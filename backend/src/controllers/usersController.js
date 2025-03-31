@@ -42,7 +42,7 @@ export const updateUserProfile = async (req, res) => {
             user: updatedUser,
         });
     } catch (error) {
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "Lỗi máy chủ" });
     }
 };
 
@@ -60,7 +60,7 @@ export const changePassword = async (req, res) => {
 
         res.json({ message: "Mật khẩu đã được cập nhật thành công!" });
     } catch (error) {
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "Lỗi máy chủ" });
     }
 };
 
@@ -99,28 +99,33 @@ export const getAllUsers = async (req, res) => {
         res.status(200).json(users);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "Lỗi máy chủ" });
     }
 };
 
 export const banAccount = async (req, res) => {
     try {
-        const userId = req.params.id;
-        const user = await User.findByIdAndUpdate(
-            userId,
-            { isActive: false },
-            { new: true }
-        );
+        const { userId } = req.params;
+        const user = await User.findById(userId);
 
-        if (!user)
+        if (!user) {
             return res
                 .status(404)
                 .json({ message: "Không tìm thấy người dùng" });
+        }
 
-        res.status(200).json({ message: "Tài khoản đã bị khóa", user });
+        user.isActive = !user.isActive;
+        await user.save();
+
+        res.status(200).json({
+            message: user.isActive
+                ? "Tài khoản đã được mở khóa"
+                : "Tài khoản đã bị khóa",
+            user,
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "Lỗi máy chủ" });
     }
 };
 
@@ -143,6 +148,26 @@ export const updateUserRole = async (req, res) => {
         res.status(200).json({ message: "Cập nhật vai trò thành công.", user });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "Lỗi máy chủ" });
+    }
+};
+
+export const deleteUserByUserId = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const user = await User.findByIdAndDelete(userId);
+
+        if (!user) {
+            return res
+                .status(404)
+                .json({ message: "Không tìm thấy người dùng" });
+        }
+
+        res.status(200).json({ message: "Xoá người dùng thành công" });
+    } catch (error) {
+        res.status(500).json({
+            message: "Lỗi máy chủ",
+            error: error.message,
+        });
     }
 };

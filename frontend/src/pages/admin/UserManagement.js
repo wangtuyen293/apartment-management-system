@@ -9,27 +9,33 @@ import {
     Alert,
 } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUsers } from "../../redux/userSlice";
+import { fetchUsers, banUser, deleteUser } from "../../redux/userSlice";
 
 const UserManagement = () => {
     const dispatch = useDispatch();
-    const { users, loading, error } = useSelector((state) => state.user);
+    const { users, loading, error, successMessage } = useSelector((state) => state.user);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         dispatch(fetchUsers());
     }, [dispatch]);
 
+    const handleBanUser = (userId) => {
+        dispatch(banUser(userId));
+    };
+
+    const handleDeleteUser = (userId) => {
+        if (window.confirm("Bạn có chắc muốn xóa người dùng này không?")) {
+            dispatch(deleteUser(userId));
+        }
+    };
+
     const validUsers = Array.isArray(users) ? users : [];
 
     const filteredUsers = validUsers.filter(
         (user) =>
-            (user?.name?.toLowerCase() || "").includes(
-                searchTerm.toLowerCase()
-            ) ||
-            (user?.email?.toLowerCase() || "").includes(
-                searchTerm.toLowerCase()
-            )
+            (user?.name?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+            (user?.email?.toLowerCase() || "").includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -44,6 +50,8 @@ const UserManagement = () => {
                 />
                 <Button variant="outline-secondary">Tìm kiếm</Button>
             </InputGroup>
+
+            {successMessage && <Alert variant="success">{successMessage}</Alert>}
 
             {loading ? (
                 <div className="text-center">
@@ -62,28 +70,37 @@ const UserManagement = () => {
                             <th>Tên</th>
                             <th>Email</th>
                             <th>Vai Trò</th>
+                            <th>Trạng thái</th>
                             <th>Hành Động</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredUsers.length > 0 ? (
-                            filteredUsers.map((user, index) => (
-                                <tr key={user._id || index}>
-                                    <td>{index + 1}</td>
-                                    <td>{user.name || "N/A"}</td>
-                                    <td>{user.email || "N/A"}</td>
-                                    <td>{user.role === "Manager" ? "Quản lý" : "Người dùng"}</td>
-                                    <td>
-                                        <Button variant="warning" size="sm" className="me-2">Khóa tài khoản</Button>
-                                        <Button variant="danger" size="sm">Xóa</Button>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5" className="text-center">Không tìm thấy kết quả nào.</td>
+                        {filteredUsers.map((user, index) => (
+                            <tr key={user._id || index}>
+                                <td>{index + 1}</td>
+                                <td>{user.name || "N/A"}</td>
+                                <td>{user.email || "N/A"}</td>
+                                <td>{user.role === "Manager" ? "Quản lý" : "Người dùng"}</td>
+                                <td>{user.isActive ? "Hoạt động" : "Bị khóa"}</td>
+                                <td>
+                                    <Button
+                                        variant={user.isActive ? "warning" : "success"}
+                                        size="sm"
+                                        className="me-2"
+                                        onClick={() => handleBanUser(user._id)}
+                                    >
+                                        {user.isActive ? "Khóa" : "Mở khóa"}
+                                    </Button>
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        onClick={() => handleDeleteUser(user._id)}
+                                    >
+                                        Xóa
+                                    </Button>
+                                </td>
                             </tr>
-                        )}
+                        ))}
                     </tbody>
                 </Table>
             )}
@@ -92,3 +109,4 @@ const UserManagement = () => {
 };
 
 export default UserManagement;
+
