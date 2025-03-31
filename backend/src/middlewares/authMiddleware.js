@@ -35,7 +35,7 @@ export const adminAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const user = await User.findById(decoded.id).select("-password");
     
-    if (user && user.role === "Admin") {
+    if (user && user.role === "Manager") {
         next();
     } else {
         res.status(403).json({ message: "Bạn không có quyền thực hiện thao tác này." });

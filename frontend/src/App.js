@@ -28,6 +28,8 @@ import ChangePasswordPage from "./pages/user/ChangePasswordPage";
 import ForgotPassword from "./pages/user/ForgotPassword";
 import ResetPassword from "./pages/user/ResetPassword";
 import ManagerLayout from "./components/layout/ManagerLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import UserManagement from "./pages/admin/UserManagement";
 
 function App() {
     return (
@@ -44,6 +46,14 @@ function App() {
                     <Route path="/verify-email" element={<VerifyEmail />} />
                     <Route path="/admin/*" element={<ManagerLayout />}>
                         <Route index element={<ProfilePage />} />
+                        <Route
+                            path="dashboard"
+                            element={<AdminDashboard />}
+                        />
+                        <Route
+                            path="users"
+                            element={<UserManagement />}
+                        />
                     </Route>
                     <Route path="/profile/*" element={<ProfileLayout />}>
                         <Route index element={<ProfilePage />} />

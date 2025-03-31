@@ -5,6 +5,19 @@ const API_URL = "http://localhost:5000/api/v1";
 
 axios.defaults.withCredentials = true;
 
+export const fetchUsers = createAsyncThunk(
+    "auth/fetchUsers",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_URL}/users`);
+
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data || error.message);
+        }
+    }
+);
+
 export const fetchUser = createAsyncThunk(
     "auth/fetchUser",
     async (_, { rejectWithValue }) => {
@@ -65,6 +78,7 @@ export const changePassword = createAsyncThunk(
 const userSlice = createSlice({
     name: "user",
     initialState: {
+        users: [],
         user: null,
         loading: false,
         error: null,
@@ -77,8 +91,23 @@ const userSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(fetchUsers.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchUsers.fulfilled, (state, action) => {
+                state.loading = false;
+                state.users = Array.isArray(action.payload) ? action.payload : [];
+            })
+            .addCase(fetchUsers.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload?.message || "Lỗi không xác định";
+                state.users = [];
+            })
+
             .addCase(fetchUser.pending, (state) => {
                 state.loading = true;
+                state.error = null;
             })
             .addCase(fetchUser.fulfilled, (state, action) => {
                 state.loading = false;
@@ -88,6 +117,7 @@ const userSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
+
             .addCase(updateUserProfile.pending, (state) => {
                 state.loading = true;
             })
