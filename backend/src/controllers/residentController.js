@@ -624,6 +624,17 @@ const getBill = async (req, res) => {
     }
 };
 
+
+const getCustomerRequest = async (req, res) => {
+    try {
+        const requests = await CustomerRequest.find().populate('apartment_id').populate('userId');
+        console.log(requests);
+        res.json(requests);
+    } catch (error) {
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
 export {
     getCustomerViewApartment,
     getCustomerRequestRentApartment,
@@ -636,4 +647,5 @@ export {
     sendBill,
     getCustomerDeposit,
     getBill,
+    getCustomerRequest
 };

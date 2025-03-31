@@ -1,5 +1,9 @@
 import express from 'express';
-import { getCustomerViewApartment, getCustomerRequestRentApartment, ApproveRentApartment, RejectRentApartment, ApproveViewApartment, RejectViewApartment, getAllResidents, updateIndex, sendBill, getCustomerDeposit, getBill } from '../controllers/residentController.js';
+import {
+    getCustomerViewApartment, getCustomerRequestRentApartment, ApproveRentApartment,
+    RejectRentApartment, ApproveViewApartment, RejectViewApartment, getAllResidents, updateIndex, sendBill,
+    getCustomerDeposit, getBill, getCustomerRequest
+} from '../controllers/residentController.js';
 
 const router = express.Router();
 
@@ -18,5 +22,7 @@ router.route('/reject-rent').post(RejectRentApartment);
 router.route('/update-index').post(updateIndex);
 router.route('/send-bill').post(sendBill);
 router.route('/bill-status').get(getBill);
+
+router.route('/customer-request').get(getCustomerRequest);
 
 export default router;

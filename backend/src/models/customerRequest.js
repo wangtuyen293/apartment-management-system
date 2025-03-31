@@ -12,7 +12,7 @@ const customerRequest = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ["Khách hẹn xem", "Đã cọc", "Đang xét duyệt"],
+            enum: ["Khách hẹn xem", "Đã cọc", "Đang xét duyệt", "Gia hạn hợp đồng", "Chấm dứt hợp đồng"],
         },
         action: {
             type: String,

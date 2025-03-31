@@ -21,7 +21,7 @@ const Success = () => {
         <div style={styles.container}>
             <h1 style={styles.header}>Thanh Toán Thành Công!</h1>
             <p style={styles.message}>
-                Cảm ơn bạn đã thanh toán đặt cọc căn hộ. Giao dịch của bạn đã được xử lý thành công.
+                Cảm ơn bạn đã thanh toán. Giao dịch của bạn đã được xử lý thành công.
             </p>
             <button style={styles.button} onClick={handleBackToHome}>
                 Về Trang Chủ

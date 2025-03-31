@@ -94,6 +94,30 @@ export const extendContract = createAsyncThunk(
     }
 );
 
+export const userExtendContract = createAsyncThunk(
+    "contract/userExtendContract",
+    async (payload, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(`${API_URL}/api/v1/apartments/contracts/extend`, { payload });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
+export const terminateContract = createAsyncThunk(
+    "contract/terminateContract",
+    async (payload, { rejectWithValue }) => {
+        try {
+            const response = await axios.post(`${API_URL}/api/v1/apartments/contracts/terminate`, { payload });
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 export const requestForViewApartment = createAsyncThunk(
     "apartment/requestForViewApartment",
     async ({ apartmentId, tenantId, date }, { rejectWithValue }) => {
@@ -266,6 +290,31 @@ const apartmentSlice = createSlice({
             .addCase(requestForRentApartment.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || "Failed to request for rent apartment";
+            });
+        builder
+            // Extend Contract by User
+            .addCase(userExtendContract.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(userExtendContract.fulfilled, (state, action) => {
+                state.loading = false;
+            })
+            .addCase(userExtendContract.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to extend contract by user";
+            })
+            // Terminate Contract
+            .addCase(terminateContract.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(terminateContract.fulfilled, (state, action) => {
+                state.loading = false;
+            })
+            .addCase(terminateContract.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || "Failed to terminate contract";
             });
     },
 });

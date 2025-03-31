@@ -286,5 +286,50 @@ const removeContract = async (req, res) => {
     }
 }
 
+const userExtendContract = async (req, res) => {
+    try {
+        const { payload } = req.body;
+        const apartment = await Apartment.findById(payload.id).populate('tenantId');
+        if (!apartment) {
+            return res.status(404).json({ message: "Apartment not found" });
+        }
+        const request = new CustomerRequest({
+            apartment_id: apartment._id,
+            status: "Gia hạn hợp đồng",
+            userId: apartment.tenantId._id,
+            date: payload.extendDate,
+            contractMonths: payload.extendDuration,
+        })
+        await request.save();
+        res.status(200).json({ message: "Request for contract extension sent successfully" });
+    } catch (error) {
+        console.error('Error extending contract:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
 
-export { getApartment, getApartmentDetail, requestForViewApartment, requestForRentApartment, addApartment, updateApartment, deleteApartment, extendContract, removeContract };
+const terminateContract = async (req, res) => {
+    try {
+        const { payload } = req.body;
+        console.log('Payload:', payload);
+        const apartment = await Apartment.findById(payload.id).populate('tenantId');
+        if (!apartment) {
+            return res.status(404).json({ message: "Apartment not found" });
+        }
+        const request = new CustomerRequest({
+            apartment_id: apartment._id,
+            status: "Chấm dứt hợp đồng",
+            userId: apartment.tenantId._id
+        })
+        await request.save();
+        res.status(200).json({ message: "Request for contract extension sent successfully" });
+    } catch (error) {
+        console.error('Error extending contract:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+}
+
+export {
+    getApartment, getApartmentDetail, requestForViewApartment, requestForRentApartment, addApartment,
+    updateApartment, deleteApartment, extendContract, removeContract, userExtendContract, terminateContract,
+};

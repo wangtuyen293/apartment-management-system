@@ -195,7 +195,7 @@ const Sidebar = () => {
                                 <NavDropdown.Item href="/customer/rent">
                                     Khách yêu cầu thuê
                                 </NavDropdown.Item>
-                                <NavDropdown.Item href="#">
+                                <NavDropdown.Item href="/handle-contract">
                                     Hợp đồng
                                 </NavDropdown.Item>
                             </NavDropdown>

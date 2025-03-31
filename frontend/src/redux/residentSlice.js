@@ -17,6 +17,19 @@ export const getCustomerDeposit = createAsyncThunk(
     }
 );
 
+
+export const getCustomerRequest = createAsyncThunk(
+    "resident/request",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_URL}/api/v1/residents/customer-request`);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response.data);
+        }
+    }
+);
+
 export const getBill = createAsyncThunk(
     "resident/billstatus",
     async ({ apartment_id }, { rejectWithValue }) => {
@@ -194,6 +207,18 @@ const residentSlice = createSlice({
                 state.resident = action.payload;
             })
             .addCase(getCustomerDeposit.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.error.message;
+            })
+        builder
+            .addCase(getCustomerRequest.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(getCustomerRequest.fulfilled, (state, action) => {
+                state.loading = false;
+                state.resident = action.payload;
+            })
+            .addCase(getCustomerRequest.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.error.message;
             })

@@ -30,6 +30,7 @@ import ResetPassword from "./pages/user/ResetPassword";
 import ManagerLayout from "./components/layout/ManagerLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
+import HandleContract from "./pages/customerManagement/contractHandle";
 
 function App() {
     return (
@@ -102,6 +103,7 @@ function App() {
                 <Route path="/service/request" element={<ServiceRequestPage />} />
                 <Route path="/notification" element={<NotificationPage />} />
                 <Route path="/notification/create" element={<CreateNotification />} />
+                <Route path="/handle-contract" element={<HandleContract />} />
 
             </Routes>
         </Router>

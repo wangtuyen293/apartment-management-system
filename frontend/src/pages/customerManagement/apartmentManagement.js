@@ -101,10 +101,20 @@ const ApartmentManagement = () => {
     };
 
     const handleDelete = async () => {
+        if (selectedApartment.tenantId) {
+            alert("Căn hộ này đang có hợp đồng thuê, không thể xóa!");
+            return;
+        }
         if (window.confirm("Bạn có chắc muốn xóa căn hộ này?")) {
-            await dispatch(deleteApartment(selectedApartment._id)).unwrap();
-            await dispatch(getApartment());
-            setShowModal1(false);
+            await dispatch(deleteApartment(selectedApartment._id)).unwrap()
+                .then(async () => {
+                    alert("Xóa căn hộ thành công!");
+                    await dispatch(getApartment());
+                    setShowModal1(false);
+                })
+                .catch((error) => {
+                    alert("Xóa căn hộ thất bại!");
+                });
         }
     };
 

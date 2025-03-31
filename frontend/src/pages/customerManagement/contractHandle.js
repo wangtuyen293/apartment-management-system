@@ -24,20 +24,25 @@ import {
     HandThumbsUp,
     HandThumbsDown
 } from "react-bootstrap-icons";
-import { getCustomerViewApartment, ApproveViewApartment, RejectViewApartment } from '../../redux/residentSlice';
+import { getCustomerRequest } from '../../redux/residentSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUser } from "../../redux/authSlice";
 import Sidebar from "../../components/SideBar";
 
-const CustomerRequestView = () => {
+const HandleContract = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { resident, loading, error } = useSelector(state => state.resident);
     const { user } = useSelector(state => state.auth);
+
     console.log(resident);
+
     useEffect(() => {
-        dispatch(getCustomerViewApartment());
+        dispatch(getCustomerRequest());
     }, [dispatch]);
+
+    const residentContract = resident?.filter((request) => request.status === "Gia hạn hợp đồng" || request.status === "Chấm dứt hợp đồng");
+    console.log(residentContract);
 
     const handleLogout = () => {
         dispatch(logoutUser());
@@ -54,49 +59,21 @@ const CustomerRequestView = () => {
 
     const getStatusBadge = (status) => {
         switch (status) {
-            case 'Pending':
-                return <Badge bg="warning" text="dark">Đang chờ</Badge>;
-            case 'Confirmed':
-                return <Badge bg="success">Đã xác nhận</Badge>;
-            case 'Cancelled':
-                return <Badge bg="danger">Đã hủy</Badge>;
+            case 'Gia hạn hợp đồng':
+                return <Badge bg="warning" text="dark">Gia hạn hợp đồng</Badge>;
+            case 'Chấm dứt hợp đồng':
+                return <Badge bg="success">Chấm dứt hợp đồng</Badge>;
             default:
                 return <Badge bg="secondary">Đang chờ</Badge>;
         }
     };
 
     const handleApprove = (id) => {
-        dispatch(ApproveViewApartment(id))
-            .then((resultAction) => {
-                if (ApproveViewApartment.fulfilled.match(resultAction)) {
-                    alert('Xác nhận thành công!');
-                    getStatusBadge('Confirmed');
-                    window.location.reload();
-                } else if (ApproveViewApartment.rejected.match(resultAction)) {
 
-                    console.error("Payment error:", resultAction.payload);
-                }
-            })
-            .catch((error) => {
-                console.error("Unexpected error:", error);
-            });
     };
 
     const handleReject = (id) => {
-        dispatch(RejectViewApartment(id))
-            .then((resultAction) => {
-                if (RejectViewApartment.fulfilled.match(resultAction)) {
-                    alert('Từ chối thành công!');
-                    getStatusBadge('Confirmed');
-                    window.location.reload();
-                } else if (RejectViewApartment.rejected.match(resultAction)) {
 
-                    console.error("Payment error:", resultAction.payload);
-                }
-            })
-            .catch((error) => {
-                console.error("Unexpected error:", error);
-            });
     };
 
     return (
@@ -113,13 +90,13 @@ const CustomerRequestView = () => {
                                     <Calendar2Check className="me-2" />
                                     Lịch hẹn xem căn hộ
                                 </h1>
-                                <p className="mb-0 opacity-75">Quản lý các lịch hẹn xem phòng với khách hàng</p>
+                                <p className="mb-0 opacity-75">Quản lý yêu cầu hợp đồng</p>
                             </div>
                             <div>
                                 <Button
                                     variant="outline-light"
                                     size="sm"
-                                    onClick={() => dispatch(getCustomerViewApartment())}
+                                    onClick={() => dispatch(getCustomerRequest())}
                                 >
                                     <Eye className="me-1" /> Xem tất cả
                                 </Button>
@@ -164,7 +141,7 @@ const CustomerRequestView = () => {
                                 <div className="d-flex justify-content-between align-items-center">
                                     <h5 className="mb-0 text-info">
                                         <Calendar2Check className="me-2" />
-                                        Danh sách khách hẹn xem phòng
+                                        Danh sách cần xử lý
                                     </h5>
                                     <div>
                                         <Badge bg="secondary" className="me-2">Tổng: {resident ? resident.length : 0}</Badge>
@@ -179,7 +156,7 @@ const CustomerRequestView = () => {
                                 {loading ? (
                                     <div className="text-center py-5">
                                         <Spinner animation="border" variant="info" />
-                                        <p className="mt-3 text-muted">Đang tải dữ liệu lịch hẹn...</p>
+                                        <p className="mt-3 text-muted">Đang tải dữ liệu...</p>
                                     </div>
                                 ) : error ? (
                                     <div className="alert alert-danger m-4" role="alert">
@@ -193,15 +170,13 @@ const CustomerRequestView = () => {
                                                 <tr>
                                                     <th className="px-4 py-3 border-0">Khách hàng</th>
                                                     <th className="py-3 border-0">Căn hộ</th>
-                                                    <th className="py-3 border-0">Trạng thái</th>
-                                                    <th className="py-3 border-0">Ngày xem</th>
-                                                    <th className="py-3 border-0">Tình trạng</th>
-                                                    <th className="py-3 border-0 text-end pe-4">Thao tác</th>
+                                                    <th className="py-3 border-0">Yêu cầu</th>
+                                                    <th className="py-3 border-0">Ngày gia hạn</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {resident && resident.length > 0 ? (
-                                                    resident.map((request) => (
+                                                {residentContract && residentContract.length > 0 ? (
+                                                    residentContract.map((request) => (
                                                         <tr key={request._id}>
                                                             <td className="px-4 py-3">
                                                                 <div className="d-flex align-items-center">
@@ -226,7 +201,7 @@ const CustomerRequestView = () => {
                                                                 </div>
                                                             </td>
                                                             <td className="py-3">
-                                                                {getStatusBadge()}
+                                                                {getStatusBadge(request.status)}
                                                             </td>
                                                             <td className="py-3">
                                                                 <div className="d-flex align-items-center">
@@ -241,32 +216,6 @@ const CustomerRequestView = () => {
                                                                         </small>
                                                                     </div>
                                                                 </div>
-                                                            </td>
-                                                            <td className="py-3">
-                                                                <div className="d-flex align-items-center">
-                                                                    <div>
-                                                                        {request.action ? request.action : "Chưa xem"}
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-3 text-end pe-4">
-                                                                <Button
-                                                                    variant="success"
-                                                                    size="sm"
-                                                                    className="me-2"
-                                                                    onClick={() => handleApprove(request._id)}
-                                                                    disabled={request.action === "Đồng ý" || request.action === "Từ chối"}
-                                                                >
-                                                                    <HandThumbsUp className="me-1" /> Đồng ý
-                                                                </Button>
-                                                                <Button
-                                                                    variant="outline-danger"
-                                                                    size="sm"
-                                                                    onClick={() => handleReject(request._id)}
-                                                                    disabled={request.action === "Đồng ý" || request.action === "Từ chối"}
-                                                                >
-                                                                    <HandThumbsDown className="me-1" /> Từ chối
-                                                                </Button>
                                                             </td>
                                                         </tr>
                                                     ))
@@ -294,4 +243,4 @@ const CustomerRequestView = () => {
     );
 };
 
-export default CustomerRequestView;
+export default HandleContract;
