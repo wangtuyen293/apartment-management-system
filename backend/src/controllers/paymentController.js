@@ -85,6 +85,7 @@ export const checkPaymentStatus = async (req, res) => {
         });
         await newPayment.save();
 
+
         const updateBill = await Bill.findOneAndUpdate(
             { orderCode: orderCode },
             {
@@ -94,16 +95,20 @@ export const checkPaymentStatus = async (req, res) => {
             }
         );
 
-        const request = await CustomerRequest.findOne({
-            userId: userId,
-            status: "Đã cọc"
-        }).populate("apartment_id");
+        if (paymentInfo.transactions[0].description.includes("DEPOSIT")) {
+            const descript = paymentInfo.transactions[0].description.substring(paymentInfo.transactions[0].description.indexOf("DEPOSIT"));
+            const apartmentNumber = descript.substring(7, 10);
+            const apartment = await Apartment.findOne({ apartmentNumber: apartmentNumber });
+            if (!apartment) {
+                return res.status(404).json({ message: "Apartment not found" });
+            }
 
-        const updateApartment = await Apartment.findByIdAndUpdate(
-            request.apartment_id._id,
-            { $set: { status: "Đã cọc" } },
-            { new: true }
-        );
+            const updateApartment = await Apartment.findByIdAndUpdate(
+                apartment._id,
+                { $set: { status: "Đã cọc" } },
+                { new: true }
+            );
+        }
 
         return res.status(200).json({ message: "Save success" });
     } catch (error) {
