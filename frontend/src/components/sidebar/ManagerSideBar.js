@@ -27,7 +27,7 @@ const ManagerSideBar = () => {
             </div>
 
             <nav className="sidebar-menu">
-                <Link to="/admin/dashboard" className={`menu-item ${location.pathname === "/admin/dashboard" ? "active" : ""}`}>
+                <Link to="/admin" className={`menu-item ${location.pathname === "/admin/dashboard" ? "active" : ""}`}>
                     <FaChartBar className="icon" /> Thống Kê
                 </Link>
                 <Link to="/admin/users" className={`menu-item ${location.pathname === "/admin/users" ? "active" : ""}`}>

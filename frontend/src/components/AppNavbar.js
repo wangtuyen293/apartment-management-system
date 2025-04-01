@@ -63,21 +63,21 @@ const AppNavbar = () => {
                             <Nav.Link
                                 as={Link}
                                 to="/view-payment"
-                                active={location.pathname === "/transactions"}
+                                active={location.pathname === "/view-payment"}
                             >
                                 Thanh toán
                             </Nav.Link>
                             <Nav.Link
                                 as={Link}
                                 to="/profile/transactions"
-                                active={location.pathname === "/transactions"}
+                                active={location.pathname === "/profile/transactions"}
                             >
                                 Giao Dịch
                             </Nav.Link>
                             <Nav.Link
                                 as={Link}
                                 to="/service"
-                                active={location.pathname === "/services"}
+                                active={location.pathname === "/service"}
                             >
                                 Dịch Vụ
                             </Nav.Link>
@@ -89,13 +89,6 @@ const AppNavbar = () => {
                                 as={Link}
                                 to="/admin"
                                 active={location.pathname === "/admin"}
-                            >
-                                Quản Lý
-                            </Nav.Link>
-                            <Nav.Link
-                                as={Link}
-                                to="/statistics"
-                                active={location.pathname === "/statistics"}
                             >
                                 Thống Kê
                             </Nav.Link>

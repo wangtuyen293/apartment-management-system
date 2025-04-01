@@ -46,11 +46,7 @@ function App() {
                     <Route path="/reset-password/:token" element={<ResetPassword />} />
                     <Route path="/verify-email" element={<VerifyEmail />} />
                     <Route path="/admin/*" element={<ManagerLayout />}>
-                        <Route index element={<ProfilePage />} />
-                        <Route
-                            path="dashboard"
-                            element={<AdminDashboard />}
-                        />
+                        <Route index element={<AdminDashboard />} />
                         <Route
                             path="users"
                             element={<UserManagement />}

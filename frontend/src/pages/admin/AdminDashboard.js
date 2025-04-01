@@ -2,40 +2,22 @@ import { useEffect, useState } from "react";
 import { Container, Row, Col, Card, Spinner } from "react-bootstrap";
 import { FaUsers, FaBuilding, FaHistory, FaTools } from "react-icons/fa";
 import "../../assets/css/AdminDashboard.css";
+import { fetchUsers } from "../../redux/userSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 const AdminDashboard = () => {
     const [stats, setStats] = useState({
-        users: 0,
-        apartments: 0,
-        transactions: 0,
-        services: 0,
+        apartments: 50,
+        transactions: 200,
+        services: 30,
     });
 
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
+    const { users, loading } = useSelector((state) => state.user);
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const response = await new Promise((resolve) =>
-                    setTimeout(() => {
-                        resolve({
-                            users: 120,
-                            apartments: 50,
-                            transactions: 200,
-                            services: 30,
-                        });
-                    }, 1000)
-                );
-                setStats(response);
-                setLoading(false);
-            } catch (error) {
-                console.error("Lỗi khi tải dữ liệu:", error);
-                setLoading(false);
-            }
-        };
-
-        fetchStats();
-    }, []);
+        dispatch(fetchUsers());
+    }, [dispatch]);
 
     return (
         <Container className="dashboard-container my-5">
@@ -53,7 +35,7 @@ const AdminDashboard = () => {
                                 <h5 className="fw-bolder">Người Dùng</h5>
                                 <p className="text-secondary fs-6 p-0">
                                     <FaUsers className="dashboard-icon users" />{" "}
-                                    {stats.users}
+                                    {users.length}
                                 </p>
                             </Card.Body>
                         </Card>
