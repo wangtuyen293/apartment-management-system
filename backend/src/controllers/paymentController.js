@@ -58,7 +58,7 @@ export const depositPayment = async (req, res) => {
 
         const order = {
             amount: 10000,
-            description: `DEPOSIT${apartment.apartmentNumber}${user.username}`,
+            description: `Deposit${apartment.apartmentNumber}${user.username}`,
             orderCode: orderCode,
             returnUrl: `${process.env.FRONTEND_URL}/success`,
             cancelUrl: `${process.env.FRONTEND_URL}/cancel`
@@ -95,9 +95,10 @@ export const checkPaymentStatus = async (req, res) => {
             }
         );
 
-        if (paymentInfo.transactions[0].description.includes("DEPOSIT")) {
-            const descript = paymentInfo.transactions[0].description.substring(paymentInfo.transactions[0].description.indexOf("DEPOSIT"));
+        if (paymentInfo.transactions[0].description.includes("Deposit")) {
+            const descript = paymentInfo.transactions[0].description.substring(paymentInfo.transactions[0].description.indexOf("Deposit"));
             const apartmentNumber = descript.substring(7, 10);
+            console.log(apartmentNumber);
             const apartment = await Apartment.findOne({ apartmentNumber: apartmentNumber });
             if (!apartment) {
                 return res.status(404).json({ message: "Apartment not found" });
@@ -142,7 +143,7 @@ export const BillPayment = async (req, res) => {
             return res.status(400).json({ message: "Missing required parameters" });
         }
 
-        const bill = await Bill.findById(id).populate('user_id');
+        const bill = await Bill.findById(id).populate('user_id apartment_id');
 
         if (!bill) {
             return res.status(400).json({ message: "Can not find bill" });
@@ -159,7 +160,7 @@ export const BillPayment = async (req, res) => {
 
         const order = {
             amount: bill.fee,
-            description: `PAY${bill.typeOfPaid}${bill.user_id.username}`,
+            description: `PAY${bill.typeOfPaid}${bill.apartment_id.apartmentNumber}${bill.user_id.username}`,
             orderCode: orderCode,
             returnUrl: `${process.env.FRONTEND_URL}/success`,
             cancelUrl: `${process.env.FRONTEND_URL}/cancel`

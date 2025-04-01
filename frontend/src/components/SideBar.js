@@ -198,6 +198,9 @@ const Sidebar = () => {
                                 <NavDropdown.Item href="/handle-contract">
                                     Hợp đồng
                                 </NavDropdown.Item>
+                                <NavDropdown.Item href="/admin/users">
+                                    Quản lý người dùng
+                                </NavDropdown.Item>
                             </NavDropdown>
                         </>
                     ) : (

@@ -82,7 +82,7 @@ const CustomerRequestRent = () => {
                 return <Badge bg="info">{status}</Badge>;
         }
     };
-
+    console.log(resident);
     return (
         <Container fluid className="p-0">
             <Row className="g-0">
@@ -193,6 +193,7 @@ const CustomerRequestRent = () => {
                                                                         size="sm"
                                                                         className="me-2"
                                                                         onClick={() => handleApprove(request._id, request.date, request.contractMonths)}
+                                                                        disabled={request.action === "Đồng ý" || request.action === "Từ chối"}
                                                                     >
                                                                         <HandThumbsUp className="me-1" /> Phê duyệt
                                                                     </Button>
@@ -206,6 +207,7 @@ const CustomerRequestRent = () => {
                                                                         variant="outline-danger"
                                                                         size="sm"
                                                                         onClick={() => handleReject(request._id)}
+                                                                        disabled={request.action === "Đồng ý" || request.action === "Từ chối"}
                                                                     >
                                                                         <HandThumbsDown className="me-1" /> Từ chối
                                                                     </Button>

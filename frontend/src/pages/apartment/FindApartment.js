@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Container, Spinner, Row, Col, Card, Button, Form,
-    InputGroup, Badge, Dropdown, DropdownButton
+    InputGroup, Badge, Dropdown, DropdownButton, Pagination
 } from "react-bootstrap";
 import {
     Search, Filter, House, CurrencyDollar, SquareFill, SortDown
 } from "react-bootstrap-icons";
 import apartmentImage1 from '../../assets/images/fpt-login.jpg';
 import { getApartment, getApartmentDetail } from '../../redux/apartmentSlice';
-import { logoutUser } from "../../redux/authSlice";
 import { useDispatch, useSelector } from 'react-redux';
 import Sidebar from "../../components/SideBar";
 
@@ -27,15 +26,16 @@ const HomePage = () => {
     const [sortOption, setSortOption] = useState(null);
     const [startDateFilter, setStartDateFilter] = useState(null);
     const [endDateFilter, setEndDateFilter] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(6);
+
     useEffect(() => {
         dispatch(getApartment());
     }, [dispatch]);
-    console.log(apartment[1]);
 
     useEffect(() => {
         if (apartment) {
             let results = [...apartment];
-
             if (searchTerm) {
                 results = results.filter(apt =>
                     apt.apartmentNumber.toString().includes(searchTerm) ||
@@ -46,13 +46,13 @@ const HomePage = () => {
             if (priceFilter) {
                 switch (priceFilter) {
                     case 'low':
-                        results = results.filter(apt => apt.price < 3000);
+                        results = results.filter(apt => apt.price <= 3000);
                         break;
                     case 'medium':
-                        results = results.filter(apt => apt.price >= 3000 && apt.price <= 4000);
+                        results = results.filter(apt => apt.price >= 3000 && apt.price <= 5000);
                         break;
                     case 'high':
-                        results = results.filter(apt => apt.price > 4000);
+                        results = results.filter(apt => apt.price > 5000);
                         break;
                     default:
                         break;
@@ -64,7 +64,6 @@ const HomePage = () => {
                     if (!apt.startRentDate || !apt.endRentDate) {
                         return true;
                     }
-
                     const startRent = new Date(apt.startRentDate);
                     const endRent = new Date(apt.endRentDate);
                     const startFilter = new Date(startDateFilter);
@@ -76,13 +75,13 @@ const HomePage = () => {
             if (areaFilter) {
                 switch (areaFilter) {
                     case 'small':
-                        results = results.filter(apt => apt.area < 50);
+                        results = results.filter(apt => apt.area <= 50);
                         break;
                     case 'medium':
-                        results = results.filter(apt => apt.area >= 50 && apt.area <= 80);
+                        results = results.filter(apt => apt.area >= 50 && apt.area <= 90);
                         break;
                     case 'large':
-                        results = results.filter(apt => apt.area > 80);
+                        results = results.filter(apt => apt.area > 90);
                         break;
                     default:
                         break;
@@ -113,8 +112,17 @@ const HomePage = () => {
             }
 
             setFilteredApartments(results);
+            setCurrentPage(1); // Reset to first page when filters change
         }
     }, [apartment, searchTerm, priceFilter, areaFilter, statusFilter, sortOption, startDateFilter, endDateFilter]);
+
+    // Pagination logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentApartments = filteredApartments.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredApartments.length / itemsPerPage);
+
+    const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
     const handleViewDetails = (apartmentId) => {
         dispatch(getApartmentDetail(apartmentId));
@@ -130,6 +138,7 @@ const HomePage = () => {
         setStartDateFilter(null);
         setEndDateFilter(null);
         setFilteredApartments(apartment);
+        setCurrentPage(1);
     };
 
     const formatPrice = (price) => {
@@ -145,9 +154,7 @@ const HomePage = () => {
         <Container fluid className="p-0" style={{ backgroundColor: "#F5F7FA" }}>
             <Row className="g-0">
                 <Sidebar />
-
                 <Col xs={10} className="p-0 ms-auto" style={{ marginLeft: "16.67%" }}>
-
                     <div className="bg-success text-white py-4 px-4">
                         <Container>
                             <h1 className="display-5 fw-bold">Tìm kiếm căn hộ lý tưởng cho bạn</h1>
@@ -197,13 +204,13 @@ const HomePage = () => {
                                             size="sm"
                                         >
                                             <Dropdown.Item onClick={() => setPriceFilter('low')}>
-                                                Dưới 3000 VND
+                                                Trên Dưới 3000 VND
                                             </Dropdown.Item>
                                             <Dropdown.Item onClick={() => setPriceFilter('medium')}>
-                                                3000 - 4000 VND
+                                                3000 - 5000 VND
                                             </Dropdown.Item>
                                             <Dropdown.Item onClick={() => setPriceFilter('high')}>
-                                                Trên 4000 VND
+                                                Trên 5000 VND
                                             </Dropdown.Item>
                                             <Dropdown.Divider />
                                             <Dropdown.Item onClick={() => setPriceFilter(null)}>
@@ -218,13 +225,13 @@ const HomePage = () => {
                                             size="sm"
                                         >
                                             <Dropdown.Item onClick={() => setAreaFilter('small')}>
-                                                Dưới 50 m²
+                                                Trên Dưới 50 m²
                                             </Dropdown.Item>
                                             <Dropdown.Item onClick={() => setAreaFilter('medium')}>
-                                                50 - 80 m²
+                                                50 - 90 m²
                                             </Dropdown.Item>
                                             <Dropdown.Item onClick={() => setAreaFilter('large')}>
-                                                Trên 80 m²
+                                                Trên 90 m²
                                             </Dropdown.Item>
                                             <Dropdown.Divider />
                                             <Dropdown.Item onClick={() => setAreaFilter(null)}>
@@ -393,83 +400,116 @@ const HomePage = () => {
                                 <p className="mb-0">Không có căn hộ nào khớp với bộ lọc, thử 1 bộ lọc khác.</p>
                             </div>
                         ) : (
-                            <Row>
-                                {filteredApartments.map((apt) => (
-                                    <Col lg={4} md={6} key={apt._id} className="mb-4">
-                                        <Card className="h-100 shadow-sm border-0 rounded-3 apartment-card">
-                                            <div className="position-relative">
-                                                <Card.Img
-                                                    variant="top"
-                                                    src={apt.images && apt.images.length > 0
-                                                        ? `http://localhost:5000${apt.images[0].url}`
-                                                        : apartmentImage1}
-                                                    className="img-fluid"
-                                                    style={{ height: "200px", objectFit: "cover" }}
-                                                />
-                                                <Badge
-                                                    bg={
-                                                        apt.status === 'Trống' ? 'success' :
-                                                            apt.status === 'Đã cho thuê' ? 'danger' :
-                                                                apt.status === 'Đang xét duyệt' ? 'primary' :
-                                                                    apt.status === 'Đã cọc' ? 'secondary' : 'warning'
-                                                    }
-                                                    className="position-absolute top-0 end-0 m-2 py-2 px-3"
-                                                >
-                                                    {apt.status}
-                                                </Badge>
-                                            </div>
-                                            <Card.Body>
-                                                <Card.Title className="fs-4 d-flex justify-content-between align-items-center">
-                                                    <span>Căn hộ {apt.apartmentNumber}</span>
-                                                    <Badge bg="primary" pill>{apt.area} m²</Badge>
-                                                </Card.Title>
-                                                <Card.Text>
-                                                    <Row className="mt-3">
-                                                        <Col xs={6}>
-                                                            <div className="text-muted mb-2">
-                                                                <i className="bi bi-building me-2"></i> Tầng {Math.floor(apt.apartmentNumber / 100)}
-                                                            </div>
-                                                        </Col>
-                                                        <Col xs={6}>
-                                                            <div className="text-muted mb-2">
-                                                                <i className="bi bi-square me-2"></i> Diện tích: {apt.area} m²
-                                                            </div>
-                                                        </Col>
-                                                    </Row>
-                                                    <Badge bg="danger" pill>{apt.status === 'Đã cho thuê'
-                                                        ? `Thời hạn thuê: ${formatDay(apt.startRentDate)} - ${formatDay(apt.endRentDate)}`
-                                                        : 'Phòng trống toàn thời gian'}
-                                                    </Badge>
-                                                    {apt.images && apt.images.length > 0 && (
-                                                        <div className="mt-3">
-                                                            <small className="text-muted">Hình ảnh:</small>
-                                                            <div className="d-flex flex-wrap gap-2">
-                                                                {apt.images.map((image, index) => (
-                                                                    <img
-                                                                        key={index}
-                                                                        src={`http://localhost:5000${image.url}`}
-                                                                        alt={`Ảnh ${index + 1}`}
-                                                                        style={{ width: "50px", height: "50px", objectFit: "cover" }}
-                                                                    />
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </Card.Text>
-                                                <div className="d-flex justify-content-between align-items-center mt-3">
-                                                    <h5 className="text-primary mb-0">{formatPrice(apt.price)} VND</h5>
-                                                    <Button
-                                                        variant="outline-primary"
-                                                        onClick={() => handleViewDetails(apt._id)}
+                            <>
+                                <Row>
+                                    {currentApartments.map((apt) => (
+                                        <Col lg={4} md={6} key={apt._id} className="mb-4">
+                                            <Card className="h-100 shadow-sm border-0 rounded-3 apartment-card">
+                                                <div className="position-relative">
+                                                    <Card.Img
+                                                        variant="top"
+                                                        src={apt.images && apt.images.length > 0
+                                                            ? `http://localhost:5000${apt.images[0].url}`
+                                                            : apartmentImage1}
+                                                        className="img-fluid"
+                                                        style={{ height: "200px", objectFit: "cover" }}
+                                                    />
+                                                    <Badge
+                                                        bg={
+                                                            apt.status === 'Trống' ? 'success' :
+                                                                apt.status === 'Đã cho thuê' ? 'danger' :
+                                                                    apt.status === 'Đang xét duyệt' ? 'primary' :
+                                                                        apt.status === 'Đã cọc' ? 'secondary' : 'warning'
+                                                        }
+                                                        className="position-absolute top-0 end-0 m-2 py-2 px-3"
                                                     >
-                                                        Xem chi tiết
-                                                    </Button>
+                                                        {apt.status}
+                                                    </Badge>
                                                 </div>
-                                            </Card.Body>
-                                        </Card>
-                                    </Col>
-                                ))}
-                            </Row>
+                                                <Card.Body>
+                                                    <Card.Title className="fs-4 d-flex justify-content-between align-items-center">
+                                                        <span>Căn hộ {apt.apartmentNumber}</span>
+                                                        <Badge bg="primary" pill>{apt.area} m²</Badge>
+                                                    </Card.Title>
+                                                    <Card.Text>
+                                                        <Row className="mt-3">
+                                                            <Col xs={6}>
+                                                                <div className="text-muted mb-2">
+                                                                    <i className="bi bi-building me-2"></i> Tầng {Math.floor(apt.apartmentNumber / 100)}
+                                                                </div>
+                                                            </Col>
+                                                            <Col xs={6}>
+                                                                <div className="text-muted mb-2">
+                                                                    <i className="bi bi-square me-2"></i> Diện tích: {apt.area} m²
+                                                                </div>
+                                                            </Col>
+                                                        </Row>
+                                                        <Badge bg="danger" pill>{apt.status === 'Đã cho thuê'
+                                                            ? `Thời hạn thuê: ${formatDay(apt.startRentDate)} - ${formatDay(apt.endRentDate)}`
+                                                            : 'Phòng trống toàn thời gian'}
+                                                        </Badge>
+                                                        {apt.images && apt.images.length > 0 && (
+                                                            <div className="mt-3">
+                                                                <small className="text-muted">Hình ảnh:</small>
+                                                                <div className="d-flex flex-wrap gap-2">
+                                                                    {apt.images.map((image, index) => (
+                                                                        <img
+                                                                            key={index}
+                                                                            src={`http://localhost:5000${image.url}`}
+                                                                            alt={`Ảnh ${index + 1}`}
+                                                                            style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </Card.Text>
+                                                    <div className="d-flex justify-content-between align-items-center mt-3">
+                                                        <h5 className="text-primary mb-0">{formatPrice(apt.price)} VND</h5>
+                                                        <Button
+                                                            variant="outline-primary"
+                                                            onClick={() => handleViewDetails(apt._id)}
+                                                        >
+                                                            Xem chi tiết
+                                                        </Button>
+                                                    </div>
+                                                </Card.Body>
+                                            </Card>
+                                        </Col>
+                                    ))}
+                                </Row>
+
+                                {/* Pagination Component */}
+                                {totalPages > 1 && (
+                                    <Pagination className="justify-content-center mt-4">
+                                        <Pagination.First
+                                            onClick={() => paginate(1)}
+                                            disabled={currentPage === 1}
+                                        />
+                                        <Pagination.Prev
+                                            onClick={() => paginate(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                        />
+                                        {[...Array(totalPages)].map((_, index) => (
+                                            <Pagination.Item
+                                                key={index + 1}
+                                                active={index + 1 === currentPage}
+                                                onClick={() => paginate(index + 1)}
+                                            >
+                                                {index + 1}
+                                            </Pagination.Item>
+                                        ))}
+                                        <Pagination.Next
+                                            onClick={() => paginate(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                        />
+                                        <Pagination.Last
+                                            onClick={() => paginate(totalPages)}
+                                            disabled={currentPage === totalPages}
+                                        />
+                                    </Pagination>
+                                )}
+                            </>
                         )}
                     </Container>
                 </Col>

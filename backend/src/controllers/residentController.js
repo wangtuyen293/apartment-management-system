@@ -226,6 +226,7 @@ const getCustomerRequestRentApartment = async (req, res) => {
                 phoneNumber: username.phoneNumber,
                 status: user.status,
                 date: user.date,
+                action: user.action,
                 contractMonths: user.contractMonths,
             });
         }
@@ -339,8 +340,23 @@ const ApproveRentApartment = async (req, res) => {
         }
 
         let endDate = new Date(date);
-        endDate.setMonth(endDate.getMonth() + duration);
 
+        console.log("Start date:", date);
+        console.log("Duration:", duration);
+        console.log("Current month (0-11):", endDate.getMonth());
+
+        let targetMonth = endDate.getMonth() + duration;
+        console.log("Target month before adjustment:", targetMonth);
+        let targetYear = endDate.getFullYear() + Math.floor(targetMonth / 12);
+        targetMonth = targetMonth % 12;
+        console.log("Target month after adjustment:", targetMonth);
+        console.log("Target year:", targetYear);
+
+        endDate = new Date(targetYear, targetMonth, endDate.getDate(),
+            endDate.getHours(), endDate.getMinutes(),
+            endDate.getSeconds(), endDate.getMilliseconds());
+
+        console.log("End date:", endDate);
         const updatedApartment = await Apartment.updateOne(
             { _id: request.apartment_id },
             {

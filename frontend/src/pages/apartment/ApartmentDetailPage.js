@@ -604,9 +604,9 @@ const ApartmentDetailPage = () => {
 
             <Modal show={isSuccessModalOpen} onHide={handleCloseModal}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Đã ký hợp đồng</Modal.Title>
+                    <Modal.Title>Xác nhận hợp đồng</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>Vui lòng thanh toán tiền đặt cọc cho căn hộ</Modal.Body>
+                <Modal.Body>Xác nhận hợp đồng thành công, chúng tôi sẽ liên hệ bạn để ký hợp đồng trực tiếp. Vui lòng thanh toán tiền đặt cọc để chúng tôi xác nhận.</Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseModal}>
                         Đóng

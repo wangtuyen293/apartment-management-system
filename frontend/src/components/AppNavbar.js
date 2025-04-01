@@ -46,7 +46,7 @@ const AppNavbar = () => {
                 <Nav className="me-auto">
                     <Nav.Link
                         as={Link}
-                        to="/"
+                        to="/home"
                         active={location.pathname === "/"}
                     >
                         Trang Chủ
