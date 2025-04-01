@@ -55,13 +55,13 @@ const ServiceManagementPage = () => {
         setEditingCategory(category);
         setCategoryName(category ? category.name : "");
         setDescription(category ? category.description : "");
-        setPriceQuotation(category ? category.price_quotation : "");
+        setPriceQuotation(category ? String(category.price_quotation) : ""); 
         setShowModal(true);
     };
 
     const handleSaveCategory = async () => {
-        if (categoryName.trim() === "" || priceQuotation.trim() === "") {
-            alert("Tên danh mục và báo giá không được để trống!");
+        if (categoryName.trim() === "") {
+            alert("Tên dịch vụ và báo giá không được để trống!");
             return;
         }
 
@@ -75,6 +75,8 @@ const ServiceManagementPage = () => {
             description,
             price_quotation: Number(priceQuotation),
         };
+
+        console.log("Dữ liệu gửi lên Redux:", categoryData);
 
         if (editingCategory) {
             await dispatch(updateServiceCategory({ id: editingCategory._id, data: categoryData }));
@@ -90,7 +92,7 @@ const ServiceManagementPage = () => {
 
 
     const handleDeleteCategory = (id) => {
-        if (window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
+        if (window.confirm("Bạn có chắc chắn muốn xóa dịch vụ này?")) {
             dispatch(deleteServiceCategory(id));
         }
     };
@@ -168,7 +170,7 @@ const ServiceManagementPage = () => {
                                             ) : (
                                                 <tr>
                                                     <td colSpan="4" className="text-center py-5 text-muted">
-                                                        Chưa có danh mục nào.
+                                                        Chưa có dịch vụ nào.
                                                     </td>
                                                 </tr>
                                             )}
@@ -181,15 +183,15 @@ const ServiceManagementPage = () => {
                 </Col>
             </Row>
 
-            {/* Modal Thêm/Sửa Danh mục */}
+            {/* Modal Thêm/Sửa dịch vụ */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{editingCategory ? "Chỉnh sửa danh mục" : "Thêm danh mục mới"}</Modal.Title>
+                    <Modal.Title>{editingCategory ? "Chỉnh sửa dịch vụ" : "Thêm dịch vụ mới"}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
                         <Form.Group className="mb-3">
-                            <Form.Label>Tên danh mục</Form.Label>
+                            <Form.Label>Tên dịch vụ</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={categoryName}
@@ -211,7 +213,6 @@ const ServiceManagementPage = () => {
                                 type="number"
                                 value={priceQuotation}
                                 onChange={(e) => setPriceQuotation(e.target.value)}
-                                required
                             />
                         </Form.Group>
                     </Form>

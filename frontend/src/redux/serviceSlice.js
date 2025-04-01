@@ -34,9 +34,9 @@ export const createServiceCategory = createAsyncThunk(
 // Cập nhật danh mục dịch vụ
 export const updateServiceCategory = createAsyncThunk(
     "serviceCategory/update",
-    async ({ id, categoryData }, { rejectWithValue }) => {
+    async ({ id, data }, { rejectWithValue }) => {
         try {
-            const response = await axios.put(`${API_URL}/categories/${id}`, categoryData);
+            const response = await axios.put(`${API_URL}/categories/${id}`, data);
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data || "Lỗi không xác định");
